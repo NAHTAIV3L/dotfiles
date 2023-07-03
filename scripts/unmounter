@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# Unmount USB drives or Android phones. Replaces the older `dmenuumount`. Fewer
+# prompt and also de-decrypts LUKS drives that are unmounted.
+
+set -e
+
+lsblk -lp | grep part | grep -v "part $" | grep -v "boot" | grep -v "SWAP" | grep -v ' /$'
+
+lsblkoutput="$(lsblk -lp)"
+mounteddrives="$(echo "$lsblkoutput" | grep part | grep -v "part $" | grep -v 'boot' | grep -v 'SWAP' | grep -v ' /$')"
+
+allunmountable="$(echo "$mounteddrives" | awk '{print $NF " (" $4 ")" }')"
+test -n "$allunmountable"
+
+chosen="$(echo "$allunmountable" | dmenu -i -p "Unmount which drive?" | cut -d' ' -f1)"
+test -n "$chosen"
+echo $chosen
+sudo -A umount -l "$chosen"
+notify-send "Device unmounted." "$chosen has been unmounted."

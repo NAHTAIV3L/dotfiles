@@ -1,0 +1,50 @@
+#!/bin/sh
+
+file="$HOME/.dotfiles/bookmark"
+while getopts "adph" o; do case "${o}" in
+    a)
+        abookmark="$(xclip -o)"
+        if grep -q "^$abookmark$" "$file"; then
+            notify-send "Already Added" "$abookmark" ; exit
+        fi
+        if [ -z "$abookmark" ] ; then
+            notify-send "nothing highlighted" ; exit
+        fi
+        desc=$(cat "" | dmenu -c -bw 3 -p "enter description")
+        if [ -z "$desc" ] ; then
+            notify-send "Addition Canceled" ; exit
+        fi
+        notify-send "Bookmark Added" "$abookmark"
+        final="$abookmark #$desc"
+        echo "$final" >> "$file"
+        ;;
+    d)
+        bookmark=$(grep -v '^#' "$file" | dmenu -i -l 50 | cut -d' ' -f1)
+        if [ "$bookmark" = "" ]; then
+            notify-send "Deletion Canceled" ; exit
+        fi
+        check="$(printf 'No\nYes' | dmenu -i -sb "#AA0000" -p "Are You Sure?" )"
+        if [ "$check" = "Yes" ]; then
+            new=$(grep -v "$bookmark" "$file")
+            echo "$new" > "$file"
+            notify-send "Deleted Bookmark" "$bookmark"
+        else
+            notify-send "Deletion Canceled" "$bookmark"
+        fi
+        ;;
+    p)
+        thing=$(grep -v '^#' "$file" | cut -d'#' -f2 | dmenu -i -c -bw 3 -l 10)
+        if [ -z "$thing" ] ; then
+            exit
+        fi
+        string=$(grep "#$thing" "$file" | cut -d'#' -f1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+        #notify-send "$string"
+        #string=$(grep -v '^#' "$file" | dmenu -i -c -bw 3 -l 10 | cut -d'#' -f1)
+        xdotool type --delay 1 --clearmodifiers "$string"
+        ;;
+    h)
+        echo "usage: mkmrkcli [-a] [-d] [-p]"
+        ;;
+    *)
+        echo "invalid option"
+esac done

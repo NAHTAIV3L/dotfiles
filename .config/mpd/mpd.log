@@ -1,0 +1,145 @@
+Feb 13 14:08 : exception: Failed to open '/home/nahtaiv3l/.mpd/mpdstate': No such file or directory
+Feb 13 14:08 : config: option 'device' on line 13 was not recognized
+Feb 13 14:08 : exception: Failed to access /home/nahtaiv3l/Music: No such file or directory
+Feb 13 14:10 : config: option 'device' on line 13 was not recognized
+Feb 13 14:15 : config: option 'device' on line 13 was not recognized
+Feb 13 14:15 : update: added /Fox-Liquicity-Prague-2021.mp3
+Feb 13 14:15 : update: added /Lexurus-Liquicity-Festivl-2022.mp3
+Feb 13 14:15 : update: added /Feint-Liquicity-Festival-2022.mp3
+Feb 13 14:15 : update: added /BEETHOVEN.mp3
+Feb 13 14:17 : player: played "Feint-Liquicity-Festival-2022.mp3"
+Feb 13 14:17 : config: option 'device' on line 13 was not recognized
+Feb 13 14:17 : player: played "Feint-Liquicity-Festival-2022.mp3"
+Feb 13 15:10 : config: option 'device' on line 13 was not recognized
+Feb 13 15:11 : player: played "Feint-Liquicity-Festival-2022.mp3"
+Feb 13 17:24 : config: option 'device' on line 13 was not recognized
+Feb 13 17:25 : config: option 'device' on line 13 was not recognized
+Feb 13 17:25 : player: played "Fox-Liquicity-Prague-2021.mp3"
+Feb 13 17:28 : config: option 'device' on line 13 was not recognized
+Feb 13 17:45 : player: played "Fox-Liquicity-Prague-2021.mp3"
+Feb 13 20:27 : player: played "Feint-Liquicity-Festival-2022.mp3"
+Feb 13 22:36 : output: Failed to pause "pulse audio" (pulse): failed to connect the stream: Connection terminated
+Feb 13 22:40 : player: played "Lexurus-Liquicity-Festivl-2022.mp3"
+Feb 14 08:19 : config: option 'device' on line 13 was not recognized
+Feb 14 08:19 : player: played "Lexurus-Liquicity-Festivl-2022.mp3"
+Feb 14 08:35 : player: played "Feint-Liquicity-Festival-2022.mp3"
+Feb 14 15:53 : config: option 'device' on line 13 was not recognized
+Feb 14 15:54 : player: played "BEETHOVEN.mp3"
+Feb 14 20:12 : config: option 'device' on line 13 was not recognized
+Feb 14 20:12 : player: played "BEETHOVEN.mp3"
+Feb 14 20:34 : player: played "Feint-Liquicity-Festival-2022.mp3"
+Feb 14 20:34 : config: option 'device' on line 13 was not recognized
+Feb 14 20:34 : player: played "Feint-Liquicity-Festival-2022.mp3"
+Feb 15 21:20 : config: option 'device' on line 13 was not recognized
+Feb 15 22:34 : player: played "Feint-Liquicity-Festival-2022.mp3"
+Feb 15 23:17 : player: played "Fox-Liquicity-Prague-2021.mp3"
+Feb 16 15:51 : config: option 'device' on line 13 was not recognized
+Feb 16 15:51 : player: played "Fox-Liquicity-Prague-2021.mp3"
+Feb 16 19:32 : config: option 'device' on line 13 was not recognized
+Feb 16 20:38 : player: played "Fox-Liquicity-Prague-2021.mp3"
+Feb 19 21:01 : config: option 'device' on line 13 was not recognized
+Feb 19 23:15 : player: played "Fox-Liquicity-Prague-2021.mp3"
+Feb 20 15:51 : config: option 'device' on line 13 was not recognized
+Feb 20 16:55 : player: played "Fox-Liquicity-Prague-2021.mp3"
+Feb 21 19:30 : config: option 'device' on line 13 was not recognized
+Feb 21 20:12 : player: played "Lexurus-Liquicity-Festivl-2022.mp3"
+Feb 23 13:31 : config: option 'device' on line 13 was not recognized
+Feb 23 13:31 : exception: Failed to enable output "pulse audio" (pulse); pa_context_connect() has failed: Connection refused
+Feb 23 13:32 : player: played "Lexurus-Liquicity-Festivl-2022.mp3"
+Feb 23 13:34 : exception: Failed to enable output "pulse audio" (pulse); pa_context_connect() has failed: Connection refused
+Feb 23 13:34 : config: option 'device' on line 13 was not recognized
+Feb 23 13:34 : exception: Failed to enable output "pulse audio" (pulse); pa_context_connect() has failed: Connection refused
+Feb 23 13:34 : player: played "Lexurus-Liquicity-Festivl-2022.mp3"
+Mar 06 19:54 : config: option 'device' on line 13 was not recognized
+Mar 06 19:54 : update: added /Netsky-let-it-roll-2021.mp3
+Mar 06 19:54 : exception: Playlist already exists
+Mar 06 19:55 : player: played "Lexurus-Liquicity-Festivl-2022.mp3"
+Mar 06 19:55 : player: played "Netsky-let-it-roll-2021.mp3"
+Mar 10 15:11 : config: option 'device' on line 13 was not recognized
+Mar 10 15:16 : player: played "Lexurus-Liquicity-Festivl-2022.mp3"
+Mar 10 15:18 : player: played "Fox-Liquicity-Prague-2021.mp3"
+Mar 11 19:54 : config: option 'device' on line 13 was not recognized
+Mar 11 19:56 : player: played "Fox-Liquicity-Prague-2021.mp3"
+Mar 11 20:46 : player: played "Netsky-let-it-roll-2021.mp3"
+Mar 11 20:51 : player: played "Feint-Liquicity-Festival-2022.mp3"
+Mar 14 20:26 : config: option 'device' on line 13 was not recognized
+Mar 14 21:11 : player: played "Feint-Liquicity-Festival-2022.mp3"
+Mar 16 19:33 : config: option 'device' on line 13 was not recognized
+Mar 16 19:33 : player: played "Feint-Liquicity-Festival-2022.mp3"
+Mar 29 15:50 : config: option 'device' on line 13 was not recognized
+Mar 29 16:12 : player: played "Feint-Liquicity-Festival-2022.mp3"
+Mar 29 17:53 : player: played "Fox-Liquicity-Prague-2021.mp3"
+Mar 29 18:19 : player: played "Lexurus-Liquicity-Festivl-2022.mp3"
+Apr 10 20:54 : config: option 'device' on line 13 was not recognized
+Apr 10 20:54 : update: added /Koven-let-it-roll-2021.mp3
+Apr 10 20:54 : player: played "Lexurus-Liquicity-Festivl-2022.mp3"
+Apr 12 20:16 : config: option 'device' on line 13 was not recognized
+Apr 12 21:18 : player: played "Koven-let-it-roll-2021.mp3"
+Apr 12 21:36 : player: played "Netsky-let-it-roll-2021.mp3"
+Apr 18 21:11 : config: option 'device' on line 13 was not recognized
+Apr 18 21:11 : player: played "Netsky-let-it-roll-2021.mp3"
+Apr 18 21:48 : player: played "Koven-let-it-roll-2021.mp3"
+Apr 20 17:03 : config: option 'device' on line 13 was not recognized
+Apr 20 19:00 : output: Failed to play on "pulse audio" (pulse): suspended
+Apr 20 19:21 : output: Failed to play on "pulse audio" (pulse): suspended
+Apr 20 19:21 : mixer: Failed to set mixer for 'pulse audio': disconnected
+Apr 20 19:21 : exception: Failed to set mixer for 'pulse audio'; disconnected
+Apr 20 19:21 : mixer: Failed to set mixer for 'pulse audio': disconnected
+Apr 20 19:21 : exception: Failed to set mixer for 'pulse audio'; disconnected
+Apr 20 19:21 : mixer: Failed to set mixer for 'pulse audio': disconnected
+Apr 20 19:21 : exception: Failed to set mixer for 'pulse audio'; disconnected
+Apr 20 19:21 : mixer: Failed to set mixer for 'pulse audio': disconnected
+Apr 20 19:21 : exception: Failed to set mixer for 'pulse audio'; disconnected
+Apr 20 19:21 : mixer: Failed to set mixer for 'pulse audio': disconnected
+Apr 20 19:21 : exception: Failed to set mixer for 'pulse audio'; disconnected
+Apr 20 19:21 : mixer: Failed to set mixer for 'pulse audio': disconnected
+Apr 20 19:21 : exception: Failed to set mixer for 'pulse audio'; disconnected
+Apr 20 19:21 : mixer: Failed to set mixer for 'pulse audio': disconnected
+Apr 20 19:21 : exception: Failed to set mixer for 'pulse audio'; disconnected
+Apr 20 19:21 : mixer: Failed to set mixer for 'pulse audio': disconnected
+Apr 20 19:21 : exception: Failed to set mixer for 'pulse audio'; disconnected
+Apr 20 19:21 : mixer: Failed to set mixer for 'pulse audio': disconnected
+Apr 20 19:21 : exception: Failed to set mixer for 'pulse audio'; disconnected
+Apr 20 19:21 : mixer: Failed to set mixer for 'pulse audio': disconnected
+Apr 20 19:21 : exception: Failed to set mixer for 'pulse audio'; disconnected
+Apr 27 15:06 : config: option 'device' on line 13 was not recognized
+Apr 27 15:06 : player: played "Fox-Liquicity-Prague-2021.mp3"
+Apr 27 15:06 : config: option 'device' on line 13 was not recognized
+Apr 27 15:09 : player: played "Fox-Liquicity-Prague-2021.mp3"
+May 03 21:02 : config: option 'device' on line 13 was not recognized
+May 03 22:59 : player: played "Koven-let-it-roll-2021.mp3"
+May 06 21:00 : config: option 'device' on line 13 was not recognized
+May 06 21:00 : update: added /Andromedik-Liquicity-Prague.mp3
+May 06 21:43 : player: played "Andromedik-Liquicity-Prague.mp3"
+May 11 21:17 : config: option 'device' on line 13 was not recognized
+May 11 21:43 : player: played "Andromedik-Liquicity-Prague.mp3"
+May 13 15:00 : config: option 'device' on line 13 was not recognized
+May 13 15:46 : player: played "Andromedik-Liquicity-Prague.mp3"
+May 20 11:09 : config: option 'device' on line 13 was not recognized
+May 20 11:09 : update: added /Hello-2021-polygon.mp3
+May 20 11:09 : update: added /Hello-2021-Maduk.mp3
+May 20 11:09 : player: played "Andromedik-Liquicity-Prague.mp3"
+May 20 11:45 : config: option 'device' on line 13 was not recognized
+May 20 11:46 : player: played "Andromedik-Liquicity-Prague.mp3"
+May 20 11:46 : exception: Bad playlist name
+May 20 11:46 : exception: Playlist already exists
+May 20 12:52 : player: played "Hello-2021-polygon.mp3"
+May 20 13:06 : player: played "Netsky-let-it-roll-2021.mp3"
+May 23 20:43 : config: option 'device' on line 13 was not recognized
+May 23 20:43 : player: played "Netsky-let-it-roll-2021.mp3"
+May 23 21:03 : player: played "Hello-2021-polygon.mp3"
+May 24 14:06 : config: option 'device' on line 13 was not recognized
+May 25 21:25 : player: played "Hello-2021-polygon.mp3"
+May 31 15:41 : config: option 'device' on line 13 was not recognized
+May 31 16:45 : player: played "Hello-2021-polygon.mp3"
+Jun 01 07:58 : player: played "Fox-Liquicity-Prague-2021.mp3"
+Jun 12 19:58 : config: option 'device' on line 13 was not recognized
+Jun 12 19:58 : player: played "Fox-Liquicity-Prague-2021.mp3"
+Jun 12 20:59 : player: played "Koven-let-it-roll-2021.mp3"
+Jun 12 21:01 : update: added /Andromedik-Liquicity-Essentials.mp3
+Jun 12 21:54 : player: played "Andromedik-Liquicity-Essentials.mp3"
+Jun 15 21:29 : config: option 'device' on line 13 was not recognized
+Jun 15 22:37 : player: played "Andromedik-Liquicity-Essentials.mp3"
+Jun 29 20:04 : config: option 'device' on line 13 was not recognized
+Jun 29 20:05 : player: played "Andromedik-Liquicity-Essentials.mp3"
+Jul 03 13:23 : config: option 'device' on line 13 was not recognized

@@ -1,0 +1,10 @@
+#!/bin/sh
+list="$(ls $HOME/.mozilla/firefox/ | awk -F . '{if (NF>1) {print $NF}}' | grep -v ini | sort)"
+
+choice="$(echo "$list" | dmenu -i -c -bw 3 -l 10)"
+
+if [ -z "$choice" ]; then
+    echo ""
+else
+    firefox -p "$choice"
+fi

@@ -1,0 +1,10 @@
+#!/bin/sh
+file="$HOME/.dotfiles/suckless/dwm/config.h"
+temp="$(mktemp binds.XXXXXX)"
+keys="$(grep -n 'static const Key keys' $file | cut -d':' -f1)"
+buttons="$(grep -n 'static const Button buttons' $file | cut -d':' -f1)"
+grep '#define MODKEY' "$file" >> "$temp"
+sed -n "${keys},${buttons}p" "$file" | grep -v "/\*" | grep -v "TAGKEYS" | grep -v "//" | grep -v "static" | awk '{printf $3" "$2" " ; printf "\n""\t"; for(i=4;i<=NF-1;i++) {printf $i" "} printf "\n\n"}' >> $temp
+sed -n '/static const Button buttons/,$p' "$file" | grep -v "/\*" | grep -v "static" | awk '{ printf $4" "$3" "$2"\n\t"$5" "$6" " ; printf "\n\n"}' >> $temp
+less "$temp"
+rm "$temp"

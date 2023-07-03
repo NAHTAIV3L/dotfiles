@@ -1,0 +1,48 @@
+#+title: Test
+#+author: Me
+
+
+* hello
+** hello
+* two
+** hello
+* hello
+
+
+* hello
++ hello
++ this is a new item
++ more lists
+  - hello
+  + more text
+
+* C-c C-c or RET marks as done
+* TODO [0%] [0/2]
+** [ ] one
+** [ ] two
+
+* tables
+** C-RET: new line
+** type then enter to resize
+** S-RET: copy and paste to new line
+** SPC o m - inserts table heading
+
+
+| one                        | two           | three | four |
+|----------------------------+---------------+-------+------|
+| something                  | another thing |       |      |
+| something                  |               |       |      |
+| this is going to be longer | another thing |       |      |
+|                            |               |       |      |
+
+#+begin_src java
+
+public class main
+{
+    public static void main(String[] args)
+    {
+        System.out.print("Hello World!\n");
+    }
+}
+
+#+end_src

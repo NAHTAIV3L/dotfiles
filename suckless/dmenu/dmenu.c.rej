@@ -1,0 +1,23 @@
+--- dmenu.c
++++ dmenu.c
+@@ -530,6 +536,11 @@ readstdin(void)
+ 	char buf[sizeof text], *p;
+ 	size_t i, imax = 0, size = 0;
+ 	unsigned int tmpmax = 0;
++	if(passwd){
++    	inputw = lines = 0;
++    	return;
++  	}
++
+ 
+ 	/* read each line from stdin and add it to the item list */
+ 	for (i = 0; fgets(buf, sizeof buf, stdin); i++) {
+@@ -695,7 +706,7 @@ setup(void)
+ static void
+ usage(void)
+ {
+-	fputs("usage: dmenu [-bfiv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
++	fputs("usage: dmenu [-bfivP] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
+ 	      "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]\n", stderr);
+ 	exit(1);
+ }

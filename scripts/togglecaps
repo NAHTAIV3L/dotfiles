@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if [  -z "$(setxkbmap -query | grep option | cut -d' ' -f5)" ] ; then
+    setxkbmap -option caps:swapescape
+    echo on
+else
+    setxkbmap -option
+    echo off
+fi

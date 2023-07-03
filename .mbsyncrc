@@ -1,0 +1,87 @@
+# mbsyncrc based on
+# http://www.ict4g.net/adolfo/notes/2014/12/27/EmacsIMAP.html
+# ACCOUNT INFORMATION
+IMAPAccount acc1-gmail
+# Address to connect to
+Host imap.gmail.com
+User rbeckettvt@gmail.com
+# PassCmd "gpg -q --for-your-eyes-only --no-tty -d ~/.dotfiles/acc1pass.gpg"
+PassCmd "emacsclient -e \"(lookup-password :host \\\"smtp.gmail.com\\\" :login \\\"rbeckettvt@gmail.com\\\")\" | cut -d '\"' -f2"
+AuthMechs LOGIN
+SSLType IMAPS
+SSLVersions TLSv1.3
+CertificateFile /etc/ssl/certs/ca-certificates.crt
+
+# THEN WE SPECIFY THE LOCAL AND REMOTE STORAGE
+# - THE REMOTE STORAGE IS WHERE WE GET THE MAIL FROM (E.G., THE
+#   SPECIFICATION OF AN IMAP ACCOUNT)
+# - THE LOCAL STORAGE IS WHERE WE STORE THE EMAIL ON OUR COMPUTER
+
+# REMOTE STORAGE (USE THE IMAP ACCOUNT SPECIFIED ABOVE)
+IMAPStore acc1-gmail-remote
+Account acc1-gmail
+
+# LOCAL STORAGE (CREATE DIRECTORIES with mkdir -p ~/Maildir/acc1-gmail)
+MaildirStore acc1-gmail-local
+Path ~/Maildir/acc1-gmail/
+Inbox ~/Maildir/acc1-gmail/INBOX
+# REQUIRED ONLY IF YOU WANT TO DOWNLOAD ALL SUBFOLDERS; SYNCING SLOWS DOWN
+# SubFolders Verbatim
+
+# CONNECTIONS SPECIFY LINKS BETWEEN REMOTE AND LOCAL FOLDERS
+#
+# CONNECTIONS ARE SPECIFIED USING PATTERNS, WHICH MATCH REMOTE MAIl
+# FOLDERS. SOME COMMONLY USED PATTERS INCLUDE:
+#
+# 1 "*" TO MATCH EVERYTHING
+# 2 "!DIR" TO EXCLUDE "DIR"
+# 3 "DIR" TO MATCH DIR
+
+Channel acc1-gmail-inbox
+Master :acc1-gmail-remote:
+Slave :acc1-gmail-local:
+Patterns "INBOX"
+Create Both
+Expunge Both
+SyncState *
+
+Channel acc1-gmail-trash
+Master :acc1-gmail-remote:"[Gmail]/Trash"
+Slave :acc1-gmail-local:"[acc1].Trash"
+Create Both
+Expunge Both
+SyncState *
+
+Channel acc1-gmail-sent
+Master :acc1-gmail-remote:"[Gmail]/Sent Mail"
+Slave :acc1-gmail-local:"[acc1].Sent Mail"
+Create Both
+Expunge Both
+SyncState *
+
+Channel acc1-gmail-all
+Master :acc1-gmail-remote:"[Gmail]/All Mail"
+Slave :acc1-gmail-local:"[acc1].All Mail"
+Create Both
+Expunge Both
+SyncState *
+
+Channel acc1-gmail-starred
+Master :acc1-gmail-remote:"[Gmail]/Starred"
+Slave :acc1-gmail-local:"[acc1].Starred"
+Create Both
+Expunge Both
+SyncState *
+
+# GROUPS PUT TOGETHER CHANNELS, SO THAT WE CAN INVOKE
+# MBSYNC ON A GROUP TO SYNC ALL CHANNELS
+#
+# FOR INSTANCE: "mbsync gmail" GETS MAIL FROM
+# "gmail-inbox", "gmail-sent", and "gmail-trash"
+#
+Group acc1-gmail
+Channel acc1-gmail-inbox
+Channel acc1-gmail-sent
+Channel acc1-gmail-trash
+Channel acc1-gmail-all
+Channel acc1-gmail-starred

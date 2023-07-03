@@ -1,0 +1,20 @@
+#void linux things
+https://docs.voidlinux.org/ #void docs
+https://voidlinux.org/packages/ #void packages
+#other
+https://github.com/ #github
+https://suckless.org/ #suckless
+https://git.suckless.org/ #git suckless
+#ip addresses
+10.0.0.194 #static rasberry pi ip
+73.68.46.218 #home ip
+#misc,
+EssexHS/CF Montreal 23620648 #polar go fit login
+http://nmcheck.gnome.org/ #nmcheck
+https://www.gnu.org/software/emacs/manual/html_node/elisp/index.html #elisp guide
+https://app.slack.com/client/T04VADNHAC8/C04ULP16U9G #gmr green mountain robotics
+https://www.gnu.org/software/emacs/manual/html_node/emacs/Amusements.html #emacs games
+http://zvon.org/other/haskell/Outputglobal/index.html #haskell documentation
+https://refspecs.linuxfoundation.org/elf/x86_64-abi-0.99.pdf #asm parameters pg 20
+https://www.felixcloutier.com/x86/index.html #assembly instructions
+https://github.com/torvalds/linux/blob/master/arch/x86/entry/syscalls/syscall_64.tbl #linux syscalls

@@ -1,0 +1,14 @@
+#!/bin/sh
+
+param="$1"
+folder="$2"
+if [ -z "$folder" ] ; then
+    folder="/"
+fi
+
+if [ -z "$param" ] ; then
+    exit
+else
+    return=$(find "$folder" -iname "*$param*" 2>/dev/null)
+    echo "$return" | grep -i --color=auto "$param"
+fi
