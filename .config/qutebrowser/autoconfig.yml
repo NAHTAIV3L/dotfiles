@@ -17,3 +17,7 @@ settings:
     global: dark
   qt.force_software_rendering:
     global: qt-quick
+  scrolling.smooth:
+    global: true
+  tabs.tabs_are_windows:
+    global: true

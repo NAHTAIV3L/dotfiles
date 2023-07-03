@@ -2,12 +2,19 @@
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 #+STARTUP: fold
 * General Changes
-** UI Changes
+** Set variables
 
 #+begin_src emacs-lisp
   (setq user-full-name "Riley Beckett")
   (setq user-mail-address "rbeckettvt@gmail.com")
   (setq-default indent-tabs-mode nil)
+  (setq make-backup-files nil)
+  (setq create-lockfiles nil)
+#+end_src
+
+** UI Changes
+
+#+begin_src emacs-lisp
   (setq inhibit-startup-message t)
   (setq backup-inhibited t)
 
@@ -62,215 +69,250 @@
 
 #+end_src
 
-* Packages
-** Use-package setup
+* Use-package and straight.el setup
+
+Use straight.el as package manager and use-package for configuring packages.
 
 #+begin_src emacs-lisp
-  (defvar bootstrap-version)
-  (let ((bootstrap-file
-	 (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-	(bootstrap-version 5))
-    (unless (file-exists-p bootstrap-file)
-      (with-current-buffer
-	  (url-retrieve-synchronously
-	   "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-	   'silent 'inhibit-cookies)
-	(goto-char (point-max))
-	(eval-print-last-sexp)))
-    (load bootstrap-file nil 'nomessage))
+(defvar bootstrap-version)
+(let ((bootstrap-file
+        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+    (bootstrap-version 5))
+(unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+        "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+        'silent 'inhibit-cookies)
+    (goto-char (point-max))
+    (eval-print-last-sexp)))
+(load bootstrap-file nil 'nomessage))
 
-  (straight-use-package 'use-package)
+(straight-use-package 'use-package)
 
-  (setq straight-use-package-by-default t)
-  ;; (require 'package)
+(setq straight-use-package-by-default t)
+;; (require 'package)
 
-  ;; (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-  ;; 			   ("org" . "https://orgmode.org/elpa/")
-  ;; 			   ("elpa" . "https://elpa.gnu.org/packages/")))
+;; (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+;; 			   ("org" . "https://orgmode.org/elpa/")
+;; 			   ("elpa" . "https://elpa.gnu.org/packages/")))
 
-  ;; (package-initialize)
-  ;; (unless package-archive-contents
-  ;;   (package-refresh-contents))
+;; (package-initialize)
+;; (unless package-archive-contents
+;;   (package-refresh-contents))
 
-  ;; (unless (package-installed-p 'use-package)
-  ;;   (package-install 'use-package))
+;; (unless (package-installed-p 'use-package)
+;;   (package-install 'use-package))
 
-  ;; (require 'use-package)
-  ;; (setq use-package-always-ensure t)
+;; (require 'use-package)
+;; (setq use-package-always-ensure t)
 #+end_src
 
-** Gcmh
+* No-littering
+
+no-littering is used to get rid of annoying temp files.
 
 #+begin_src emacs-lisp
-      (use-package gcmh
-	:init
-	(gcmh-mode 1))
+(recentf-mode 1)
+(use-package no-littering)
+(add-to-list 'recentf-exclude
+            (recentf-expand-file-name no-littering-var-directory))
+(add-to-list 'recentf-exclude
+            (recentf-expand-file-name no-littering-etc-directory))
+(setq custom-file (no-littering-expand-etc-file-name "custom.el"))
 #+end_src
 
-** Ivy/Counsel
+* Gcmh
+
+Garbage collector magic hack to stop lots of garbage collection.
 
 #+begin_src emacs-lisp
-  ;; (use-package ivy
-  ;;     :diminish
-  ;;     :bind (("C-s" . swiper)
-  ;; 	     :map ivy-minibuffer-map
-  ;; 	     ("TAB" . ivy-alt-done)
-  ;; 	     ("C-l" . ivy-alt-done)
-  ;; 	     ("C-j" . ivy-next-line)
-  ;; 	     ("C-k" . ivy-previous-line)
-  ;; 	     :map ivy-switch-buffer-map
-  ;; 	     ("C-k" . ivy-previous-line)
-  ;; 	     ("C-l" . ivy-done)
-  ;; 	     ("C-d" . ivy-switch-buffer-kill)
-  ;; 	     :map ivy-reverse-i-search-map
-  ;; 	     ("C-k" . ivy-previous-line)
-  ;; 	     ("C-d" . ivy-reverse-i-search-kill))
-  ;;     :config
-  ;;     (ivy-mode 1))
-
-  ;; (use-package ivy-rich
-  ;;   :after ivy
-  ;;   :init
-  ;;   (ivy-rich-mode 1))
-
-  ;; (use-package counsel
-  ;;   :bind (:map minibuffer-local-map
-  ;; 	   ("C-r" . 'counsel-minibuffer-history))
-  ;;   :custom
-  ;;   (counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
-  ;;   :config
-  ;;   (counsel-mode 1))
-  #+end_src
-
-** Prescient.el
-
-#+begin_src emacs-lisp
-  ;; (use-package ivy-prescient
-  ;;   :after counsel
-  ;;   :custom
-  ;;   (ivy-prescient-enable-filtering t)
-  ;;   (ivy-prescient-retain-classic-highlighting t)
-  ;;   :config
-  ;;   ;; Uncomment the following line to have sorting remembered across sessions!
-  ;; 					  ;(prescient-persist-mode 1)
-  ;;   (ivy-prescient-mode 1))
+    (use-package gcmh
+    :init
+    (gcmh-mode 1))
 #+end_src
 
+* Completion
 ** Vertico
 
+Vertico used for completion for minibuffers.
+
 #+begin_src emacs-lisp
-  (use-package vertico
-    :bind (:map vertico-map
-		("C-n" . vertico-next)
-		("C-p" . vertico-previous))
-    :init
-    (vertico-mode 1)
-    (setq vertico-count 15))
-
-  (use-package savehist
-    :init
-    (savehist-mode 1))
-
-  (use-package marginalia
-    :after vertico
-    :custom
-    (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
-    :init
-    (marginalia-mode))
-
-  (use-package consult)
-
-  (use-package orderless
-    :config
-    (setq completion-styles '(orderless)
-	  completion-category-defaults nil
-	  completion-category-overrides '((file (styles . (partial-completion))))))
+(use-package vertico
+:bind (:map vertico-map
+            ("C-n" . vertico-next)
+            ("C-p" . vertico-previous))
+:init
+(vertico-mode 1)
+(setq vertico-count 15))
 #+end_src
 
-** UI packages
+** Saving history
+
+use save-hist-mode to get history saved for completion
 
 #+begin_src emacs-lisp
-  (use-package doom-modeline
-    :init
-    (setq doom-modeline-display-default-persp-name t)
-    (doom-modeline-mode 1)
-    :custom ((doom-modeline-height 35)))
-
-  (use-package doom-themes
-    :init (load-theme 'doom-one t))
-
-  (use-package rainbow-delimiters
-    :hook (prog-mode . rainbow-delimiters-mode))
-
-  (use-package which-key
-    :init (which-key-mode)
-    :diminish which-key-mode
-    :config
-    (setq which-key-idle-delay 1))
+(use-package savehist
+:init
+(savehist-mode 1))
 #+end_src
 
-** Helpful
+** Marginalia
+
+better results in minibuffers with marginalia
 
 #+begin_src emacs-lisp
-      (use-package helpful
-	;; :custom
-	;; (counsel-describe-function-function #'helpful-callable)
-	;; (counsel-describe-variable-function #'helpful-variable)
-	:bind
-	;; ([remap describe-function] . counsel-describe-function)
-	([remap describe-command] . helpful-command)
-	([remap describe-function] . helpful-callable)
-	([remap describe-variable] . helpful-variable)
-	;; ([remap describe-variable] . counsel-describe-variable)
-	([remap describe-key] . helpful-key))
+(use-package marginalia
+:after vertico
+:custom
+(marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
+:init
+(marginalia-mode))
 #+end_src
 
-** Undo-tree
+** Consult
+
+vertico enriched functions
 
 #+begin_src emacs-lisp
-  (use-package undo-tree)
+(use-package consult)
 #+end_src
 
-** Evil mode
+** Orderless
+
+better searching
 
 #+begin_src emacs-lisp
-    (use-package evil
+
+(use-package orderless
+:config
+(setq completion-styles '(orderless)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles . (partial-completion))))))
+#+end_src
+
+* UI packages
+** doom-modeline
+
+doom-modeline for a detailed fancy modeline
+
+#+begin_src emacs-lisp
+(use-package doom-modeline
+:init
+(setq doom-modeline-display-default-persp-name t)
+(setq doom-modeline-buffer-file-name-style 'relative-from-project)
+(doom-modeline-mode 1)
+:custom ((doom-modeline-height 35)))
+#+end_src
+
+** doom-themes
+
+good looking themes with doom-themes
+
+#+begin_src emacs-lisp
+(use-package doom-themes
+:init (load-theme 'doom-one t))
+#+end_src
+
+** rainbow-delimiters
+
+rainbow-delimiters for parens coloring
+
+#+begin_src emacs-lisp
+(use-package rainbow-delimiters
+:hook (prog-mode . rainbow-delimiters-mode))
+#+end_src
+
+** which-key
+
+which-ke for descriptions when entering keybinds
+
+#+begin_src emacs-lisp
+(use-package which-key
+:init (which-key-mode)
+:diminish which-key-mode
+:config
+(setq which-key-idle-delay 1))
+#+end_src
+
+* Helpful
+
+More descriptive describe functions from helpful.
+
+#+begin_src emacs-lisp
+    (use-package helpful
+    :bind
+    ([remap describe-command] . helpful-command)
+    ([remap describe-function] . helpful-callable)
+    ([remap describe-variable] . helpful-variable)
+    ([remap describe-key] . helpful-key))
+#+end_src
+
+* Undo-tree
+
+undo-tree for good undoing
+
+#+begin_src emacs-lisp
+    (use-package undo-tree
       :init
-      (setq evil-want-integration t)
-      (setq evil-want-keybinding nil)
-      (setq evil-want-C-u-scroll t)
-      (setq evil-want-C-i-jump nil)
-      (setq evil-undo-system 'undo-redo)
-      :config
-      (evil-mode 1)
-
-      (evil-set-initial-state 'messages-buffer-mode 'normal)
-      (evil-set-initial-state 'dashboard-mode 'normal))
-
-    (use-package evil-collection
-      :after evil
-      :config
-      (evil-collection-init))
+      (global-undo-tree-mode))
 #+end_src
 
-** Anzu
+* Evil mode
+
+vim keybinds in emacs
 
 #+begin_src emacs-lisp
-  (use-package evil-anzu
+(use-package evil
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+    (setq evil-want-C-u-scroll t)
+    (setq evil-want-C-i-jump nil)
+    (setq evil-undo-system 'undo-tree)
+    :config
+    (evil-mode 1)
+
+    (evil-set-initial-state 'messages-buffer-mode 'normal)
+    (evil-set-initial-state 'dashboard-mode 'normal))
+
+(use-package evil-collection
     :after evil
     :config
-    (global-anzu-mode 1))
+    (evil-collection-init))
 #+end_src
 
-** Org mode
-*** general
+* Evil nerd commenter
+
+easy commenting with the keybinds: gcc or gc
+
+#+begin_src emacs-lisp
+(use-package evil-nerd-commenter
+    :after evil)
+#+end_src
+
+* Anzu
+
+counter on modeline for how many search results from evil-search-forward
+
+#+begin_src emacs-lisp
+(use-package evil-anzu
+:after evil
+:config
+(global-anzu-mode 1))
+#+end_src
+
+* Org mode
+** general
+
+general configuration of org-mode
 
 #+begin_src emacs-lisp
   (use-package org
-    :config
-    (setq org-ellipsis " ▾"))
+  :config
+  (setq org-ellipsis " ▾"))
+
   (use-package org-superstar
-    :after org)
+  :after org)
   (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
   (setq org-hide-leading-stars t)
   (require 'org-tempo)
@@ -280,249 +322,284 @@
   (add-to-list 'org-structure-template-alist '("py" . "src python"))
 
   (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((emacs-lisp . t)
-     (python . t)))
+  'org-babel-load-languages
+  '((emacs-lisp . t)
+      (python . t)))
 #+end_src
 
-*** Automatic tangle
+** Automatic tangle
+
+Automatically tangle org config files into .el files.
 
 #+begin_src emacs-lisp
-    (defun org-babel-tangle-config ()
-      (when (or
-	     (string-equal (buffer-file-name) (expand-file-name "~/.config/emacs/Emacs.org"))
-	     (string-equal (buffer-file-name) (expand-file-name "~/.config/emacs/Desktop.org")))
-	;; Dynamic scoping to the rescue
-	(let ((org-confirm-babel-evaluate nil))
-	  (org-babel-tangle))))
+(defun org-babel-tangle-config ()
+    (when (or
+            (string-equal (buffer-file-name) (expand-file-name "~/.dotfiles/.config/emacs/Emacs.org"))
+            (string-equal (buffer-file-name) (expand-file-name "~/.dotfiles/.config/emacs/Desktop.org")))
+    ;; Dynamic scoping to the rescue
+    (let ((org-confirm-babel-evaluate nil))
+        (org-babel-tangle))))
 
-    (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'org-babel-tangle-config)))
+(add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'org-babel-tangle-config)))
 
 #+end_src
 
-** Smartparens
+* Smartparens
+
+place closing paren when opening one is placed
 
 #+begin_src emacs-lisp
-  (use-package smartparens
+(use-package smartparens
+:config
+(setq sp-highlight-pair-overlay nil)
+(sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
+(smartparens-global-mode 1))
+#+end_src
+
+* Hydra
+
+mini-menus 
+
+#+begin_src emacs-lisp
+(use-package hydra)
+(defhydra hydra-text-scale (:timeout 4)
+"scale text"
+("j" text-scale-increase "in")
+("k" text-scale-decrease "out")
+("f" nil "finished" :exit t))
+#+end_src
+
+* Perspective
+
+multiple perspectives per frame
+
+#+begin_src emacs-lisp
+(use-package perspective
+:init
+(setq persp-suppress-no-prefix-key-warning t)
+(persp-mode))
+#+end_src
+
+* status
+
+#+begin_src emacs-lisp
+(add-to-list 'load-path "~/.config/emacs/lisp/")
+(require 'status)
+#+end_src
+
+* General
+
+general for keybinds
+
+#+begin_src emacs-lisp
+(use-package general)
+#+end_src
+
+* mu4e
+
+setup mu4e as email client.
+
+#+begin_src emacs-lisp
+(use-package mu4e
+:ensure nil
+:straight nil
+:config
+
+;; This is set to 't' to avoid mail syncing issues when using mbsync
+(setq mu4e-change-filenames-when-moving t)
+
+;; Refresh mail using isync every 10 minutes
+(setq mu4e-update-interval (* 10 60))
+(setq mu4e-get-mail-command "mbsync -a")
+(setq mu4e-maildir "~/Maildir")
+
+(setq mu4e-drafts-folder "/acc1-gmail/[acc1].Drafts")
+(setq mu4e-sent-folder   "/acc1-gmail/[acc1].Sent Mail")
+(setq mu4e-refile-folder "/acc1-gmail/[acc1].All Mail")
+(setq mu4e-trash-folder  "/acc1-gmail/[acc1].Trash")
+(setq smtpmail-smtp-server "smtp.gmail.com")
+(setq smtpmail-smtp-service 465)
+(setq smtpmail-stream-type  'ssl)
+(setq message-send-mail-function 'smtpmail-send-it)
+(setq mu4e-compose-signature "Riley Beckett\nrbeckettvt@gmail.com")
+(setq mu4e-compose-format-flowed t))
+
+(use-package mu4e-alert
+:config
+(mu4e-alert-set-default-style 'libnotify)
+(add-hook 'after-init-hook #'mu4e-alert-enable-notifications))
+#+end_src
+
+* EXWM
+
+exwm for using emacs as a WM.
+
+#+begin_src emacs-lisp
+(use-package exwm)
+#+end_src
+
+* Projectile
+
+projectile is used for swaping to projects
+
+#+begin_src emacs-lisp
+(use-package projectile
+:diminish projectile-mode
+:config (projectile-mode))
+#+end_src
+
+* Magit
+
+best git front end ever
+
+#+begin_src emacs-lisp
+(use-package magit
+:custom
+(magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+#+end_src
+
+* flycheck
+
+give good errors when programming
+
+#+begin_src emacs-lisp
+(use-package flycheck
+    :init (global-flycheck-mode))
+#+end_src
+
+* Code Completion
+
+Using lsp-mode and company for code completion.
+
+** Lsp-mode
+
+Language Server Protocol Modes also describe keybinds
+
+#+begin_src emacs-lisp
+(use-package lsp-mode
+:init
+(setq lsp-keymap-prefix "C-c l")
+(setq lsp-headerline-breadcrumb-enable nil)
+:hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
+        (c-mode . lsp)
+        ;; if you want which-key integration
+        (lsp-mode . lsp-enable-which-key-integration))
+:commands lsp)
+
+(use-package lsp-ui
+:after lsp
+:config
+(setq lsp-ui-sideline-update-mode 'point)
+(setq lsp-ui-sideline-show-diagnostics t)
+(setq lsp-ui-sideline-ignore-duplicate t))
+
+(use-package lsp-haskell
+:hook
+(haskell-mode . lsp))
+
+(use-package lsp-treemacs
+:after lsp)
+
+(use-package consult-lsp
+:after lsp)
+
+(defun lsp-bind ()
+(interactive)
+(define-key myemacs-leader-map (kbd "l") lsp-command-map)
+(which-key-add-keymap-based-replacements myemacs-leader-map "l" "lsp")
+(which-key-add-keymap-based-replacements myemacs-leader-map "l=" "formatting")
+(which-key-add-keymap-based-replacements myemacs-leader-map "lF" "folders")
+(which-key-add-keymap-based-replacements myemacs-leader-map "lG" "peek")
+(which-key-add-keymap-based-replacements myemacs-leader-map "lT" "toggle")
+(which-key-add-keymap-based-replacements myemacs-leader-map "la" "code actions")
+(which-key-add-keymap-based-replacements myemacs-leader-map "lg" "goto")
+(which-key-add-keymap-based-replacements myemacs-leader-map "lh" "help")
+(which-key-add-keymap-based-replacements myemacs-leader-map "lr" "refactor")
+(which-key-add-keymap-based-replacements myemacs-leader-map "lu" "ui")
+(which-key-add-keymap-based-replacements myemacs-leader-map "lw" "workspaces")
+(define-key myemacs-leader-map (kbd "lug") '("ui doc glance" . lsp-ui-doc-glance)))
+(add-hook 'lsp-mode-hook 'lsp-bind)
+#+end_src
+
+** Company-mode
+
+use company for completion coming from lsp
+
+#+begin_src emacs-lisp
+(use-package company
+:after lsp-mode
+:init (global-company-mode 1)
+:bind (:map company-active-map
+            ("<tab>" . company-complete-selection))
+(:map lsp-mode-map
+        ("<tab>" . company-indent-or-complete-common))
+:custom
+(company-minimum-prefix-length 1)
+(company-idle-delay 0.0))
+
+(use-package company-box
+:hook (company-mode . company-box-mode))
+#+end_src
+
+* Highlighing
+** Tree-sitter
+
+tree-sitter used for very detailed syntax highlighting
+
+#+begin_src emacs-lisp
+(use-package tree-sitter
     :config
-    (setq sp-highlight-pair-overlay nil)
-    (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
-    (smartparens-global-mode 1))
+    (global-tree-sitter-mode 1))
+(use-package tree-sitter-langs)
 #+end_src
 
-** Hydra
+** Higlight-quoted
+
+elisp ' highlighting
 
 #+begin_src emacs-lisp
-  (use-package hydra)
-  (defhydra hydra-text-scale (:timeout 4)
-    "scale text"
-    ("j" text-scale-increase "in")
-    ("k" text-scale-decrease "out")
-    ("f" nil "finished" :exit t))
+(use-package highlight-quoted
+:config
+(require 'highlight-quoted)
+(add-hook 'emacs-lisp-mode 'highlight-quoted-mode))
 #+end_src
 
-** Persp mode
+** hl-todo
+
+highlights TODO and other things
 
 #+begin_src emacs-lisp
-  (use-package persp-mode
-    :init
-    (setq persp-nil-name "main")
-    :config
-    (add-hook 'window-setup-hook #'(lambda () (persp-mode 1))))
-  (add-to-list 'load-path "~/.config/emacs/lisp/")
-  (require 'workspace)
-  (require 'status)
-#+end_src
-
-** General
-
-#+begin_src emacs-lisp
-  (use-package general)
-#+end_src
-
-** mu4e
-
-#+begin_src emacs-lisp
-  (use-package mu4e
-    :ensure nil
-    :straight nil
-    ;; :load-path "/usr/share/emacs/site-lisp/mu4e/"
-    ;; :defer 20 ; Wait until 20 seconds after startup
-    :config
-
-    ;; This is set to 't' to avoid mail syncing issues when using mbsync
-    (setq mu4e-change-filenames-when-moving t)
-
-    ;; Refresh mail using isync every 10 minutes
-    (setq mu4e-update-interval (* 10 60))
-    (setq mu4e-get-mail-command "mbsync -a")
-    (setq mu4e-maildir "~/Maildir")
-
-    (setq mu4e-drafts-folder "/acc1-gmail/[acc1].Drafts")
-    (setq mu4e-sent-folder   "/acc1-gmail/[acc1].Sent Mail")
-    (setq mu4e-refile-folder "/acc1-gmail/[acc1].All Mail")
-    (setq mu4e-trash-folder  "/acc1-gmail/[acc1].Trash")
-    (setq smtpmail-smtp-server "smtp.gmail.com")
-    (setq smtpmail-smtp-service 465)
-    (setq smtpmail-stream-type  'ssl)
-    (setq message-send-mail-function 'smtpmail-send-it)
-    (setq mu4e-compose-signature "Riley Beckett\nrbeckettvt@gmail.com")
-    (setq mu4e-compose-format-flowed t))
-
-  (use-package mu4e-alert
-    :config
-    (mu4e-alert-set-default-style 'libnotify)
-    (add-hook 'after-init-hook #'mu4e-alert-enable-notifications))
-#+end_src
-
-** EXWM
-
-#+begin_src emacs-lisp
-  (use-package exwm)
-#+end_src
-
-* Programming
-** Projectile
-
-#+begin_src emacs-lisp
-  (use-package projectile
-    :diminish projectile-mode
-    :config (projectile-mode))
-#+end_src
-
-** Magit
-
-#+begin_src emacs-lisp
-  (use-package magit
-    :custom
-    (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
-#+end_src
-
-** flycheck
-
-#+begin_src emacs-lisp
-    (use-package flycheck
-      :init (global-flycheck-mode))
-#+end_src
-
-** Completion
-*** Lsp-mode
-
-#+begin_src emacs-lisp
-  (use-package lsp-mode
-    :init
-    (setq lsp-keymap-prefix "C-c l")
-    (setq lsp-headerline-breadcrumb-enable nil)
-    :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-	   (c-mode . lsp)
-	   ;; if you want which-key integration
-	   (lsp-mode . lsp-enable-which-key-integration))
-    :commands lsp)
-
-  (use-package lsp-ui
-    :after lsp
-    :config
-    (setq lsp-ui-sideline-update-mode 'point)
-    (setq lsp-ui-sideline-show-diagnostics t)
-    (setq lsp-ui-sideline-ignore-duplicate t))
-
-  (use-package lsp-haskell
+    (use-package hl-todo
     :hook
-    (haskell-mode . lsp))
-
-  (use-package lsp-treemacs
-    :after lsp)
-
-  (use-package consult-lsp
-    :after lsp)
-
-  (defun lsp-bind ()
-    (interactive)
-    (define-key myemacs-leader-map (kbd "l") lsp-command-map)
-    (which-key-add-keymap-based-replacements myemacs-leader-map "l" "lsp")
-    (which-key-add-keymap-based-replacements myemacs-leader-map "l=" "formatting")
-    (which-key-add-keymap-based-replacements myemacs-leader-map "lF" "folders")
-    (which-key-add-keymap-based-replacements myemacs-leader-map "lG" "peek")
-    (which-key-add-keymap-based-replacements myemacs-leader-map "lT" "toggle")
-    (which-key-add-keymap-based-replacements myemacs-leader-map "la" "code actions")
-    (which-key-add-keymap-based-replacements myemacs-leader-map "lg" "goto")
-    (which-key-add-keymap-based-replacements myemacs-leader-map "lh" "help")
-    (which-key-add-keymap-based-replacements myemacs-leader-map "lr" "refactor")
-    (which-key-add-keymap-based-replacements myemacs-leader-map "lu" "ui")
-    (which-key-add-keymap-based-replacements myemacs-leader-map "lw" "workspaces")
-    (define-key myemacs-leader-map (kbd "lug") '("ui doc glance" . lsp-ui-doc-glance)))
-  (add-hook 'lsp-mode-hook 'lsp-bind)
+    (prog-mode . hl-todo-mode))
 #+end_src
 
-*** Company-mode
+* Eros
+
+displays elisp evaluation where cursor is.
 
 #+begin_src emacs-lisp
-  (use-package company
-    :after lsp-mode
-    :init (global-company-mode 1)
-    :bind (:map company-active-map
-		("<tab>" . company-complete-selection))
-    (:map lsp-mode-map
-	  ("<tab>" . company-indent-or-complete-common))
-    :custom
-    (company-minimum-prefix-length 1)
-    (company-idle-delay 0.0))
-
-  (use-package company-box
-    :hook (company-mode . company-box-mode))
-#+end_src
-
-** Evil nerd commenter
-
-#+begin_src emacs-lisp
-    (use-package evil-nerd-commenter
-      :after evil)
-#+end_src
-
-** Highlighing
-*** Tree-sitter
-
-#+begin_src emacs-lisp
-    (use-package tree-sitter
-      :config
-      (global-tree-sitter-mode 1))
-    (use-package tree-sitter-langs)
-#+end_src
-
-*** Higlight-quoted
-
-#+begin_src emacs-lisp
-  (use-package highlight-quoted
+    (use-package eros
     :config
-    (require 'highlight-quoted)
-    (add-hook 'emacs-lisp-mode 'highlight-quoted-mode))
+    (eros-mode 1))
 #+end_src
 
-*** hl-todo
+* harpoon.el
+
+harpoon for easy jumping between files in projects
 
 #+begin_src emacs-lisp
-      (use-package hl-todo
-	:hook
-	(prog-mode . hl-todo-mode))
-#+end_src
-
-** Eros
-
-#+begin_src emacs-lisp
-      (use-package eros
-	:config
-	(eros-mode 1))
-#+end_src
-
-** harpoon.el
-
-#+begin_src emacs-lisp
-    (use-package harpoon
-      :straight '(:package "harpoon.el" :host github :type git :repo "NAHTAIV3L/harpoon.el"))
+(use-package harpoon
+    :straight '(:package "harpoon.el" :host github :type git :repo "NAHTAIV3L/harpoon.el"))
 #+end_src
 
 * Terminals
+
+configuration for terminals
+
 ** vterm
+
+vterm is a terminal emulator in emacs
 
 #+begin_src emacs-lisp
   (use-package vterm
@@ -533,6 +610,8 @@
 #+end_src
 
 ** eshell
+
+shell written in elisp also can run elisp
 
 #+begin_src emacs-lisp
   (defun configure-eshell ()
@@ -567,8 +646,27 @@
     (eshell-git-prompt-use-theme 'robbyrussell))
 #+end_src
 
+* Random Functions
+
+some helper functions that found and edited
+
+#+begin_src emacs-lisp
+  (defun browse-config ()
+    (interactive)
+    (let ((default-directory (file-truename (expand-file-name "~/.config/emacs/"))))
+      (call-interactively #'find-file)))
+
+  (defun lookup-password (&rest keys)
+    (let ((result (apply #'auth-source-search keys)))
+      (if result
+          (funcall (plist-get (car result) :secret))
+        nil)))
+#+end_src
+
 * Keybinds
 ** Escape
+
+setup escape to end things
 
 #+begin_src emacs-lisp
   (global-set-key (kbd "<escape>") 'keyboard-quit)
@@ -602,6 +700,8 @@
 
 ** General
 
+general keybinds that I like.
+
 #+begin_src emacs-lisp
   (defvar myemacs-leader-map (make-sparse-keymap)
    "map for leader")
@@ -618,6 +718,7 @@
   (define-key myemacs-leader-map (kbd ".") '("find file" . find-file))
   (define-key myemacs-leader-map (kbd "<") '("switch buffer" . switch-to-buffer))
   (define-key myemacs-leader-map (kbd "s") '("search in file" . consult-line))
+  (define-key myemacs-leader-map (kbd "`") '("open file in config dir" . browse-config))
 
   (evil-global-set-key 'normal "gc" 'evilnc-comment-operator)
   (evil-global-set-key 'visual "gc" 'evilnc-comment-operator)
@@ -637,53 +738,29 @@
   (define-key myemacs-leader-map (kbd "h") '("help" . help-command))
   (define-key myemacs-leader-map (kbd "w") '("window" . evil-window-map))
   (define-key myemacs-leader-map (kbd "p") '("project" . projectile-command-map))
+  (define-key myemacs-leader-map (kbd "t") '("persp" . perspective-map))
   (unbind-key (kbd "ESC") projectile-command-map)
-#+end_src
-
-** Configs
-
-#+begin_src emacs-lisp
-  (defun browse-config ()
-    (interactive)
-    (let ((default-directory (file-truename (expand-file-name "~/.config/emacs/"))))
-      (call-interactively #'find-file)))
-  (define-key myemacs-leader-map (kbd "`") '("open file in config dir" . browse-config))
 #+end_src
 
 ** Workspace
 
+perspective workspace binding. (probably an easier way to do this)
+
 #+begin_src emacs-lisp
-  (which-key-add-keymap-based-replacements myemacs-leader-map "TAB" "workspace")
-  (define-key myemacs-leader-map (kbd "TAB TAB") '("list workspaces" . +workspace/display))
-  (define-key myemacs-leader-map (kbd "TAB n") '("new workspace" . +workspace/new))
-  (define-key myemacs-leader-map (kbd "TAB d") '("delete workspace" . +workspace/delete))
-  (define-key myemacs-leader-map (kbd "TAB r") '("rename workspace" . +workspace/rename))
-  (define-key myemacs-leader-map (kbd "TAB .") '("switch workspace" . +workspace/switch-to))
-  (define-key myemacs-leader-map (kbd "TAB [") '("previous workspace" . +workspace/switch-left))
-  (define-key myemacs-leader-map (kbd "TAB ]") '("next workspace" . +workspace/switch-right))
-  (define-key myemacs-leader-map (kbd "TAB 1") '("switch to workspace 1" . +workspace/switch-to-1))
-  (define-key myemacs-leader-map (kbd "TAB 2") '("switch to workspace 2" . +workspace/switch-to-2))
-  (define-key myemacs-leader-map (kbd "TAB 3") '("switch to workspace 3" . +workspace/switch-to-3))
-  (define-key myemacs-leader-map (kbd "TAB 4") '("switch to workspace 4" . +workspace/switch-to-4))
-  (define-key myemacs-leader-map (kbd "TAB 5") '("switch to workspace 5" . +workspace/switch-to-5))
-  (define-key myemacs-leader-map (kbd "TAB 6") '("switch to workspace 6" . +workspace/switch-to-6))
-  (define-key myemacs-leader-map (kbd "TAB 7") '("switch to workspace 7" . +workspace/switch-to-7))
-  (define-key myemacs-leader-map (kbd "TAB 8") '("switch to workspace 8" . +workspace/switch-to-8))
-  (define-key myemacs-leader-map (kbd "TAB 9") '("switch to workspace 9" . +workspace/switch-to-9))
-  (define-key myemacs-leader-map (kbd "TAB 0") '("switch to final workspace" . +workspace/switch-to-final))
-  (define-key general-override-mode-map (kbd "M-1") '("switch to workspace 1" . +workspace/switch-to-1))
-  (define-key general-override-mode-map (kbd "M-2") '("switch to workspace 2" . +workspace/switch-to-2))
-  (define-key general-override-mode-map (kbd "M-3") '("switch to workspace 3" . +workspace/switch-to-3))
-  (define-key general-override-mode-map (kbd "M-4") '("switch to workspace 4" . +workspace/switch-to-4))
-  (define-key general-override-mode-map (kbd "M-5") '("switch to workspace 5" . +workspace/switch-to-5))
-  (define-key general-override-mode-map (kbd "M-6") '("switch to workspace 6" . +workspace/switch-to-6))
-  (define-key general-override-mode-map (kbd "M-7") '("switch to workspace 7" . +workspace/switch-to-7))
-  (define-key general-override-mode-map (kbd "M-8") '("switch to workspace 8" . +workspace/switch-to-8))
-  (define-key general-override-mode-map (kbd "M-9") '("switch to workspace 9" . +workspace/switch-to-9))
-  (define-key general-override-mode-map (kbd "M-0") '("switch to final workspace" . +workspace/switch-to-final))
+  (define-key general-override-mode-map (kbd "M-1") '("switch to workspace 1" . (lambda () (interactive) (persp-switch-by-number 1))))
+  (define-key general-override-mode-map (kbd "M-2") '("switch to workspace 2" . (lambda () (interactive) (persp-switch-by-number 2))))
+  (define-key general-override-mode-map (kbd "M-3") '("switch to workspace 3" . (lambda () (interactive) (persp-switch-by-number 3))))
+  (define-key general-override-mode-map (kbd "M-4") '("switch to workspace 4" . (lambda () (interactive) (persp-switch-by-number 4))))
+  (define-key general-override-mode-map (kbd "M-5") '("switch to workspace 5" . (lambda () (interactive) (persp-switch-by-number 5))))
+  (define-key general-override-mode-map (kbd "M-6") '("switch to workspace 6" . (lambda () (interactive) (persp-switch-by-number 6))))
+  (define-key general-override-mode-map (kbd "M-7") '("switch to workspace 7" . (lambda () (interactive) (persp-switch-by-number 7))))
+  (define-key general-override-mode-map (kbd "M-8") '("switch to workspace 8" . (lambda () (interactive) (persp-switch-by-number 8))))
+  (define-key general-override-mode-map (kbd "M-9") '("switch to workspace 9" . (lambda () (interactive) (persp-switch-by-number 9))))
 #+end_src
 
 ** Harpoon
+
+bindings for harpoon.el
 
 #+begin_src emacs-lisp
   (define-key myemacs-leader-map (kbd "1") '("harpoon go to 1" . harpoon-go-to-1))
@@ -715,7 +792,10 @@
   (define-key general-override-mode-map (kbd "C-SPC") '("harpoon toggle quick menu" . harpoon-toggle-quick-menu))
 #+end_src
 
-* desktop
+* Desktop
+
+run desktop.el if using EXWM
+
 #+begin_src emacs-lisp
   (if (or (string= (getenv "WINDOWMANAGER") "d") (string= (getenv "WINDOWMANAGER") ""))
       nil

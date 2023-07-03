@@ -1,16 +1,11 @@
 #+TITLE Desktop.org config
 #+PROPERTY: header-args:emacs-lisp :tangle ./desktop.el :mkdirp yes
 #+STARTUP: fold
-* EXWM setup
+* EXWM functions
+
+define functions used later
 
 #+begin_src emacs-lisp
-
-  (defun lookup-password (&rest keys)
-    (let ((result (apply #'auth-source-search keys)))
-      (if result
-          (funcall (plist-get (car result) :secret))
-        nil)))
-
   (defun emacs-dmenu ()
     (interactive)
     (let* ((programs (split-string (shell-command-to-string "IFS=: ; stest -flx $PATH | sort -u") "\n" t ))
@@ -29,16 +24,15 @@
   (defun cmdline ()
     (let* ((pid (getpid))
            (str (file-to-string (format "/proc/%s/cmdline" pid))))
-      (s-replace "\x00" " " (substring str 0 (- (length str) 1)))))
+      (car (last (split-string (s-replace "\x00" " " (substring str 0 (- (length str) 1))) "/" t)))))
 
   (defun exwm-update-class ()
     (exwm-workspace-rename-buffer (cmdline)))
 
   (defun exwm-update-title ()
-    ;; (pcase exwm-class-name
-    ;;   ("Firefox" (exwm-workspace-rename-buffer (format "Firefox: %s" exwm-title)))
-    ;;   ("qutebrowser" (exwm-workspace-rename-buffer (format "qutebrowser: %s" exwm-title))))
-    (exwm-workspace-rename-buffer (format "%s: %s" (cmdline) exwm-title)))
+    (let* ((greater (length> exwm-title 30))
+           (str (if greater (substring exwm-title 0 30) exwm-title)))
+      (exwm-workspace-rename-buffer (format "%s: %s" (cmdline) str))))
 
   (defun exwm-special-keys ()
     (global-set-key [\S-XF86MonBrightnessDown]      #'(lambda () (interactive)
@@ -66,7 +60,13 @@
     (which-key-add-keymap-based-replacements myemacs-leader-map "e" "emacs")
     (define-key myemacs-leader-map (kbd "ex") '("sleep" . (lambda () (interactive (start-process-shell-command "loginctl" nil "loginctl suspend")))))
     (define-key myemacs-leader-map (kbd "ez") '("hybernate" . (lambda () (interactive (start-process-shell-command "loginctl" nil "loginctl hybernate"))))))
+#+end_src
 
+* EXWM setup
+
+configure exwm and then start it
+
+#+begin_src emacs-lisp
   (add-hook 'exwm-update-class-hook #'exwm-update-class)
   (add-hook 'exwm-update-title-hook #'exwm-update-title)
   (setq exwm-input-prefix-keys
@@ -111,16 +111,15 @@
           ([?\M-\ ] . myemacs/leader)
           ;; Launch applications via shell command
           ([?\M-p] . emacs-dmenu)
-          ([?\s-1] . +workspace/switch-to-1)
-          ([?\s-2] . +workspace/switch-to-2)
-          ([?\s-3] . +workspace/switch-to-3)
-          ([?\s-4] . +workspace/switch-to-4)
-          ([?\s-5] . +workspace/switch-to-5)
-          ([?\s-6] . +workspace/switch-to-6)
-          ([?\s-7] . +workspace/switch-to-7)
-          ([?\s-8] . +workspace/switch-to-8)
-          ([?\s-9] . +workspace/switch-to-9)))
+
+          ,@(mapcar (lambda (i)
+                      `(,(kbd (format "s-%d" i)) .
+                        (lambda ()
+                          (interactive)
+                          (exwm-workspace-switch-create ,i))))
+                    (number-sequence 0 9))))
   (exwm-enable)
+  (exwm-workspace-switch-create 1)
   (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
 
 #+end_src
