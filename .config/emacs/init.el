@@ -56,36 +56,21 @@
     (with-current-buffer
         (url-retrieve-synchronously
         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-        'silent 'inhibit-cookies)
-    (goto-char (point-max))
-    (eval-print-last-sexp)))
+    'silent 'inhibit-cookies)
+(goto-char (point-max))
+(eval-print-last-sexp)))
 (load bootstrap-file nil 'nomessage))
 
 (straight-use-package 'use-package)
 
 (setq straight-use-package-by-default t)
-;; (require 'package)
-
-;; (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-;; 			   ("org" . "https://orgmode.org/elpa/")
-;; 			   ("elpa" . "https://elpa.gnu.org/packages/")))
-
-;; (package-initialize)
-;; (unless package-archive-contents
-;;   (package-refresh-contents))
-
-;; (unless (package-installed-p 'use-package)
-;;   (package-install 'use-package))
-
-;; (require 'use-package)
-;; (setq use-package-always-ensure t)
 
 (recentf-mode 1)
 (use-package no-littering)
 (add-to-list 'recentf-exclude
-            (recentf-expand-file-name no-littering-var-directory))
+        (recentf-expand-file-name no-littering-var-directory))
 (add-to-list 'recentf-exclude
-            (recentf-expand-file-name no-littering-etc-directory))
+        (recentf-expand-file-name no-littering-etc-directory))
 (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
 
 (use-package gcmh
@@ -94,8 +79,8 @@
 
 (use-package vertico
 :bind (:map vertico-map
-            ("C-n" . vertico-next)
-            ("C-p" . vertico-previous))
+        ("C-n" . vertico-next)
+        ("C-p" . vertico-previous))
 :init
 (vertico-mode 1)
 (setq vertico-count 15))
@@ -116,8 +101,8 @@
 (use-package orderless
 :config
 (setq completion-styles '(orderless)
-        completion-category-defaults nil
-        completion-category-overrides '((file (styles . (partial-completion))))))
+    completion-category-defaults nil
+    completion-category-overrides '((file (styles . (partial-completion))))))
 
 (use-package doom-modeline
 :init
@@ -146,29 +131,29 @@
 ([remap describe-key] . helpful-key))
 
 (use-package undo-tree
-  :init
-  (global-undo-tree-mode))
+    :init
+    (global-undo-tree-mode))
 
 (use-package evil
-    :init
-    (setq evil-want-integration t)
-    (setq evil-want-keybinding nil)
-    (setq evil-want-C-u-scroll t)
-    (setq evil-want-C-i-jump nil)
-    (setq evil-undo-system 'undo-tree)
-    :config
-    (evil-mode 1)
+:init
+(setq evil-want-integration t)
+(setq evil-want-keybinding nil)
+(setq evil-want-C-u-scroll t)
+(setq evil-want-C-i-jump nil)
+(setq evil-undo-system 'undo-tree)
+:config
+(evil-mode 1)
 
-    (evil-set-initial-state 'messages-buffer-mode 'normal)
-    (evil-set-initial-state 'dashboard-mode 'normal))
+(evil-set-initial-state 'messages-buffer-mode 'normal)
+(evil-set-initial-state 'dashboard-mode 'normal))
 
 (use-package evil-collection
-    :after evil
-    :config
-    (evil-collection-init))
+:after evil
+:config
+(evil-collection-init))
 
 (use-package evil-nerd-commenter
-    :after evil)
+:after evil)
 
 (use-package evil-anzu
 :after evil
@@ -195,12 +180,12 @@
     (python . t)))
 
 (defun org-babel-tangle-config ()
-    (when (or
-            (string-equal (buffer-file-name) (expand-file-name "~/.dotfiles/.config/emacs/Emacs.org"))
-            (string-equal (buffer-file-name) (expand-file-name "~/.dotfiles/.config/emacs/Desktop.org")))
-    ;; Dynamic scoping to the rescue
-    (let ((org-confirm-babel-evaluate nil))
-        (org-babel-tangle))))
+(when (or
+        (string-equal (buffer-file-name) (expand-file-name "~/.dotfiles/.config/emacs/Emacs.org"))
+        (string-equal (buffer-file-name) (expand-file-name "~/.dotfiles/.config/emacs/Desktop.org")))
+;; Dynamic scoping to the rescue
+(let ((org-confirm-babel-evaluate nil))
+    (org-babel-tangle))))
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'org-babel-tangle-config)))
 
@@ -222,8 +207,8 @@
 (setq persp-suppress-no-prefix-key-warning t)
 (persp-mode))
 
-(add-to-list 'load-path "~/.config/emacs/lisp/")
-(require 'status)
+(use-package statusbar
+    :straight '(:package "statusbar.el" :host github :type git :repo "NAHTAIV3L/statusbar.el")
 
 (use-package general)
 
@@ -267,16 +252,16 @@
 (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
 (use-package flycheck
-    :init (global-flycheck-mode))
+:init (global-flycheck-mode))
 
 (use-package lsp-mode
 :init
 (setq lsp-keymap-prefix "C-c l")
 (setq lsp-headerline-breadcrumb-enable nil)
 :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-        (c-mode . lsp)
-        ;; if you want which-key integration
-        (lsp-mode . lsp-enable-which-key-integration))
+    (c-mode . lsp)
+    ;; if you want which-key integration
+    (lsp-mode . lsp-enable-which-key-integration))
 :commands lsp)
 
 (use-package lsp-ui
@@ -314,28 +299,25 @@
 (add-hook 'lsp-mode-hook 'lsp-bind)
 
 (use-package company
-:after lsp-mode
-:init (global-company-mode 1)
-:bind (:map company-active-map
-            ("<tab>" . company-complete-selection))
-(:map lsp-mode-map
+  :hook (prog-mode . company-mode)
+  :bind (:map company-active-map
+              ("<tab>" . company-complete-selection))
+  (:map lsp-mode-map
         ("<tab>" . company-indent-or-complete-common))
-:custom
-(company-minimum-prefix-length 1)
-(company-idle-delay 0.0))
+  :custom
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.0))
 
 (use-package company-box
-:hook (company-mode . company-box-mode))
+  :hook (company-mode . company-box-mode))
 
 (use-package tree-sitter
-    :config
-    (global-tree-sitter-mode 1))
+:config
+(global-tree-sitter-mode 1))
 (use-package tree-sitter-langs)
 
 (use-package highlight-quoted
-:config
-(require 'highlight-quoted)
-(add-hook 'emacs-lisp-mode 'highlight-quoted-mode))
+:hook (emacs-lisp-mode . highlight-quoted-mode))
 
 (use-package hl-todo
 :hook
@@ -346,7 +328,7 @@
 (eros-mode 1))
 
 (use-package harpoon
-    :straight '(:package "harpoon.el" :host github :type git :repo "NAHTAIV3L/harpoon.el"))
+  :straight '(:package "harpoon.el" :host github :type git :repo "NAHTAIV3L/harpoon.el"))
 
 (use-package vterm
   :commands vterm
@@ -396,6 +378,10 @@
         (funcall (plist-get (car result) :secret))
       nil)))
 
+(defun map! (key desc fun)
+  (define-key myemacs-leader-map (kbd key) fun)
+  (which-key-add-keymap-based-replacements myemacs-leader-map key desc))
+
 (global-set-key (kbd "<escape>") 'keyboard-quit)
 
 (defvar myemacs-escape-hook nil
@@ -436,30 +422,31 @@
 (global-set-key (kbd alt-leader) 'myemacs/leader)
 (general-override-mode +1)
 
-(define-key myemacs-leader-map (kbd ".") '("find file" . find-file))
-(define-key myemacs-leader-map (kbd "<") '("switch buffer" . switch-to-buffer))
-(define-key myemacs-leader-map (kbd "s") '("search in file" . consult-line))
-(define-key myemacs-leader-map (kbd "`") '("open file in config dir" . browse-config))
+;; (define-key myemacs-leader-map (kbd ".") '("find file" . find-file))
+(map! "." "find file"  #'find-file)
+(map! "<" "switch buffer" #'switch-to-buffer)
+(map! "s" "search in file" #'consult-line)
+(map! "`" "open file in config dir" #'browse-config)
 
 (evil-global-set-key 'normal "gc" 'evilnc-comment-operator)
 (evil-global-set-key 'visual "gc" 'evilnc-comment-operator)
 
 (which-key-add-keymap-based-replacements myemacs-leader-map "t" "toggle")
-(define-key myemacs-leader-map (kbd "ts") '("text scaling" . hydra-text-scale/body))
+(map! "ts" "text scaling" #'hydra-text-scale/body)
 
 (which-key-add-keymap-based-replacements myemacs-leader-map "b" "buffer")
-(define-key myemacs-leader-map (kbd "bk") '("kill buffer" . kill-current-buffer))
-(define-key myemacs-leader-map (kbd "bi") '("ibuffer" . ibuffer))
-(define-key myemacs-leader-map (kbd "bn") '("next buffer" . evil-next-buffer))
-(define-key myemacs-leader-map (kbd "bp") '("previous buffer" . evil-prev-buffer))
+(map! "bk" "kill buffer" #'kill-current-buffer)
+(map! "bi" "ibuffer" #'persp-ibuffer)
+(map! "bn" "next buffer" #'evil-next-buffer)
+(map! "bp" "previous buffer" #'evil-prev-buffer)
 
 (which-key-add-keymap-based-replacements myemacs-leader-map "g" "git")
-(define-key myemacs-leader-map (kbd "gg") '("Magit status" . magit-status))
+(map! "gg" "Magit status" #'magit-status)
 
-(define-key myemacs-leader-map (kbd "h") '("help" . help-command))
-(define-key myemacs-leader-map (kbd "w") '("window" . evil-window-map))
-(define-key myemacs-leader-map (kbd "p") '("project" . projectile-command-map))
-(define-key myemacs-leader-map (kbd "t") '("persp" . perspective-map))
+(map! "h" "help" #'help-command)
+(map! "w" "window" #'evil-window-map)
+(map! "p" "project" #'projectile-command-map)
+(map! "t" "persp" #'perspective-map)
 (unbind-key (kbd "ESC") projectile-command-map)
 
 (define-key general-override-mode-map (kbd "M-1") '("switch to workspace 1" . (lambda () (interactive) (persp-switch-by-number 1))))
@@ -472,32 +459,32 @@
 (define-key general-override-mode-map (kbd "M-8") '("switch to workspace 8" . (lambda () (interactive) (persp-switch-by-number 8))))
 (define-key general-override-mode-map (kbd "M-9") '("switch to workspace 9" . (lambda () (interactive) (persp-switch-by-number 9))))
 
-(define-key myemacs-leader-map (kbd "1") '("harpoon go to 1" . harpoon-go-to-1))
-(define-key myemacs-leader-map (kbd "2") '("harpoon go to 2" . harpoon-go-to-2))
-(define-key myemacs-leader-map (kbd "3") '("harpoon go to 3" . harpoon-go-to-3))
-(define-key myemacs-leader-map (kbd "4") '("harpoon go to 4" . harpoon-go-to-4))
-(define-key myemacs-leader-map (kbd "5") '("harpoon go to 5" . harpoon-go-to-5))
-(define-key myemacs-leader-map (kbd "6") '("harpoon go to 6" . harpoon-go-to-6))
-(define-key myemacs-leader-map (kbd "7") '("harpoon go to 7" . harpoon-go-to-7))
-(define-key myemacs-leader-map (kbd "8") '("harpoon go to 8" . harpoon-go-to-8))
-(define-key myemacs-leader-map (kbd "9") '("harpoon go to 9" . harpoon-go-to-9))
+(map! "1" "harpoon go to 1" #'harpoon-go-to-1)
+(map! "2" "harpoon go to 2" #'harpoon-go-to-2)
+(map! "3" "harpoon go to 3" #'harpoon-go-to-3)
+(map! "4" "harpoon go to 4" #'harpoon-go-to-4)
+(map! "5" "harpoon go to 5" #'harpoon-go-to-5)
+(map! "6" "harpoon go to 6" #'harpoon-go-to-6)
+(map! "7" "harpoon go to 7" #'harpoon-go-to-7)
+(map! "8" "harpoon go to 8" #'harpoon-go-to-8)
+(map! "9" "harpoon go to 9" #'harpoon-go-to-9)
 
 (which-key-add-keymap-based-replacements myemacs-leader-map "d" "delete")
-(define-key myemacs-leader-map (kbd "d1") '("harpoon delete 1" . harpoon-delete-1))
-(define-key myemacs-leader-map (kbd "d2") '("harpoon delete 2" . harpoon-delete-2))
-(define-key myemacs-leader-map (kbd "d3") '("harpoon delete 3" . harpoon-delete-3))
-(define-key myemacs-leader-map (kbd "d4") '("harpoon delete 4" . harpoon-delete-4))
-(define-key myemacs-leader-map (kbd "d5") '("harpoon delete 5" . harpoon-delete-5))
-(define-key myemacs-leader-map (kbd "d6") '("harpoon delete 6" . harpoon-delete-6))
-(define-key myemacs-leader-map (kbd "d7") '("harpoon delete 7" . harpoon-delete-7))
-(define-key myemacs-leader-map (kbd "d8") '("harpoon delete 8" . harpoon-delete-8))
-(define-key myemacs-leader-map (kbd "d9") '("harpoon delete 9" . harpoon-delete-9))
+(map! "d1" "harpoon delete 1" #'harpoon-delete-1)
+(map! "d2" "harpoon delete 2" #'harpoon-delete-2)
+(map! "d3" "harpoon delete 3" #'harpoon-delete-3)
+(map! "d4" "harpoon delete 4" #'harpoon-delete-4)
+(map! "d5" "harpoon delete 5" #'harpoon-delete-5)
+(map! "d6" "harpoon delete 6" #'harpoon-delete-6)
+(map! "d7" "harpoon delete 7" #'harpoon-delete-7)
+(map! "d8" "harpoon delete 8" #'harpoon-delete-8)
+(map! "d9" "harpoon delete 9" #'harpoon-delete-9)
 
 (which-key-add-keymap-based-replacements myemacs-leader-map "j" "harpoon")
-(define-key myemacs-leader-map (kbd "ja") '("harpoon add file" . harpoon-add-file))
-(define-key myemacs-leader-map (kbd "jD") '("harpoon delete item" . harpoon-delete-item))
-(define-key myemacs-leader-map (kbd "jc") '("harpoon clear" . harpoon-clear))
-(define-key myemacs-leader-map (kbd "jf") '("harpoon toggle file" . harpoon-toggle-file))
+(map! "ja" "harpoon add file" #'harpoon-add-file)
+(map! "jD" "harpoon delete item" #'harpoon-delete-item)
+(map! "jc" "harpoon clear" #'harpoon-clear)
+(map! "jf" "harpoon toggle file" #'harpoon-toggle-file)
 (define-key general-override-mode-map (kbd "C-SPC") '("harpoon toggle quick menu" . harpoon-toggle-quick-menu))
 
 (if (or (string= (getenv "WINDOWMANAGER") "d") (string= (getenv "WINDOWMANAGER") ""))

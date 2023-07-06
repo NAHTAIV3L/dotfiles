@@ -51,7 +51,8 @@
                                                       (start-process-shell-command "pactl" nil "pactl set-sink-mute @DEFAULT_SINK@ toggle")))
   (which-key-add-keymap-based-replacements myemacs-leader-map "e" "emacs")
   (define-key myemacs-leader-map (kbd "ex") '("sleep" . (lambda () (interactive (start-process-shell-command "loginctl" nil "loginctl suspend")))))
-  (define-key myemacs-leader-map (kbd "ez") '("hybernate" . (lambda () (interactive (start-process-shell-command "loginctl" nil "loginctl hybernate"))))))
+  (define-key myemacs-leader-map (kbd "ez") '("hybernate" . (lambda () (interactive (start-process-shell-command "loginctl" nil "loginctl hybernate")))))
+  (define-key myemacs-leader-map (kbd "epoweroff") '("poweroff" . (lambda () (interactive (start-process-shell-command "loginctl" nil "loginctl poweroff"))))))
 
 (add-hook 'exwm-update-class-hook #'exwm-update-class)
 (add-hook 'exwm-update-title-hook #'exwm-update-title)
@@ -79,20 +80,15 @@
         XF86AudioMute))
 
 (exwm-special-keys)
-(setq display-time-format "%I:%M:%S %p")
-(setq display-time-interval 1)
-(setq display-time-load-average-threshold 10)
-(display-time-mode)
-(display-battery-mode)
-(display-wifi-mode)
-(display-volume-mode)
-(display-brightness-mode)
-(server-start)
 
 (setq exwm-input-global-keys
       `(
         ;; Reset to line-mode (C-c C-k switches to char-mode via exwm-input-release-keyboard)
         ([?\s-r] . exwm-reset)
+
+        ([?\s-s] . (lambda () (interactive) (start-process-shell-command "bkmrkcli" nil "bkmrkcli -p")))
+        ([?\C-\s-s] . (lambda () (interactive) (start-process-shell-command "bkmrkcli" nil "bkmrkcli -a")))
+        ([?\M-\s-s] . (lambda () (interactive) (start-process-shell-command "bkmrkcli" nil "bkmrkcli -d")))
 
         ([?\M-\ ] . myemacs/leader)
         ;; Launch applications via shell command
@@ -107,3 +103,14 @@
 (exwm-enable)
 (exwm-workspace-switch-create 1)
 (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
+
+(statusbar-mode 1)
+(display-wifi-mode 1)
+(display-volume-mode 1)
+(display-brightness-mode 1)
+(setq display-time-format "%I:%M:%S %p")
+(setq display-time-interval 1)
+(setq display-time-load-average-threshold 10)
+(statusbar-time-mode 1)
+(statusbar-battery-mode 1)
+(server-start)
