@@ -368,8 +368,8 @@ multiple perspectives per frame
 * Statusbar
 
 #+begin_src emacs-lisp
-(use-package statusbar
-    :straight '(:package "statusbar.el" :host github :type git :repo "NAHTAIV3L/statusbar.el")
+  (use-package statusbar
+      :straight '(:package "statusbar.el" :host github :type git :repo "NAHTAIV3L/statusbar.el"))
 #+end_src
 
 * General

@@ -208,7 +208,7 @@
 (persp-mode))
 
 (use-package statusbar
-    :straight '(:package "statusbar.el" :host github :type git :repo "NAHTAIV3L/statusbar.el")
+    :straight '(:package "statusbar.el" :host github :type git :repo "NAHTAIV3L/statusbar.el"))
 
 (use-package general)
 

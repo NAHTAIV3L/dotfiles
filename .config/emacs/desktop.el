@@ -6,7 +6,8 @@
 
 (defun getpid ()
   (interactive)
-  (car (split-string (car (last (split-string (shell-command-to-string (format "xprop -id 0x%X _NET_WM_PID" (exwm--buffer->id (current-buffer)))) " " t))) "\n" t)))
+  (let ((output (shell-command-to-string (format "xprop -id 0x%X _NET_WM_PID" (exwm--buffer->id (current-buffer))))))
+    (string-trim (car (last (split-string output " " t))))))
 
 (defun file-to-string (file)
   (with-temp-buffer
@@ -22,9 +23,7 @@
   (exwm-workspace-rename-buffer (cmdline)))
 
 (defun exwm-update-title ()
-  (let* ((greater (length> exwm-title 30))
-         (str (if greater (substring exwm-title 0 30) exwm-title)))
-    (exwm-workspace-rename-buffer (format "%s: %s" (cmdline) str))))
+  (exwm-workspace-rename-buffer (format "%s: %s" (cmdline) exwm-title)))
 
 (defun exwm-special-keys ()
   (global-set-key [\S-XF86MonBrightnessDown]      #'(lambda () (interactive)
@@ -53,6 +52,17 @@
   (define-key myemacs-leader-map (kbd "ex") '("sleep" . (lambda () (interactive (start-process-shell-command "loginctl" nil "loginctl suspend")))))
   (define-key myemacs-leader-map (kbd "ez") '("hybernate" . (lambda () (interactive (start-process-shell-command "loginctl" nil "loginctl hybernate")))))
   (define-key myemacs-leader-map (kbd "epoweroff") '("poweroff" . (lambda () (interactive (start-process-shell-command "loginctl" nil "loginctl poweroff"))))))
+
+(defun turn-on-statusbar ()
+  (statusbar-mode 1)
+  (display-wifi-mode 1)
+  (display-volume-mode 1)
+  (display-brightness-mode 1)
+  (setq display-time-format "%I:%M:%S %p")
+  (setq display-time-interval 1)
+  (setq display-time-load-average-threshold 10)
+  (statusbar-time-mode 1)
+  (statusbar-battery-mode 1))
 
 (add-hook 'exwm-update-class-hook #'exwm-update-class)
 (add-hook 'exwm-update-title-hook #'exwm-update-title)
@@ -104,13 +114,5 @@
 (exwm-workspace-switch-create 1)
 (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
 
-(statusbar-mode 1)
-(display-wifi-mode 1)
-(display-volume-mode 1)
-(display-brightness-mode 1)
-(setq display-time-format "%I:%M:%S %p")
-(setq display-time-interval 1)
-(setq display-time-load-average-threshold 10)
-(statusbar-time-mode 1)
-(statusbar-battery-mode 1)
+(run-at-time 4 nil #'turn-on-statusbar)
 (server-start)
