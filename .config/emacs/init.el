@@ -1,8 +1,9 @@
-(setq user-full-name "Riley Beckett")
-(setq user-mail-address "rbeckettvt@gmail.com")
+(setq user-full-name    "Riley Beckett"
+      user-mail-address "rbeckettvt@gmail.com"
+      make-backup-files nil
+      create-lockfiles  nil
+      confirm-kill-processes nil)
 (setq-default indent-tabs-mode nil)
-(setq make-backup-files nil)
-(setq create-lockfiles nil)
 
 (setq inhibit-startup-message t)
 (setq backup-inhibited t)
@@ -23,10 +24,10 @@
 (global-hl-line-mode t)
 
 (dolist (mode '(org-mode-hook
-		term-mode-hook
-		vterm-mode-hook
-		shell-mode-hook
-		eshell-mode-hook))
+      	        term-mode-hook
+      	        vterm-mode-hook
+      	        shell-mode-hook
+      	        eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 (setq scroll-up-aggressively nil)
@@ -41,25 +42,25 @@
 (defun display-startup-time ()
   (interactive)
   (message "Emacs loaded in %s with %d garbage collections."
-	   (format "%.2f seconds"
-		   (float-time
-		    (time-subtract after-init-time before-init-time)))
-	   gcs-done))
+           (format "%.2f seconds"
+      	           (float-time
+      	            (time-subtract after-init-time before-init-time)))
+           gcs-done))
 
 (add-hook 'emacs-startup-hook #'display-startup-time)
 
 (defvar bootstrap-version)
 (let ((bootstrap-file
-        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-    (bootstrap-version 5))
-(unless (file-exists-p bootstrap-file)
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
     (with-current-buffer
         (url-retrieve-synchronously
-        "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-    'silent 'inhibit-cookies)
-(goto-char (point-max))
-(eval-print-last-sexp)))
-(load bootstrap-file nil 'nomessage))
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
 
 (straight-use-package 'use-package)
 
@@ -68,104 +69,105 @@
 (recentf-mode 1)
 (use-package no-littering)
 (add-to-list 'recentf-exclude
-        (recentf-expand-file-name no-littering-var-directory))
+             (recentf-expand-file-name no-littering-var-directory))
 (add-to-list 'recentf-exclude
-        (recentf-expand-file-name no-littering-etc-directory))
+             (recentf-expand-file-name no-littering-etc-directory))
 (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
 
 (use-package gcmh
-:init
-(gcmh-mode 1))
+  :init
+  (gcmh-mode 1))
 
 (use-package vertico
-:bind (:map vertico-map
-        ("C-n" . vertico-next)
-        ("C-p" . vertico-previous))
-:init
-(vertico-mode 1)
-(setq vertico-count 15))
+  :bind (:map vertico-map
+              ("C-n" . vertico-next)
+              ("C-p" . vertico-previous))
+  :init
+  (vertico-mode 1)
+  (setq vertico-count 15))
 
 (use-package savehist
-:init
-(savehist-mode 1))
+  :init
+  (savehist-mode 1))
 
 (use-package marginalia
-:after vertico
-:custom
-(marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
-:init
-(marginalia-mode))
+  :after vertico
+  :custom
+  (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
+  :init
+  (marginalia-mode))
 
 (use-package consult)
 
 (use-package orderless
-:config
-(setq completion-styles '(orderless)
-    completion-category-defaults nil
-    completion-category-overrides '((file (styles . (partial-completion))))))
+  :config
+  (setq completion-styles '(orderless)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles . (partial-completion))))))
 
 (use-package doom-modeline
-:init
-(setq doom-modeline-display-default-persp-name t)
-(setq doom-modeline-buffer-file-name-style 'relative-from-project)
-(doom-modeline-mode 1)
-:custom ((doom-modeline-height 35)))
+  :init
+  (setq doom-modeline-display-default-persp-name t
+        doom-modeline-buffer-file-name-style 'relative-from-project
+        doom-modeline-mu4e t)
+  (doom-modeline-mode 1)
+  :custom ((doom-modeline-height 35)))
 
 (use-package doom-themes
-:init (load-theme 'doom-one t))
+  :init (load-theme 'doom-one t))
 
 (use-package rainbow-delimiters
-:hook (prog-mode . rainbow-delimiters-mode))
+  :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package which-key
-:init (which-key-mode)
-:diminish which-key-mode
-:config
-(setq which-key-idle-delay 1))
+  :init (which-key-mode)
+  :diminish which-key-mode
+  :config
+  (setq which-key-idle-delay 1))
 
 (use-package helpful
-:bind
-([remap describe-command] . helpful-command)
-([remap describe-function] . helpful-callable)
-([remap describe-variable] . helpful-variable)
-([remap describe-key] . helpful-key))
+  :bind
+  ([remap describe-command] . helpful-command)
+  ([remap describe-function] . helpful-callable)
+  ([remap describe-variable] . helpful-variable)
+  ([remap describe-key] . helpful-key))
 
 (use-package undo-tree
-    :init
-    (global-undo-tree-mode))
+  :init
+  (global-undo-tree-mode))
 
 (use-package evil
-:init
-(setq evil-want-integration t)
-(setq evil-want-keybinding nil)
-(setq evil-want-C-u-scroll t)
-(setq evil-want-C-i-jump nil)
-(setq evil-undo-system 'undo-tree)
-:config
-(evil-mode 1)
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-i-jump nil)
+  (setq evil-undo-system 'undo-tree)
+  :config
+  (evil-mode 1)
 
-(evil-set-initial-state 'messages-buffer-mode 'normal)
-(evil-set-initial-state 'dashboard-mode 'normal))
+  (evil-set-initial-state 'messages-buffer-mode 'normal)
+  (evil-set-initial-state 'dashboard-mode 'normal))
 
 (use-package evil-collection
-:after evil
-:config
-(evil-collection-init))
+  :after evil
+  :config
+  (evil-collection-init))
 
 (use-package evil-nerd-commenter
-:after evil)
+  :after evil)
 
 (use-package evil-anzu
-:after evil
-:config
-(global-anzu-mode 1))
+  :after evil
+  :config
+  (global-anzu-mode 1))
 
 (use-package org
-:config
-(setq org-ellipsis " ▾"))
+  :config
+  (setq org-ellipsis " ▾"))
 
 (use-package org-superstar
-:after org)
+  :after org)
 (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
 (setq org-hide-leading-stars t)
 (require 'org-tempo)
@@ -175,127 +177,154 @@
 (add-to-list 'org-structure-template-alist '("py" . "src python"))
 
 (org-babel-do-load-languages
-'org-babel-load-languages
-'((emacs-lisp . t)
-    (python . t)))
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   (python . t)))
 
 (defun org-babel-tangle-config ()
-(when (or
-        (string-equal (buffer-file-name) (expand-file-name "~/.dotfiles/.config/emacs/Emacs.org"))
-        (string-equal (buffer-file-name) (expand-file-name "~/.dotfiles/.config/emacs/Desktop.org")))
-;; Dynamic scoping to the rescue
-(let ((org-confirm-babel-evaluate nil))
-    (org-babel-tangle))))
+  (when (or
+         (string-equal (buffer-file-name) (expand-file-name "~/.dotfiles/.config/emacs/Emacs.org"))
+         (string-equal (buffer-file-name) (expand-file-name "~/.dotfiles/.config/emacs/Desktop.org")))
+    ;; Dynamic scoping to the rescue
+    (let ((org-confirm-babel-evaluate nil))
+      (org-babel-tangle))))
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'org-babel-tangle-config)))
 
+(use-package dired
+  :ensure nil
+  :straight nil
+  :commands (dired dired-jump)
+  :bind (("C-x C-j" . dired-jump))
+  :custom ((dired-listing-switches "-agho --group-directories-first"))
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "h" 'dired-single-up-directory
+    "l" 'dired-single-buffer))
+
+(use-package dired-single
+  :commands (dired dired-jump))
+
+(use-package all-the-icons)
+
+(use-package all-the-icons-dired
+  :hook (dired-mode . all-the-icons-dired-mode))
+
+(use-package dired-hide-dotfiles
+  :hook (dired-mode . dired-hide-dotfiles-mode)
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "H" 'dired-hide-dotfiles-mode))
+
 (use-package smartparens
-:config
-(setq sp-highlight-pair-overlay nil)
-(sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
-(smartparens-global-mode 1))
+  :config
+  (setq sp-highlight-pair-overlay nil)
+  (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
+  (smartparens-global-mode 1))
 
 (use-package hydra)
 (defhydra hydra-text-scale (:timeout 4)
-"scale text"
-("j" text-scale-increase "in")
-("k" text-scale-decrease "out")
-("f" nil "finished" :exit t))
+  "scale text"
+  ("j" text-scale-increase "in")
+  ("k" text-scale-decrease "out")
+  ("f" nil "finished" :exit t))
 
 (use-package perspective
-:init
-(setq persp-suppress-no-prefix-key-warning t)
-(persp-mode))
+  :init
+  (setq persp-suppress-no-prefix-key-warning t)
+  (persp-mode))
 
 (use-package statusbar
-    :straight '(:package "statusbar.el" :host github :type git :repo "NAHTAIV3L/statusbar.el"))
+  :straight '(:package "statusbar.el" :host github :type git :repo "NAHTAIV3L/statusbar.el"))
 
 (use-package general)
 
 (use-package mu4e
-:ensure nil
-:straight nil
-:config
+  :ensure nil
+  :straight nil
+  :config
 
-;; This is set to 't' to avoid mail syncing issues when using mbsync
-(setq mu4e-change-filenames-when-moving t)
+  ;; This is set to 't' to avoid mail syncing issues when using mbsync
+  (setq mu4e-change-filenames-when-moving t)
 
-;; Refresh mail using isync every 10 minutes
-(setq mu4e-update-interval (* 10 60))
-(setq mu4e-get-mail-command "mbsync -a")
-(setq mu4e-maildir "~/Maildir")
+  ;; Refresh mail using isync every 10 minutes
+  (setq mu4e-update-interval (* 10 60))
+  (setq mu4e-get-mail-command "mbsync -a")
+  (setq mu4e-maildir "~/Maildir")
 
-(setq mu4e-drafts-folder "/acc1-gmail/[acc1].Drafts")
-(setq mu4e-sent-folder   "/acc1-gmail/[acc1].Sent Mail")
-(setq mu4e-refile-folder "/acc1-gmail/[acc1].All Mail")
-(setq mu4e-trash-folder  "/acc1-gmail/[acc1].Trash")
-(setq smtpmail-smtp-server "smtp.gmail.com")
-(setq smtpmail-smtp-service 465)
-(setq smtpmail-stream-type  'ssl)
-(setq message-send-mail-function 'smtpmail-send-it)
-(setq mu4e-compose-signature "Riley Beckett\nrbeckettvt@gmail.com")
-(setq mu4e-compose-format-flowed t))
+  (setq mu4e-drafts-folder "/acc1-gmail/[acc1].Drafts")
+  (setq mu4e-sent-folder   "/acc1-gmail/[acc1].Sent Mail")
+  (setq mu4e-refile-folder "/acc1-gmail/[acc1].All Mail")
+  (setq mu4e-trash-folder  "/acc1-gmail/[acc1].Trash")
+  (setq smtpmail-smtp-server "smtp.gmail.com")
+  (setq smtpmail-smtp-service 465)
+  (setq smtpmail-stream-type  'ssl)
+  (setq message-send-mail-function 'smtpmail-send-it)
+  (setq mu4e-compose-signature "Riley Beckett\nrbeckettvt@gmail.com")
+  (setq mu4e-compose-format-flowed t))
 
 (use-package mu4e-alert
-:config
-(mu4e-alert-set-default-style 'libnotify)
-(add-hook 'after-init-hook #'mu4e-alert-enable-notifications))
+  :config
+  (mu4e-alert-set-default-style 'libnotify)
+  (add-hook 'after-init-hook #'mu4e-alert-enable-notifications))
+
+(use-package pinentry)
 
 (use-package exwm)
 
 (use-package projectile
-:diminish projectile-mode
-:config (projectile-mode))
+  :diminish projectile-mode
+  :config (projectile-mode))
 
 (use-package magit
-:custom
-(magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+  :custom
+  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
 (use-package flycheck
-:init (global-flycheck-mode))
+  :init (global-flycheck-mode))
 
 (use-package lsp-mode
-:init
-(setq lsp-keymap-prefix "C-c l")
-(setq lsp-headerline-breadcrumb-enable nil)
-:hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-    (c-mode . lsp)
-    ;; if you want which-key integration
-    (lsp-mode . lsp-enable-which-key-integration))
-:commands lsp)
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  (setq lsp-headerline-breadcrumb-enable nil)
+  :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
+         (c-mode . lsp)
+         ;; if you want which-key integration
+         (lsp-mode . lsp-enable-which-key-integration))
+  :commands lsp)
 
 (use-package lsp-ui
-:after lsp
-:config
-(setq lsp-ui-sideline-update-mode 'point)
-(setq lsp-ui-sideline-show-diagnostics t)
-(setq lsp-ui-sideline-ignore-duplicate t))
+  :after lsp
+  :config
+  (setq lsp-ui-sideline-update-mode 'point)
+  (setq lsp-ui-sideline-show-diagnostics t)
+  (setq lsp-ui-sideline-ignore-duplicate t))
 
 (use-package lsp-haskell
-:hook
-(haskell-mode . lsp))
+  :hook
+  (haskell-mode . lsp))
 
 (use-package lsp-treemacs
-:after lsp)
+  :after lsp)
 
 (use-package consult-lsp
-:after lsp)
+  :after lsp)
 
 (defun lsp-bind ()
-(interactive)
-(define-key myemacs-leader-map (kbd "l") lsp-command-map)
-(which-key-add-keymap-based-replacements myemacs-leader-map "l" "lsp")
-(which-key-add-keymap-based-replacements myemacs-leader-map "l=" "formatting")
-(which-key-add-keymap-based-replacements myemacs-leader-map "lF" "folders")
-(which-key-add-keymap-based-replacements myemacs-leader-map "lG" "peek")
-(which-key-add-keymap-based-replacements myemacs-leader-map "lT" "toggle")
-(which-key-add-keymap-based-replacements myemacs-leader-map "la" "code actions")
-(which-key-add-keymap-based-replacements myemacs-leader-map "lg" "goto")
-(which-key-add-keymap-based-replacements myemacs-leader-map "lh" "help")
-(which-key-add-keymap-based-replacements myemacs-leader-map "lr" "refactor")
-(which-key-add-keymap-based-replacements myemacs-leader-map "lu" "ui")
-(which-key-add-keymap-based-replacements myemacs-leader-map "lw" "workspaces")
-(define-key myemacs-leader-map (kbd "lug") '("ui doc glance" . lsp-ui-doc-glance)))
+  (interactive)
+  (define-key myemacs-leader-map (kbd "l") lsp-command-map)
+  (which-key-add-keymap-based-replacements myemacs-leader-map "l" "lsp")
+  (which-key-add-keymap-based-replacements myemacs-leader-map "l=" "formatting")
+  (which-key-add-keymap-based-replacements myemacs-leader-map "lF" "folders")
+  (which-key-add-keymap-based-replacements myemacs-leader-map "lG" "peek")
+  (which-key-add-keymap-based-replacements myemacs-leader-map "lT" "toggle")
+  (which-key-add-keymap-based-replacements myemacs-leader-map "la" "code actions")
+  (which-key-add-keymap-based-replacements myemacs-leader-map "lg" "goto")
+  (which-key-add-keymap-based-replacements myemacs-leader-map "lh" "help")
+  (which-key-add-keymap-based-replacements myemacs-leader-map "lr" "refactor")
+  (which-key-add-keymap-based-replacements myemacs-leader-map "lu" "ui")
+  (which-key-add-keymap-based-replacements myemacs-leader-map "lw" "workspaces")
+  (define-key myemacs-leader-map (kbd "lug") '("ui doc glance" . lsp-ui-doc-glance)))
 (add-hook 'lsp-mode-hook 'lsp-bind)
 
 (use-package company
@@ -310,20 +339,20 @@
   :hook (company-mode . company-box-mode))
 
 (use-package tree-sitter
-:config
-(global-tree-sitter-mode 1))
+  :config
+  (global-tree-sitter-mode 1))
 (use-package tree-sitter-langs)
 
 (use-package highlight-quoted
-:hook (emacs-lisp-mode . highlight-quoted-mode))
+  :hook (emacs-lisp-mode . highlight-quoted-mode))
 
 (use-package hl-todo
-:hook
-(prog-mode . hl-todo-mode))
+  :hook
+  (prog-mode . hl-todo-mode))
 
 (use-package eros
-:config
-(eros-mode 1))
+  :config
+  (eros-mode 1))
 
 (use-package harpoon
   :straight '(:package "harpoon.el" :host github :type git :repo "NAHTAIV3L/harpoon.el"))
@@ -347,9 +376,9 @@
   (evil-normalize-keymaps)
 
   (setq eshell-history-size         10000
-	eshell-buffer-maximum-lines 10000
-	eshell-hist-ignoredups t
-	eshell-scroll-to-bottom-on-input t))
+        eshell-buffer-maximum-lines 10000
+        eshell-hist-ignoredups t
+        eshell-scroll-to-bottom-on-input t))
 
 (use-package eshell-git-prompt)
 
@@ -389,27 +418,27 @@
   "Run `myemacs-escape-hook'."
   (interactive (list 'interactive))
   (cond ((minibuffer-window-active-p (minibuffer-window))
-	 ;; quit the minibuffer if open.
-	 (when interactive
-	   (setq this-command 'abort-recursive-edit))
-	 (abort-recursive-edit))
-	;; Run all escape hooks. If any returns non-nil, then stop there.
-	((run-hook-with-args-until-success 'myemacs-escape-hook))
-	;; don't abort macros
-	((or defining-kbd-macro executing-kbd-macro) nil)
-	;; Back to the default
-	((unwind-protect (keyboard-quit)
-	   (when interactive
-	     (setq this-command 'keyboard-quit))))))
+         ;; quit the minibuffer if open.
+         (when interactive
+           (setq this-command 'abort-recursive-edit))
+         (abort-recursive-edit))
+        ;; Run all escape hooks. If any returns non-nil, then stop there.
+        ((run-hook-with-args-until-success 'myemacs-escape-hook))
+        ;; don't abort macros
+        ((or defining-kbd-macro executing-kbd-macro) nil)
+        ;; Back to the default
+        ((unwind-protect (keyboard-quit)
+           (when interactive
+             (setq this-command 'keyboard-quit))))))
 
 (global-set-key [remap keyboard-quit] #'myemacs/escape)
 (add-hook 'myemacs-escape-hook (lambda ()
-				 (when (evil-ex-hl-active-p 'evil-ex-search)
-				   (evil-ex-nohighlight)
-				   t)))
+      			         (when (evil-ex-hl-active-p 'evil-ex-search)
+      			           (evil-ex-nohighlight)
+      			           t)))
 
 (defvar myemacs-leader-map (make-sparse-keymap)
- "map for leader")
+  "map for leader")
 (setq leader "SPC")
 (setq alt-leader "M-SPC")
 
@@ -422,6 +451,7 @@
 
 ;; (define-key myemacs-leader-map (kbd ".") '("find file" . find-file))
 (map! "." "find file"  #'find-file)
+(map! "," "open dired"  #'dired-jump)
 (map! "<" "switch buffer" #'switch-to-buffer)
 (map! "s" "search in file" #'consult-line)
 (map! "`" "open file in config dir" #'browse-config)
@@ -487,4 +517,4 @@
 
 (if (or (string= (getenv "WINDOWMANAGER") "d") (string= (getenv "WINDOWMANAGER") ""))
     nil
-    (load "~/.config/emacs/desktop.el"))
+  (load "~/.config/emacs/desktop.el"))

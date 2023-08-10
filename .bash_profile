@@ -9,7 +9,7 @@ fi
 export LESSHISTFILE="-"
 export CARGO_HOME="$HOME/.local/share/cargo"
 # Custom scripts
-export PATH="$PATH:$HOME/.dotfiles/scripts:$HOME/.config/emacs/bin"
+export PATH="$PATH:$HOME/.dotfiles/scripts:/opt/zoom"
 export SUDO_ASKPASS="$HOME/.dotfiles/scripts/dmenupass"
 
 if [ "$(tty)" = "/dev/tty1" ]; then

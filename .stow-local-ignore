@@ -5,3 +5,6 @@
 cs1.jar
 profile.zip
 bookmark
+.*~undo-tree~
+/.git
+.gitignore

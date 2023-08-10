@@ -2,23 +2,26 @@
 # togglecaps
 # xset r rate 300 50
 # xbacklight -set 10
-# slstatus & disown
-# xss-lock slock & disown
-# dunst & disown
-# restartemacs >/dev/null & disown
+# slstatus & 
+# xss-lock slock & 
+# dunst & 
+# restartemacs >/dev/null & 
 # exec dwm
 #exec emacs
 #!/bin/bash
 togglecaps
-xset r rate 300 50
-xbacklight -set 10
-xss-lock slock & disown
-dunst & disown
+xset r rate 300 30
+backlightctrl -set 10
+gpgconf -K gpg-agent
+xss-lock slock & 
+dunst & 
 if [ -z "$WINDOWMANAGER" ] || [ "$WINDOWMANAGER" = "d" ] ; then
-    slstatus & disown
-    restartemacs >/dev/null & disown
+    gpg-agent --daemon
+    slstatus & 
+    restartemacs >/dev/null & 
     exec dwm
 else
+    gpg-agent --options ~/.gnupg/gpg-agent-exwm.conf --daemon
     pkill -x emacs
     exec emacs -mm --debug-init
 fi

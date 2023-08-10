@@ -16,7 +16,7 @@ settings:
   qt.force_platformtheme:
     global: dark
   qt.force_software_rendering:
-    global: qt-quick
+    global: software-opengl
   scrolling.smooth:
     global: true
   tabs.tabs_are_windows:

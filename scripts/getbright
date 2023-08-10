@@ -1,2 +1,2 @@
 #/bin/bash
-printf "%.*f\n" 0 $(xbacklight -get)
+echo $(backlightctrl -get)

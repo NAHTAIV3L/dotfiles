@@ -1,0 +1,14 @@
+#!/bin/sh
+
+echo "$1"
+if [ -z "$1" ] ; then
+    echo "usage: $0 [url of youtube video]"
+    exit 1
+fi
+musicfile="$HOME/.dotfiles/files/music.txt"
+musictempfile="$HOME/.dotfiles/files/music.temp"
+yt-dlp -x --audio-format mp3 --audio-quality 0 "$1"
+echo "$1" >> "$musicfile"
+sort "$musicfile" | uniq > "$musictempfile"
+cp "$musictempfile" "$musicfile"
+rm "$musictempfile"
