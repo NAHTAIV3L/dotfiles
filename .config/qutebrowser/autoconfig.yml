@@ -6,11 +6,6 @@
 
 config_version: 2
 settings:
-  bindings.commands:
-    global:
-      normal:
-        <Space>bk: tab-close
-        b: null
   colors.webpage.preferred_color_scheme:
     global: dark
   qt.force_platformtheme:

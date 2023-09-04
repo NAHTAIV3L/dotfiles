@@ -1,23 +1,12 @@
---- dmenu.c
-+++ dmenu.c
-@@ -530,6 +536,11 @@ readstdin(void)
- 	char buf[sizeof text], *p;
- 	size_t i, imax = 0, size = 0;
- 	unsigned int tmpmax = 0;
-+	if(passwd){
-+    	inputw = lines = 0;
-+    	return;
-+  	}
-+
- 
- 	/* read each line from stdin and add it to the item list */
- 	for (i = 0; fgets(buf, sizeof buf, stdin); i++) {
-@@ -695,7 +706,7 @@ setup(void)
- static void
+--- dmenu.c	2019-02-02 13:55:02.000000000 +0100
++++ dmenu.c	2020-04-04 10:27:43.888026309 +0200
+@@ -727,7 +771,8 @@ static void
  usage(void)
  {
--	fputs("usage: dmenu [-bfiv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
-+	fputs("usage: dmenu [-bfivP] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
- 	      "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]\n", stderr);
+ 	fputs("usage: dmenu [-bfiv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
+-	      "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]\n", stderr);
++	      "             [-nb color] [-nf color] [-sb color] [-sf color]\n"
++	      "             [-nhb color] [-nhf color] [-shb color] [-shf color] [-w windowid]\n", stderr);
  	exit(1);
  }
+ 

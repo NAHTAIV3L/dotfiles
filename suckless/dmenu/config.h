@@ -2,6 +2,7 @@
 /* Default settings; can be overriden by command line. */
 
 static int topbar = 1;                      /* -b  option; if 0, dmenu appears at bottom     */
+static int fuzzy = 1;
 static const unsigned int alpha = 0xf0;
 static int centered = 0;                    /* -c option; centers dmenu on screen */
 static int min_width = 500;                    /* minimum width when centered */
@@ -14,6 +15,8 @@ static const char *colors[SchemeLast][2] = {
 	              /*     fg         bg       */
 	[SchemeNorm] = { "#bbbbbb", "#000000" },
 	[SchemeSel] =  { "#eeeeee", "#350069" },
+	[SchemeSelHighlight] = { "#ffc978", "#005577" },
+	[SchemeNormHighlight] = { "#ffc978", "#222222" },
 	[SchemeOut] =  { "#000000", "#00ffff" },
 };
 

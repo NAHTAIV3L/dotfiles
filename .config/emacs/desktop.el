@@ -81,14 +81,15 @@
 
 (defun cmdline ()
   (let* ((pid (getpid))
-         (str (file-to-string (format "/proc/%s/cmdline" pid))))
-    (car (last (split-string (s-replace "\x00" " " (substring str 0 (- (length str) 1))) "/" t)))))
+         (filep (file-exists-p (format "/proc/%s/cmdline" pid)))
+         (str (if filep (file-to-string (format "/proc/%s/cmdline" pid)) nil)))
+    (if str (car (last (split-string (s-replace "\x00" " " (substring str 0 (- (length str) 1))) "/" t))) nil)))
 
 (defun exwm-update-class ()
-  (exwm-workspace-rename-buffer (cmdline)))
+  (exwm-workspace-rename-buffer (or (cmdline) (exwm-class-name))))
 
 (defun exwm-update-title ()
-  (exwm-workspace-rename-buffer (format "%s: %s" (cmdline) exwm-title)))
+  (exwm-workspace-rename-buffer (format "%s: %s" (or (cmdline) exwm-class-name "EXWM") exwm-title)))
 
 (defun exwm-special-keys ()
   (global-set-key [\S-XF86MonBrightnessDown]      #'(lambda () (interactive)
@@ -122,10 +123,10 @@
   (global-set-key [XF86AudioMute]                 #'(lambda () (interactive)
                                                       (start-process-shell-command "pactl" nil "pactl set-sink-mute @DEFAULT_SINK@ toggle")
                                                       (volume-update)))
-  (which-key-add-keymap-based-replacements myemacs-leader-map "e" "emacs")
-  (define-key myemacs-leader-map (kbd "ex") '("sleep" . (lambda () (interactive (start-process-shell-command "loginctl" nil "loginctl suspend")))))
-  (define-key myemacs-leader-map (kbd "ez") '("hybernate" . (lambda () (interactive (start-process-shell-command "loginctl" nil "loginctl hybernate")))))
-  (define-key myemacs-leader-map (kbd "epoweroff") '("poweroff" . (lambda () (interactive (start-process-shell-command "loginctl" nil "loginctl poweroff"))))))
+  (map! "e" "emacs")
+  (map! "ex" "sleep" '(lambda () (interactive) (start-process-shell-command "loginctl" nil "loginctl suspend")))
+  (map! "ez" "hibernate" '(lambda () (interactive) (start-process-shell-command "loginctl" nil "loginctl hibernate")))
+  (map! "epoweroff" "poweroff" '(lambda () (interactive) (start-process-shell-command "loginctl" nil "loginctl poweroff"))))
 
 (defun turn-on-statusbar ()
   (statusbar-mode 1)
@@ -142,6 +143,8 @@
 
 (add-hook 'exwm-update-class-hook #'exwm-update-class)
 (add-hook 'exwm-update-title-hook #'exwm-update-title)
+(add-hook 'exwm-floating-setup-hook #'exwm-layout-hide-mode-line)
+(add-hook 'exwm-floating-exit-hook #'exwm-layout-show-mode-line)
 (setq exwm-input-prefix-keys
       '(?\C-x
         ?\C-u

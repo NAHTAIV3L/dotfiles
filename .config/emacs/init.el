@@ -27,7 +27,9 @@
       	        term-mode-hook
       	        vterm-mode-hook
       	        shell-mode-hook
-      	        eshell-mode-hook))
+      	        eshell-mode-hook
+                mu4e-main-mode-hook
+                mu4e-headers-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 (setq scroll-up-aggressively nil)
@@ -48,6 +50,21 @@
            gcs-done))
 
 (add-hook 'emacs-startup-hook #'display-startup-time)
+
+(defun browse-config ()
+  (interactive)
+  (let ((default-directory (file-truename (expand-file-name "~/.config/emacs/"))))
+    (call-interactively #'find-file)))
+
+(defun lookup-password (&rest keys)
+  (let ((result (apply #'auth-source-search keys)))
+    (if result
+        (funcall (plist-get (car result) :secret))
+      nil)))
+
+(defun map! (key desc &optional fun)
+  (if fun (define-key myemacs-leader-map (kbd key) fun))
+  (which-key-add-keymap-based-replacements myemacs-leader-map key desc))
 
 (defvar bootstrap-version)
 (let ((bootstrap-file
@@ -98,6 +115,12 @@
   (marginalia-mode))
 
 (use-package consult)
+(setq completion-in-region-function
+      (lambda (&rest args)
+        (apply (if vertico-mode
+                   #'consult-completion-in-region
+                 #'completion--in-region)
+               args)))
 
 (use-package orderless
   :config
@@ -125,6 +148,9 @@
   :config
   (setq which-key-idle-delay 1))
 
+(use-package emojify
+  :hook (after-init . global-emojify-mode))
+
 (use-package helpful
   :bind
   ([remap describe-command] . helpful-command)
@@ -135,6 +161,7 @@
 (use-package undo-tree
   :init
   (global-undo-tree-mode))
+(add-hook 'authinfo-mode-hook #'(lambda () (setq-local undo-tree-auto-save-history nil)))
 
 (use-package evil
   :init
@@ -232,7 +259,9 @@
 (use-package perspective
   :init
   (setq persp-suppress-no-prefix-key-warning t)
-  (persp-mode))
+  (persp-mode)
+  (consult-customize consult--source-buffer :hidden t :default nil)
+  (add-to-list 'consult-buffer-sources persp-consult-source))
 
 (use-package statusbar
   :straight '(:package "statusbar.el" :host github :type git :repo "NAHTAIV3L/statusbar.el"))
@@ -242,26 +271,31 @@
 (use-package mu4e
   :ensure nil
   :straight nil
+  :custom
+  (mu4e-completing-read-function #'completing-read)
   :config
 
   ;; This is set to 't' to avoid mail syncing issues when using mbsync
   (setq mu4e-change-filenames-when-moving t)
 
+  (add-hook 'mu4e-compose-mode-hook
+            #'(lambda () (setq-local undo-tree-auto-save-history nil)))
   ;; Refresh mail using isync every 10 minutes
-  (setq mu4e-update-interval (* 10 60))
-  (setq mu4e-get-mail-command "mbsync -a")
-  (setq mu4e-maildir "~/Maildir")
+  (setq mu4e-update-interval (* 10 60)
+        mu4e-get-mail-command "mbsync -a"
+        mu4e-maildir "~/Maildir"
+        mu4e-read-option-use-builtin nil
 
-  (setq mu4e-drafts-folder "/acc1-gmail/[acc1].Drafts")
-  (setq mu4e-sent-folder   "/acc1-gmail/[acc1].Sent Mail")
-  (setq mu4e-refile-folder "/acc1-gmail/[acc1].All Mail")
-  (setq mu4e-trash-folder  "/acc1-gmail/[acc1].Trash")
-  (setq smtpmail-smtp-server "smtp.gmail.com")
-  (setq smtpmail-smtp-service 465)
-  (setq smtpmail-stream-type  'ssl)
-  (setq message-send-mail-function 'smtpmail-send-it)
-  (setq mu4e-compose-signature "Riley Beckett\nrbeckettvt@gmail.com")
-  (setq mu4e-compose-format-flowed t))
+        mu4e-drafts-folder "/acc1-gmail/Drafts"
+        mu4e-sent-folder   "/acc1-gmail/Sent Mail"
+        mu4e-refile-folder "/acc1-gmail/All Mail"
+        mu4e-trash-folder  "/acc1-gmail/Trash"
+        smtpmail-smtp-server "smtp.gmail.com"
+        smtpmail-smtp-service 465
+        smtpmail-stream-type  'ssl
+        message-send-mail-function 'smtpmail-send-it
+        mu4e-compose-signature "Riley Beckett\nrbeckettvt@gmail.com"
+        mu4e-compose-format-flowed t))
 
 (use-package mu4e-alert
   :config
@@ -289,6 +323,7 @@
   (setq lsp-headerline-breadcrumb-enable nil)
   :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
          (c-mode . lsp)
+         (python-mode . lsp)
          ;; if you want which-key integration
          (lsp-mode . lsp-enable-which-key-integration))
   :commands lsp)
@@ -307,23 +342,27 @@
 (use-package lsp-treemacs
   :after lsp)
 
+(use-package lsp-java
+  :hook
+  (java-mode . lsp))
+
 (use-package consult-lsp
   :after lsp)
 
 (defun lsp-bind ()
   (interactive)
   (define-key myemacs-leader-map (kbd "l") lsp-command-map)
-  (which-key-add-keymap-based-replacements myemacs-leader-map "l" "lsp")
-  (which-key-add-keymap-based-replacements myemacs-leader-map "l=" "formatting")
-  (which-key-add-keymap-based-replacements myemacs-leader-map "lF" "folders")
-  (which-key-add-keymap-based-replacements myemacs-leader-map "lG" "peek")
-  (which-key-add-keymap-based-replacements myemacs-leader-map "lT" "toggle")
-  (which-key-add-keymap-based-replacements myemacs-leader-map "la" "code actions")
-  (which-key-add-keymap-based-replacements myemacs-leader-map "lg" "goto")
-  (which-key-add-keymap-based-replacements myemacs-leader-map "lh" "help")
-  (which-key-add-keymap-based-replacements myemacs-leader-map "lr" "refactor")
-  (which-key-add-keymap-based-replacements myemacs-leader-map "lu" "ui")
-  (which-key-add-keymap-based-replacements myemacs-leader-map "lw" "workspaces")
+  (map! "l" "lsp")
+  (map! "l=" "formatting")
+  (map! "lF" "folders")
+  (map! "lG" "peek")
+  (map! "lT" "toggle")
+  (map! "la" "code actions")
+  (map! "lg" "goto")
+  (map! "lh" "help")
+  (map! "lr" "refactor")
+  (map! "lu" "ui")
+  (map! "lw" "workspaces")
   (define-key myemacs-leader-map (kbd "lug") '("ui doc glance" . lsp-ui-doc-glance)))
 (add-hook 'lsp-mode-hook 'lsp-bind)
 
@@ -337,6 +376,9 @@
 
 (use-package company-box
   :hook (company-mode . company-box-mode))
+
+(use-package clang-format)
+(use-package clang-format+)
 
 (use-package tree-sitter
   :config
@@ -356,6 +398,9 @@
 
 (use-package harpoon
   :straight '(:package "harpoon.el" :host github :type git :repo "NAHTAIV3L/harpoon.el"))
+
+(use-package glsl-mode
+  :straight '(:package "glsl-mode" :host github :type git :repo "jimhourihan/glsl-mode"))
 
 (use-package vterm
   :commands vterm
@@ -392,22 +437,7 @@
     (setq eshell-destroy-buffer-when-process-dies t)
     (setq eshell-visual-commands '("htop" "zsh" "vim")))
 
-  (eshell-git-prompt-use-theme 'robbyrussell))
-
-(defun browse-config ()
-  (interactive)
-  (let ((default-directory (file-truename (expand-file-name "~/.config/emacs/"))))
-    (call-interactively #'find-file)))
-
-(defun lookup-password (&rest keys)
-  (let ((result (apply #'auth-source-search keys)))
-    (if result
-        (funcall (plist-get (car result) :secret))
-      nil)))
-
-(defun map! (key desc fun)
-  (define-key myemacs-leader-map (kbd key) fun)
-  (which-key-add-keymap-based-replacements myemacs-leader-map key desc))
+  (eshell-git-prompt-use-theme 'multiline2))
 
 (global-set-key (kbd "<escape>") 'keyboard-quit)
 
@@ -449,6 +479,8 @@
 (global-set-key (kbd alt-leader) 'myemacs/leader)
 (general-override-mode +1)
 
+(global-unset-key (kbd "M-."))
+
 ;; (define-key myemacs-leader-map (kbd ".") '("find file" . find-file))
 (map! "." "find file"  #'find-file)
 (map! "," "open dired"  #'dired-jump)
@@ -459,16 +491,26 @@
 (evil-global-set-key 'normal "gc" 'evilnc-comment-operator)
 (evil-global-set-key 'visual "gc" 'evilnc-comment-operator)
 
-(which-key-add-keymap-based-replacements myemacs-leader-map "t" "toggle")
+(map! "t" "toggle")
 (map! "ts" "text scaling" #'hydra-text-scale/body)
 
-(which-key-add-keymap-based-replacements myemacs-leader-map "b" "buffer")
+(map! "b" "buffer")
 (map! "bk" "kill buffer" #'kill-current-buffer)
 (map! "bi" "ibuffer" #'persp-ibuffer)
 (map! "bn" "next buffer" #'evil-next-buffer)
 (map! "bp" "previous buffer" #'evil-prev-buffer)
 
-(which-key-add-keymap-based-replacements myemacs-leader-map "g" "git")
+(map! "c" "consult")
+(map! "cr" "ripgrep" #'consult-ripgrep)
+(map! "cb" "switch buffer" #'consult-buffer)
+(map! "cp" "project buffer" #'consult-project-buffer)
+(map! "cw" "window buffer" #'consult-buffer-other-window)
+(map! "cm" "imenu multi" #'consult-imenu-multi)
+(map! "ci" "imenu" #'consult-imenu)
+(map! "cf" "lsp file symbols" #'consult-lsp-file-symbols)
+(map! "cs" "lsp symbols" #'consult-lsp-symbols)
+
+(map! "g" "git")
 (map! "gg" "Magit status" #'magit-status)
 
 (map! "h" "help" #'help-command)
@@ -497,7 +539,7 @@
 (map! "8" "harpoon go to 8" #'harpoon-go-to-8)
 (map! "9" "harpoon go to 9" #'harpoon-go-to-9)
 
-(which-key-add-keymap-based-replacements myemacs-leader-map "d" "delete")
+(map! "d" "delete")
 (map! "d1" "harpoon delete 1" #'harpoon-delete-1)
 (map! "d2" "harpoon delete 2" #'harpoon-delete-2)
 (map! "d3" "harpoon delete 3" #'harpoon-delete-3)
@@ -508,7 +550,7 @@
 (map! "d8" "harpoon delete 8" #'harpoon-delete-8)
 (map! "d9" "harpoon delete 9" #'harpoon-delete-9)
 
-(which-key-add-keymap-based-replacements myemacs-leader-map "j" "harpoon")
+(map! "j" "harpoon")
 (map! "ja" "harpoon add file" #'harpoon-add-file)
 (map! "jD" "harpoon delete item" #'harpoon-delete-item)
 (map! "jc" "harpoon clear" #'harpoon-clear)

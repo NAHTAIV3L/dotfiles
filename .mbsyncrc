@@ -47,28 +47,28 @@ SyncState *
 
 Channel acc1-gmail-trash
 Master :acc1-gmail-remote:"[Gmail]/Trash"
-Slave :acc1-gmail-local:"[acc1].Trash"
+Slave :acc1-gmail-local:"Trash"
 Create Both
 Expunge Both
 SyncState *
 
 Channel acc1-gmail-sent
 Master :acc1-gmail-remote:"[Gmail]/Sent Mail"
-Slave :acc1-gmail-local:"[acc1].Sent Mail"
+Slave :acc1-gmail-local:"Sent Mail"
 Create Both
 Expunge Both
 SyncState *
 
 Channel acc1-gmail-all
 Master :acc1-gmail-remote:"[Gmail]/All Mail"
-Slave :acc1-gmail-local:"[acc1].All Mail"
+Slave :acc1-gmail-local:"All Mail"
 Create Both
 Expunge Both
 SyncState *
 
 Channel acc1-gmail-starred
 Master :acc1-gmail-remote:"[Gmail]/Starred"
-Slave :acc1-gmail-local:"[acc1].Starred"
+Slave :acc1-gmail-local:"Starred"
 Create Both
 Expunge Both
 SyncState *
