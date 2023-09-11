@@ -95,10 +95,22 @@
   :init
   (gcmh-mode 1))
 
+(defun minibuffer-backward-kill (arg)
+  "When minibuffer is completing a file name delete up to parent
+folder, otherwise delete a word"
+  (interactive "p")
+  (if minibuffer-completing-file-name
+      ;; Borrowed from https://github.com/raxod502/selectrum/issues/498#issuecomment-803283608
+      (if (string-match-p "/." (minibuffer-contents))
+          (zap-up-to-char (- arg) ?/)
+        (delete-minibuffer-contents))
+    (delete-word (- arg))))
+
 (use-package vertico
   :bind (:map vertico-map
               ("C-n" . vertico-next)
-              ("C-p" . vertico-previous))
+              ("C-p" . vertico-previous)
+              ("M-h" . minibuffer-backward-kill))
   :init
   (vertico-mode 1)
   (setq vertico-count 15))
@@ -121,12 +133,26 @@
                    #'consult-completion-in-region
                  #'completion--in-region)
                args)))
+(consult-customize consult-buffer :preview-key "M-.")
 
 (use-package orderless
   :config
   (setq completion-styles '(orderless)
         completion-category-defaults nil
         completion-category-overrides '((file (styles . (partial-completion))))))
+
+(use-package flyspell)
+
+(use-package flyspell-correct
+  :after flyspell)
+
+(use-package consult-flyspell
+  :straight (consult-flyspell :type git :host gitlab :repo "OlMon/consult-flyspell" :branch "master")
+  :config
+  ;; default settings
+  (setq consult-flyspell-select-function (lambda () (flyspell-correct-at-point) (consult-flyspell))
+        consult-flyspell-set-point-after-word t
+        consult-flyspell-always-check-buffer nil))
 
 (use-package doom-modeline
   :init
@@ -158,10 +184,19 @@
   ([remap describe-variable] . helpful-variable)
   ([remap describe-key] . helpful-key))
 
+(use-package statusbar
+  :straight '(:package "statusbar.el" :host github :type git :repo "NAHTAIV3L/statusbar.el"))
+
 (use-package undo-tree
   :init
   (global-undo-tree-mode))
 (add-hook 'authinfo-mode-hook #'(lambda () (setq-local undo-tree-auto-save-history nil)))
+(defvar --undo-history-directory (concat user-emacs-directory "undotreefiles/")
+  "Directory to save undo history files.")
+(unless (file-exists-p --undo-history-directory)
+  (make-directory --undo-history-directory t))
+;; stop littering with *.~undo-tree~ files everywhere
+(setq undo-tree-history-directory-alist `(("." . ,--undo-history-directory)))
 
 (use-package evil
   :init
@@ -188,6 +223,14 @@
   :after evil
   :config
   (global-anzu-mode 1))
+
+(use-package tex
+  :straight auctex)
+
+(use-package lsp-latex
+  :straight '(:package "lsp-latex.el" :host github :type git :repo "ROCKTAKEY/lsp-latex"))
+
+(setq markdown-command "pandoc")
 
 (use-package org
   :config
@@ -243,12 +286,6 @@
   (evil-collection-define-key 'normal 'dired-mode-map
     "H" 'dired-hide-dotfiles-mode))
 
-(use-package smartparens
-  :config
-  (setq sp-highlight-pair-overlay nil)
-  (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
-  (smartparens-global-mode 1))
-
 (use-package hydra)
 (defhydra hydra-text-scale (:timeout 4)
   "scale text"
@@ -263,11 +300,6 @@
   (consult-customize consult--source-buffer :hidden t :default nil)
   (add-to-list 'consult-buffer-sources persp-consult-source))
 
-(use-package statusbar
-  :straight '(:package "statusbar.el" :host github :type git :repo "NAHTAIV3L/statusbar.el"))
-
-(use-package general)
-
 (use-package mu4e
   :ensure nil
   :straight nil
@@ -280,11 +312,14 @@
 
   (add-hook 'mu4e-compose-mode-hook
             #'(lambda () (setq-local undo-tree-auto-save-history nil)))
+  (add-hook 'mu4e-compose-mode-hook
+            #'(lambda () (flyspell-mode)))
   ;; Refresh mail using isync every 10 minutes
   (setq mu4e-update-interval (* 10 60)
         mu4e-get-mail-command "mbsync -a"
         mu4e-maildir "~/Maildir"
         mu4e-read-option-use-builtin nil
+        mu4e-headers-skip-duplicates nil
 
         mu4e-drafts-folder "/acc1-gmail/Drafts"
         mu4e-sent-folder   "/acc1-gmail/Sent Mail"
@@ -304,11 +339,15 @@
 
 (use-package pinentry)
 
-(use-package exwm)
-
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode))
+
+(use-package smartparens
+  :config
+  (setq sp-highlight-pair-overlay nil)
+  (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
+  (smartparens-global-mode 1))
 
 (use-package magit
   :custom
@@ -439,6 +478,8 @@
 
   (eshell-git-prompt-use-theme 'multiline2))
 
+(use-package general)
+
 (global-set-key (kbd "<escape>") 'keyboard-quit)
 
 (defvar myemacs-escape-hook nil
@@ -484,7 +525,7 @@
 ;; (define-key myemacs-leader-map (kbd ".") '("find file" . find-file))
 (map! "." "find file"  #'find-file)
 (map! "," "open dired"  #'dired-jump)
-(map! "<" "switch buffer" #'switch-to-buffer)
+(map! "<" "switch buffer" #'consult-buffer)
 (map! "s" "search in file" #'consult-line)
 (map! "`" "open file in config dir" #'browse-config)
 
@@ -508,6 +549,7 @@
 (map! "cm" "imenu multi" #'consult-imenu-multi)
 (map! "ci" "imenu" #'consult-imenu)
 (map! "cf" "lsp file symbols" #'consult-lsp-file-symbols)
+(map! "cv" "consult flyspell" #'consult-flyspell)
 (map! "cs" "lsp symbols" #'consult-lsp-symbols)
 
 (map! "g" "git")
@@ -556,6 +598,8 @@
 (map! "jc" "harpoon clear" #'harpoon-clear)
 (map! "jf" "harpoon toggle file" #'harpoon-toggle-file)
 (define-key general-override-mode-map (kbd "C-SPC") '("harpoon toggle quick menu" . harpoon-toggle-quick-menu))
+
+(use-package exwm)
 
 (if (or (string= (getenv "WINDOWMANAGER") "d") (string= (getenv "WINDOWMANAGER") ""))
     nil

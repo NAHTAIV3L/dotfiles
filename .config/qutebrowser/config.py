@@ -2,7 +2,8 @@ import os
 
 config.load_autoconfig(False)
 
-c.colors.webpage.darkmode.enabled = True
+c.colors.webpage.darkmode.increase_text_contrast = True
+c.colors.webpage.preferred_color_scheme = "dark"
 c.qt.force_platformtheme = "dark"
 c.scrolling.smooth = True
 c.qt.force_software_rendering = "software-opengl"
