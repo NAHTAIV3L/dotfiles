@@ -86,7 +86,7 @@
     (if str (car (last (split-string (s-replace "\x00" " " (substring str 0 (- (length str) 1))) "/" t))) nil)))
 
 (defun exwm-update-class ()
-  (exwm-workspace-rename-buffer (or (cmdline) (exwm-class-name))))
+  (exwm-workspace-rename-buffer (or (cmdline) (or exwm-class-name "EXWM"))))
 
 (defun exwm-update-title ()
   (exwm-workspace-rename-buffer (format "%s: %s" (or (cmdline) exwm-class-name "EXWM") exwm-title)))
@@ -143,8 +143,6 @@
 
 (add-hook 'exwm-update-class-hook #'exwm-update-class)
 (add-hook 'exwm-update-title-hook #'exwm-update-title)
-(add-hook 'exwm-floating-setup-hook #'exwm-layout-hide-mode-line)
-(add-hook 'exwm-floating-exit-hook #'exwm-layout-show-mode-line)
 (setq exwm-input-prefix-keys
       '(?\C-x
         ?\C-u

@@ -18,16 +18,17 @@
 (setq scroll-up-aggressively nil)
 (setq scroll-down-aggressively nil)
 (setq scroll-conservatively 101)
+(setq display-line-numbers 'relative)
 
 (column-number-mode)
 (global-display-line-numbers-mode t)
 (global-hl-line-mode t)
 
 (dolist (mode '(org-mode-hook
-      	        term-mode-hook
-      	        vterm-mode-hook
-      	        shell-mode-hook
-      	        eshell-mode-hook
+        	term-mode-hook
+        	vterm-mode-hook
+        	shell-mode-hook
+        	eshell-mode-hook
                 mu4e-main-mode-hook
                 mu4e-headers-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
@@ -83,6 +84,9 @@
 
 (setq straight-use-package-by-default t)
 
+(use-package diminish)
+(diminish 'abbrev-mode)
+
 (recentf-mode 1)
 (use-package no-littering)
 (add-to-list 'recentf-exclude
@@ -92,34 +96,39 @@
 (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
 
 (use-package gcmh
+  :diminish gcmh-mode
   :init
   (gcmh-mode 1))
 
-(defun minibuffer-backward-kill (arg)
-  "When minibuffer is completing a file name delete up to parent
-folder, otherwise delete a word"
-  (interactive "p")
-  (if minibuffer-completing-file-name
-      ;; Borrowed from https://github.com/raxod502/selectrum/issues/498#issuecomment-803283608
-      (if (string-match-p "/." (minibuffer-contents))
-          (zap-up-to-char (- arg) ?/)
-        (delete-minibuffer-contents))
-    (delete-word (- arg))))
-
 (use-package vertico
+  :diminish vertico-mode
+  :straight (:files (:defaults "extensions/*")) 
   :bind (:map vertico-map
               ("C-n" . vertico-next)
-              ("C-p" . vertico-previous)
-              ("M-h" . minibuffer-backward-kill))
+              ("C-p" . vertico-previous))
   :init
   (vertico-mode 1)
   (setq vertico-count 15))
 
+;; Configure directory extension.
+(use-package vertico-directory
+  :after vertico
+  :straight nil
+  ;; More convenient directory navigation commands
+  :bind (:map vertico-map
+              ("RET" . vertico-directory-enter)
+              ("DEL" . vertico-directory-delete-char)
+              ("M-DEL" . vertico-directory-delete-word))
+  ;; Tidy shadowed file names
+  :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+
 (use-package savehist
+  :diminish savehist-mode
   :init
   (savehist-mode 1))
 
 (use-package marginalia
+  :diminish marginalia-mode
   :after vertico
   :custom
   (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
@@ -141,7 +150,8 @@ folder, otherwise delete a word"
         completion-category-defaults nil
         completion-category-overrides '((file (styles . (partial-completion))))))
 
-(use-package flyspell)
+(use-package flyspell
+  :diminish flyspell-mode)
 
 (use-package flyspell-correct
   :after flyspell)
@@ -154,18 +164,109 @@ folder, otherwise delete a word"
         consult-flyspell-set-point-after-word t
         consult-flyspell-always-check-buffer nil))
 
-(use-package doom-modeline
-  :init
-  (setq doom-modeline-display-default-persp-name t
-        doom-modeline-buffer-file-name-style 'relative-from-project
-        doom-modeline-mu4e t)
-  (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 35)))
+(setq-default mode-line-buffer-identification
+                '(:eval (format-mode-line (or (when-let* ((buffer-file-truename buffer-file-truename)
+                                                          (prj (cdr-safe (project-current)))
+                                                          (prj-parent (file-name-directory (directory-file-name (expand-file-name prj)))))
+                                                (concat (file-relative-name (file-name-directory buffer-file-truename) prj-parent) (file-name-nondirectory buffer-file-truename)))
+                                              "%b"))))
+  (defun ml-fill-to-right (reserve)
+    "Return empty space, leaving RESERVE space on the right."
+    (when (and window-system (eq 'right (get-scroll-bar-mode)))
+      (setq reserve (- reserve 2))) ; Powerline uses 3 here, but my scrollbars are narrower.
+    (propertize " "
+                'display `((space :align-to (- (+ right right-fringe right-margin)
+                                               ,reserve)))))
+  (defvar ml-selected-window nil)
+
+  (defun ml-record-selected-window ()
+    (setq ml-selected-window (selected-window)))
+
+  (defun ml-update-all ()
+    (force-mode-line-update t))
+
+  (add-hook 'post-command-hook 'ml-record-selected-window)
+
+  (add-hook 'buffer-list-update-hook 'ml-update-all)
+
+  (defvar mode-line-left (list 
+                          '(:eval mode-line-front-space)
+                          '(:eval evil-mode-line-tag)
+                          " %l:%c "
+                          '(:eval mode-line-mule-info)
+                          '(:eval mode-line-modified)
+                          '(:eval mode-line-remote)
+                          " "
+                          mode-line-buffer-identification))
+
+  (defvar mode-line-right (list 
+                         '(:eval (if (eq ml-selected-window (selected-window))
+                                     mode-line-misc-info
+                                 '(:propertize mode-line-misc-info 'face 'mode-line-inactive)))
+                           " "
+                           '(:eval mode-name)))
+
+  (defvar mode-line-spacing '(:eval (ml-fill-to-right (string-width (format-mode-line mode-line-right)))))
+
+  ;; (setq-default mode-line-format
+  ;;               (list
+  ;;                "%e"
+  ;;                '(:eval mode-line-left)
+  ;;                '(:eval mode-line-spacing)
+  ;;                '(:eval mode-line-right)))
+(setq-default mode-line-format
+      (list
+       "%e"
+       '(:eval mode-line-front-space)
+       '(:eval evil-mode-line-tag)
+       '(:eval mode-line-mule-info)
+       '(:eval mode-line-modified)
+       '(:eval mode-line-remote)
+       " (%l:%c) "
+       mode-line-buffer-identification
+       " "
+       '(:eval anzu--mode-line-format)
+       " "
+       mode-line-modes
+       " "
+      '(:eval (if (eq ml-selected-window (selected-window))
+                  mode-line-misc-info
+                '(:propertize mode-line-misc-info 'face 'mode-line-inactive)))
+      ))
+
+(setq mode-line-format
+      (list
+       "%e"
+       '(:eval mode-line-front-space)
+       '(:eval evil-mode-line-tag)
+       '(:eval mode-line-mule-info)
+       '(:eval mode-line-modified)
+       '(:eval mode-line-remote)
+       " (%l:%c) "
+       mode-line-buffer-identification
+       " "
+       '(:eval anzu--mode-line-format)
+       " "
+       mode-line-modes
+       " "
+      '(:eval (if (eq ml-selected-window (selected-window))
+                  mode-line-misc-info
+                '(:propertize mode-line-misc-info 'face 'mode-line-inactive)))
+      ))
+
+;; (use-package doom-modeline
+;;   :init
+;;   (setq doom-modeline-display-default-persp-name t
+;;         doom-modeline-buffer-file-name-style 'relative-from-project
+;;         doom-modeline-mu4e t)
+;;   (doom-modeline-mode 1)
+;;   :custom ((doom-modeline-height 35)))
 
 (use-package doom-themes
   :init (load-theme 'doom-one t))
 
 (use-package rainbow-delimiters
+  :diminish rainbow-delimiters-mode
   :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package which-key
@@ -175,7 +276,10 @@ folder, otherwise delete a word"
   (setq which-key-idle-delay 1))
 
 (use-package emojify
-  :hook (after-init . global-emojify-mode))
+  ;; :diminish emojify-mode
+  :hook (after-init . global-emojify-mode)
+  :config
+  (add-hook 'prog-mode-hook #'(lambda () (emojify-mode -1))))
 
 (use-package helpful
   :bind
@@ -185,9 +289,37 @@ folder, otherwise delete a word"
   ([remap describe-key] . helpful-key))
 
 (use-package statusbar
-  :straight '(:package "statusbar.el" :host github :type git :repo "NAHTAIV3L/statusbar.el"))
+  :diminish statusbar-mode
+  :straight '(:package "statusbar.el" :host github :type git :repo "NAHTAIV3L/statusbar.el")
+  :config
+  (setq display-wifi-essid-command "iw dev $(ip addr | awk '/state UP/ {gsub(\":\",\"\"); print $2}') link | awk '/SSID:/ {printf $2}'"
+        display-wifi-connection-command "iw dev $(ip addr | awk '/state UP/ {gsub(\":\",\"\"); print $2}') link | awk '/signal:/ {gsub(\"-\",\"\"); printf $2}'"))
+
+(use-package writeroom-mode
+  :diminish)
+
+(use-package fill-column-indicator
+  :diminish fci-mode
+  :config
+  (setq fci-rule-column 80))
+
+(use-package autorevert
+  :ensure nil
+  :straight nil
+  :diminish auto-revert-mode)
+
+(use-package eldoc
+  :ensure nil
+  :straight nil
+  :diminish eldoc-mode)
+
+(use-package isearch
+  :ensure nil
+  :straight nil
+  :diminish isearch-mode)
 
 (use-package undo-tree
+  :diminish undo-tree-mode
   :init
   (global-undo-tree-mode))
 (add-hook 'authinfo-mode-hook #'(lambda () (setq-local undo-tree-auto-save-history nil)))
@@ -199,6 +331,7 @@ folder, otherwise delete a word"
 (setq undo-tree-history-directory-alist `(("." . ,--undo-history-directory)))
 
 (use-package evil
+  :diminish evil-mode
   :init
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
@@ -212,6 +345,7 @@ folder, otherwise delete a word"
   (evil-set-initial-state 'dashboard-mode 'normal))
 
 (use-package evil-collection
+  :diminish evil-collection-unimpaired-mode
   :after evil
   :config
   (evil-collection-init))
@@ -220,8 +354,10 @@ folder, otherwise delete a word"
   :after evil)
 
 (use-package evil-anzu
+  :diminish anzu-mode
   :after evil
   :config
+  (setq anzu-cons-mode-line-p nil)
   (global-anzu-mode 1))
 
 (use-package tex
@@ -233,10 +369,12 @@ folder, otherwise delete a word"
 (setq markdown-command "pandoc")
 
 (use-package org
+  :diminish org-mode
   :config
   (setq org-ellipsis " ▾"))
 
 (use-package org-superstar
+  :diminish org-superstar-mode
   :after org)
 (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
 (setq org-hide-leading-stars t)
@@ -281,6 +419,7 @@ folder, otherwise delete a word"
   :hook (dired-mode . all-the-icons-dired-mode))
 
 (use-package dired-hide-dotfiles
+  :diminish dired-hide-dotfiles-mode
   :hook (dired-mode . dired-hide-dotfiles-mode)
   :config
   (evil-collection-define-key 'normal 'dired-mode-map
@@ -294,8 +433,12 @@ folder, otherwise delete a word"
   ("f" nil "finished" :exit t))
 
 (use-package perspective
+  :config
+  (add-hook 'persp-created-hook #'(lambda () (and (get-buffer "*mu4e-main*") (persp-add-buffer (get-buffer "*mu4e-main*")))))
   :init
-  (setq persp-suppress-no-prefix-key-warning t)
+  (setq persp-suppress-no-prefix-key-warning t
+        persp-initial-frame-name "main"
+        persp-sort 'name)
   (persp-mode)
   (consult-customize consult--source-buffer :hidden t :default nil)
   (add-to-list 'consult-buffer-sources persp-consult-source))
@@ -307,6 +450,7 @@ folder, otherwise delete a word"
   (mu4e-completing-read-function #'completing-read)
   :config
 
+  (add-hook 'after-init-hook #'(lambda () (mu4e t)))
   ;; This is set to 't' to avoid mail syncing issues when using mbsync
   (setq mu4e-change-filenames-when-moving t)
 
@@ -339,11 +483,16 @@ folder, otherwise delete a word"
 
 (use-package pinentry)
 
+(use-package origami
+  :config
+  (global-origami-mode 1))
+
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode))
 
 (use-package smartparens
+  :diminish smartparens-mode
   :config
   (setq sp-highlight-pair-overlay nil)
   (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
@@ -354,12 +503,17 @@ folder, otherwise delete a word"
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
 (use-package flycheck
+  :diminish flycheck-mode
+  :config
+  (setq-default flycheck-emacs-lisp-load-path 'inherit)
   :init (global-flycheck-mode))
 
 (use-package lsp-mode
   :init
   (setq lsp-keymap-prefix "C-c l")
   (setq lsp-headerline-breadcrumb-enable nil)
+  (setq lsp-keep-workspace-alive nil)
+  (setq lsp-lens-enable nil)
   :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
          (c-mode . lsp)
          (python-mode . lsp)
@@ -369,6 +523,7 @@ folder, otherwise delete a word"
 
 (use-package lsp-ui
   :after lsp
+  :diminish lsp-lens-mode
   :config
   (setq lsp-ui-sideline-update-mode 'point)
   (setq lsp-ui-sideline-show-diagnostics t)
@@ -406,6 +561,7 @@ folder, otherwise delete a word"
 (add-hook 'lsp-mode-hook 'lsp-bind)
 
 (use-package company
+  :diminish company-mode
   :hook (prog-mode . company-mode)
   :bind (:map company-active-map
               ("<tab>" . company-complete-selection))
@@ -414,17 +570,78 @@ folder, otherwise delete a word"
   (company-idle-delay 0.0))
 
 (use-package company-box
+  :diminish company-box-mode
   :hook (company-mode . company-box-mode))
 
+(use-package dap-mode
+  :diminish
+  :defer
+  :custom
+  (dap-auto-configure-mode t                           "Automatically configure dap.")
+  (dap-auto-configure-features
+   '(sessions locals breakpoints expressions tooltip)  "Remove the button panel in the top.")
+  :config
+      ;;; dap for c++
+  (require 'dap-lldb)
+  (require 'dap-gdb-lldb)
+  (require 'dap-cpptools)
+  (require 'dap-java)
+
+      ;;; set the debugger executable (c++)
+  (setq dap-lldb-debug-program '("/usr/bin/lldb-vscode"))
+
+      ;;; ask user for executable to debug if not specified explicitly (c++)
+  (setq dap-lldb-debugged-program-function (lambda () (read-file-name "Select file to debug: ")))
+
+  (setq dap-default-terminal-kind "integrated") ;; Make sure that terminal programs open a term for I/O in an Emacs buffer
+  (dap-auto-configure-mode +1)
+      ;;; default debug template for (c++)
+  (dap-register-debug-template
+   "C++ LLDB dap"
+   (list :type "lldb-vscode"
+         :cwd nil
+         :args nil
+         :request "launch"
+         :program nil))
+
+  (dap-register-debug-template
+   "Rust LLDB dap"
+   (list :type "lldb-vscode"
+         :request "launch"
+         :program nil
+         :cwd "${workspaceFolder}"
+         :dap-compilation "cargo build"
+         :dap-compilation-dir "${workspaceFolder}"))
+
+  (defun dap-debug-create-or-edit-c-json-template ()
+    "Edit the C++ debugging configuration or create + edit if none exists yet."
+    (interactive)
+    (let ((filename (concat (lsp-workspace-root) "/launch.json"))
+          (default "~/.dotfiles/.config/emacs/default-c-launch.json"))
+      (unless (file-exists-p filename)
+        (copy-file default filename))
+      (find-file-existing filename))))
+
+(c-add-style "microsoft"
+             '("stroustrup"
+               (c-offsets-alist
+                (innamespace . -)
+                (inline-open . 0)
+                (inher-cont . c-lineup-multi-inher)
+                (arglist-cont-nonempty . +)
+                (template-args-cont . +))))
+(setq c-default-style "microsoft")
 (use-package clang-format)
 (use-package clang-format+)
 
 (use-package tree-sitter
+  :diminish tree-sitter-mode
   :config
   (global-tree-sitter-mode 1))
 (use-package tree-sitter-langs)
 
 (use-package highlight-quoted
+  :diminish highlight-quoted-mode
   :hook (emacs-lisp-mode . highlight-quoted-mode))
 
 (use-package hl-todo
@@ -432,16 +649,31 @@ folder, otherwise delete a word"
   (prog-mode . hl-todo-mode))
 
 (use-package eros
+  :diminish eros-mode
   :config
   (eros-mode 1))
 
 (use-package harpoon
+  :diminish harpoon-mode
   :straight '(:package "harpoon.el" :host github :type git :repo "NAHTAIV3L/harpoon.el"))
 
 (use-package glsl-mode
+  :diminish
   :straight '(:package "glsl-mode" :host github :type git :repo "jimhourihan/glsl-mode"))
 
+(use-package rust-mode
+  :diminish
+  :hook (rust-mode . lsp))
+
+(use-package cargo
+  :diminish cargo-mode cargo-minor-mode
+  :hook (rust-mode . cargo-minor-mode))
+
+(use-package flycheck-rust
+  :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+
 (use-package vterm
+  :diminish vterm-mode
   :commands vterm
   :config
   (setq vterm-max-scrollback 10000)
@@ -469,6 +701,7 @@ folder, otherwise delete a word"
 (use-package all-the-icons)
 
 (use-package eshell
+  :diminish eshell-mode
   :hook (eshell-first-time-mode . configure-eshell)
   :config
 
@@ -556,6 +789,7 @@ folder, otherwise delete a word"
 (map! "gg" "Magit status" #'magit-status)
 
 (map! "h" "help" #'help-command)
+(map! "r" "cargo" #'cargo-minor-mode-command-map)
 (map! "w" "window" #'evil-window-map)
 (map! "p" "project" #'projectile-command-map)
 (map! "t" "persp" #'perspective-map)
