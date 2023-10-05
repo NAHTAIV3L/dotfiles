@@ -18,7 +18,7 @@
 (setq scroll-up-aggressively nil)
 (setq scroll-down-aggressively nil)
 (setq scroll-conservatively 101)
-(setq display-line-numbers 'relative)
+(setq display-line-numbers-type 'relative)
 
 (column-number-mode)
 (global-display-line-numbers-mode t)
@@ -263,7 +263,18 @@
 ;;   :custom ((doom-modeline-height 35)))
 
 (use-package doom-themes
-  :init (load-theme 'doom-one t))
+  :config
+  (setq doom-themes-enable-bold t    
+        doom-themes-enable-italic t) 
+  (load-theme 'doom-vibrant t)
+
+  ;; Enable flashing mode-line on errors
+  ;; (doom-themes-visual-bell-config)
+  ;; Enable custom neotree theme (all-the-icons must be installed!)
+  ;; or for treemacs users
+  (doom-themes-treemacs-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
 
 (use-package rainbow-delimiters
   :diminish rainbow-delimiters-mode
@@ -510,10 +521,11 @@
 
 (use-package lsp-mode
   :init
-  (setq lsp-keymap-prefix "C-c l")
-  (setq lsp-headerline-breadcrumb-enable nil)
-  (setq lsp-keep-workspace-alive nil)
-  (setq lsp-lens-enable nil)
+  (setq lsp-keymap-prefix "C-c l"
+        lsp-headerline-breadcrumb-enable nil
+        lsp-headerline-breadcrumb-icons-enable nil
+        lsp-keep-workspace-alive nil
+        lsp-lens-enable nil)
   :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
          (c-mode . lsp)
          (python-mode . lsp)
