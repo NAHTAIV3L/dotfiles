@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+    echo "usage: $0 [mp3 file] [artist]"
+    exit 1
+fi
+
+temp="$(mktemp XXXXXXXXXX.mp3)"
+
+ffmpeg -y -i "$1" -c copy -metadata artist="$2" "$temp" && mv "$temp" "$1"
+
+rm -f "$temp"

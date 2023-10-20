@@ -3,7 +3,8 @@
       make-backup-files nil
       create-lockfiles  nil
       confirm-kill-processes nil)
-(setq-default indent-tabs-mode nil)
+(setq-default indent-tabs-mode nil
+              tab-width 4)
 
 (setq inhibit-startup-message t)
 (setq backup-inhibited t)
@@ -47,15 +48,27 @@
   (message "Emacs loaded in %s with %d garbage collections."
            (format "%.2f seconds"
       	           (float-time
-      	            (time-subtract after-init-time before-init-time)))
+      	            (time-subtract elpaca-after-init-time before-init-time)))
            gcs-done))
 
-(add-hook 'emacs-startup-hook #'display-startup-time)
+(add-hook 'after-init-hook #'display-startup-time)
+(add-hook 'server-after-make-frame-hook #'display-startup-time)
+
+(setq background-transparancy '(90 . 90))
+
+(set-frame-parameter (selected-frame) 'alpha background-transparancy)
+(add-to-list 'default-frame-alist `(alpha . ,background-transparancy))
 
 (defun browse-config ()
   (interactive)
   (let ((default-directory (file-truename (expand-file-name "~/.config/emacs/"))))
     (call-interactively #'find-file)))
+
+(defun close-window-and-buffer ()
+  "Kills current buffer and closes window"
+  (interactive)
+  (kill-buffer)
+  (delete-window))
 
 (defun lookup-password (&rest keys)
   (let ((result (apply #'auth-source-search keys)))
@@ -67,42 +80,98 @@
   (if fun (define-key myemacs-leader-map (kbd key) fun))
   (which-key-add-keymap-based-replacements myemacs-leader-map key desc))
 
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
+(defun sudo-find-file (file)
+  "Open FILE as root."
+  (interactive "FOpen file as root: ")
+  (when (file-writable-p file)
+    (user-error "File is user writeable, aborting sudo"))
+  (find-file (if (file-remote-p file)
+                 (concat "/" (file-remote-p file 'method) ":"
+                         (file-remote-p file 'user) "@" (file-remote-p file 'host)
+                         "|sudo:root@"
+                         (file-remote-p file 'host) ":" (file-remote-p file 'localname))
+               (concat "/sudo:root@localhost:" file))))
 
-(straight-use-package 'use-package)
+(defvar elpaca-installer-version 0.5)
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                              :ref nil
+                              :files (:defaults (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+       (build (expand-file-name "elpaca/" elpaca-builds-directory))
+       (order (cdr elpaca-order))
+       (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (< emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                 ((zerop (call-process "git" nil buffer t "clone"
+                                       (plist-get order :repo) repo)))
+                 ((zerop (call-process "git" nil buffer t "checkout"
+                                       (or (plist-get order :ref) "--"))))
+                 (emacs (concat invocation-directory invocation-name))
+                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                 ((require 'elpaca))
+                 ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (load "./elpaca-autoloads")))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
 
-(setq straight-use-package-by-default t)
+(elpaca elpaca-use-package
+  ;; Enable :elpaca use-package keyword.
+  (elpaca-use-package-mode)
+  ;; Assume :elpaca t unless otherwise specified.
+  (setq elpaca-use-package-by-default t))
+
+;; Block until current queue processed.
+(elpaca-wait)
 
 (use-package diminish)
+(elpaca-wait)
+
+(diminish 'abbrev-mode)
+(auto-revert-mode 1)
+(diminish 'auto-revert-mode)
+(diminish 'eldoc-mode)
+(diminish 'isearch-mode)
 (diminish 'abbrev-mode)
 
 (recentf-mode 1)
-(use-package no-littering)
-(add-to-list 'recentf-exclude
-             (recentf-expand-file-name no-littering-var-directory))
-(add-to-list 'recentf-exclude
-             (recentf-expand-file-name no-littering-etc-directory))
-(setq custom-file (no-littering-expand-etc-file-name "custom.el"))
+
+(use-package no-littering
+  :config
+  (add-to-list 'recentf-exclude
+               (recentf-expand-file-name no-littering-var-directory))
+  (add-to-list 'recentf-exclude
+               (recentf-expand-file-name no-littering-etc-directory))
+  (setq custom-file (no-littering-expand-etc-file-name "custom.el")))
 
 (use-package gcmh
   :diminish gcmh-mode
   :init
   (gcmh-mode 1))
 
+(use-package which-key
+  :init (which-key-mode)
+  :diminish which-key-mode
+  :config
+  (setq which-key-idle-delay 1))
+
 (use-package vertico
+  :elpaca (vertico :files (:defaults "extensions/*"))
   :diminish vertico-mode
-  :straight (:files (:defaults "extensions/*")) 
   :bind (:map vertico-map
               ("C-n" . vertico-next)
               ("C-p" . vertico-previous))
@@ -113,7 +182,7 @@
 ;; Configure directory extension.
 (use-package vertico-directory
   :after vertico
-  :straight nil
+  :elpaca nil
   ;; More convenient directory navigation commands
   :bind (:map vertico-map
               ("RET" . vertico-directory-enter)
@@ -123,6 +192,7 @@
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
 (use-package savehist
+  :elpaca nil
   :diminish savehist-mode
   :init
   (savehist-mode 1))
@@ -132,17 +202,18 @@
   :after vertico
   :custom
   (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
-  :init
+  :config
   (marginalia-mode))
 
-(use-package consult)
-(setq completion-in-region-function
-      (lambda (&rest args)
-        (apply (if vertico-mode
-                   #'consult-completion-in-region
-                 #'completion--in-region)
-               args)))
-(consult-customize consult-buffer :preview-key "M-.")
+(use-package consult
+  :config
+  (setq completion-in-region-function
+        (lambda (&rest args)
+          (apply (if vertico-mode
+                     #'consult-completion-in-region
+                   #'completion--in-region)
+                 args)))
+  (consult-customize consult-buffer :preview-key "M-."))
 
 (use-package orderless
   :config
@@ -150,109 +221,127 @@
         completion-category-defaults nil
         completion-category-overrides '((file (styles . (partial-completion))))))
 
+(use-package embark
+  :bind
+  (("C-." . embark-act)
+   ("C-;" . embark-dwim))
+  :init
+  (setq prefix-help-command #'embark-prefix-help-command)
+  :config
+  (setq embark--minimal-indicator-overlay nil)
+  (setq embark-indicators (delq 'embark-mixed-indicator embark-indicators))
+  (add-to-list 'embark-indicators #'embark-minimal-indicator))
+
+(use-package embark-consult
+  :config
+  (define-key embark-file-map (kbd "S") 'sudo-find-file))
+
 (use-package flyspell
+  :elpaca nil
   :diminish flyspell-mode)
 
 (use-package flyspell-correct
   :after flyspell)
 
 (use-package consult-flyspell
-  :straight (consult-flyspell :type git :host gitlab :repo "OlMon/consult-flyspell" :branch "master")
+  :elpaca (consult-flyspell :host gitlab :repo "OlMon/consult-flyspell" :branch "master")
   :config
   ;; default settings
   (setq consult-flyspell-select-function (lambda () (flyspell-correct-at-point) (consult-flyspell))
         consult-flyspell-set-point-after-word t
         consult-flyspell-always-check-buffer nil))
 
+(defface modeline-project-face
+  '((t :foreground "#00F00C"
+       :weight bold))
+  "Test face."
+  :group 'modeline-face)
+
+(defface modeline-path-face
+  '((t :foreground "#00C0FF"
+       :weight bold))
+  "Test2 face."
+  :group 'modeline-face)
+
 (setq-default mode-line-buffer-identification
-                '(:eval (format-mode-line (or (when-let* ((buffer-file-truename buffer-file-truename)
-                                                          (prj (cdr-safe (project-current)))
-                                                          (prj-parent (file-name-directory (directory-file-name (expand-file-name prj)))))
-                                                (concat (file-relative-name (file-name-directory buffer-file-truename) prj-parent) (file-name-nondirectory buffer-file-truename)))
-                                              "%b"))))
-  (defun ml-fill-to-right (reserve)
-    "Return empty space, leaving RESERVE space on the right."
-    (when (and window-system (eq 'right (get-scroll-bar-mode)))
-      (setq reserve (- reserve 2))) ; Powerline uses 3 here, but my scrollbars are narrower.
-    (propertize " "
-                'display `((space :align-to (- (+ right right-fringe right-margin)
-                                               ,reserve)))))
-  (defvar ml-selected-window nil)
+              '(:eval (format-mode-line (if buffer-file-truename (or (when-let* ((prj (cdr-safe (project-current)))
+                                                                             (parent (file-name-directory (directory-file-name (cdr-safe (project-current)))))
+                                                                             (folder (file-relative-name prj parent))
+                                                                             (path (file-relative-name buffer-file-truename parent)))
+                                                                   (put-text-property 0 (-(length folder) 1) 'face 'modeline-project-face path)
+                                                                   (put-text-property (-(length folder) 1) (length path) 'face 'modeline-path-face path)
+                                                                   path)
+                                                                     "%b")
+                                          "%b"))))
 
-  (defun ml-record-selected-window ()
-    (setq ml-selected-window (selected-window)))
+(defun ml-fill-to-right (reserve)
+  "Return empty space, leaving RESERVE space on the right."
+  (when (and window-system (eq 'right (get-scroll-bar-mode)))
+    (setq reserve (- reserve 2))) ; Powerline uses 3 here, but my scrollbars are narrower.
+  (propertize " "
+              'display `((space :align-to (- (+ right right-fringe right-margin)
+                                             ,reserve)))))
+(defvar ml-selected-window nil)
 
-  (defun ml-update-all ()
-    (force-mode-line-update t))
+(defun ml-record-selected-window ()
+  (or (eq (selected-window) (minibuffer-window))
+  (setq ml-selected-window (selected-window))))
 
-  (add-hook 'post-command-hook 'ml-record-selected-window)
+(defun ml-update-all ()
+  (force-mode-line-update t))
 
-  (add-hook 'buffer-list-update-hook 'ml-update-all)
+(add-hook 'post-command-hook 'ml-record-selected-window)
 
-  (defvar mode-line-left (list 
-                          '(:eval mode-line-front-space)
-                          '(:eval evil-mode-line-tag)
-                          " %l:%c "
-                          '(:eval mode-line-mule-info)
-                          '(:eval mode-line-modified)
-                          '(:eval mode-line-remote)
-                          " "
-                          mode-line-buffer-identification))
+(add-hook 'buffer-list-update-hook 'ml-update-all)
 
-  (defvar mode-line-right (list 
+(defvar mode-line-left (list 
+                        '(:eval mode-line-front-space)
+                        '(:eval evil-mode-line-tag)
+                        " %l:%c "
+                        '(:eval mode-line-mule-info)
+                        '(:eval mode-line-modified)
+                        '(:eval mode-line-remote)
+                        " "
+                        mode-line-buffer-identification))
+
+(defvar mode-line-right (list 
                          '(:eval (if (eq ml-selected-window (selected-window))
                                      mode-line-misc-info
-                                 '(:propertize mode-line-misc-info 'face 'mode-line-inactive)))
-                           " "
-                           '(:eval mode-name)))
+                                   '(:propertize mode-line-misc-info 'face 'mode-line-inactive)))
+                         " "
+                         '(:eval mode-name)))
 
-  (defvar mode-line-spacing '(:eval (ml-fill-to-right (string-width (format-mode-line mode-line-right)))))
+(defvar mode-line-spacing '(:eval (ml-fill-to-right (string-width (format-mode-line mode-line-right)))))
 
-  ;; (setq-default mode-line-format
-  ;;               (list
-  ;;                "%e"
-  ;;                '(:eval mode-line-left)
-  ;;                '(:eval mode-line-spacing)
-  ;;                '(:eval mode-line-right)))
+(defmacro ml-inactive-color-fix (var)
+  `(if (eq ,ml-selected-window (selected-window))
+       ,var
+     '(:eval (let ((a (format-mode-line ,var)))
+               (set-text-properties 0 (length a) '(face mode-line-inactive) a)
+               a))))
+;; (setq-default mode-line-format
+;;               (list
+;;                "%e"
+;;                '(:eval mode-line-left)
+;;                '(:eval mode-line-spacing)
+;;                '(:eval mode-line-right)))
 (setq-default mode-line-format
-      (list
-       "%e"
-       '(:eval mode-line-front-space)
-       '(:eval evil-mode-line-tag)
-       '(:eval mode-line-mule-info)
-       '(:eval mode-line-modified)
-       '(:eval mode-line-remote)
-       " (%l:%c) "
-       mode-line-buffer-identification
-       " "
-       '(:eval anzu--mode-line-format)
-       " "
-       mode-line-modes
-       " "
-      '(:eval (if (eq ml-selected-window (selected-window))
-                  mode-line-misc-info
-                '(:propertize mode-line-misc-info 'face 'mode-line-inactive)))
-      ))
-
-(setq mode-line-format
-      (list
-       "%e"
-       '(:eval mode-line-front-space)
-       '(:eval evil-mode-line-tag)
-       '(:eval mode-line-mule-info)
-       '(:eval mode-line-modified)
-       '(:eval mode-line-remote)
-       " (%l:%c) "
-       mode-line-buffer-identification
-       " "
-       '(:eval anzu--mode-line-format)
-       " "
-       mode-line-modes
-       " "
-      '(:eval (if (eq ml-selected-window (selected-window))
-                  mode-line-misc-info
-                '(:propertize mode-line-misc-info 'face 'mode-line-inactive)))
-      ))
+              (list
+               "%e"
+               '(:eval mode-line-front-space)
+               '(:eval evil-mode-line-tag)
+               '(:eval mode-line-mule-info)
+               '(:eval mode-line-modified)
+               '(:eval mode-line-remote)
+               " (%l:%c) "
+               ;; '(:eval (ml-inactive-color-fix mode-line-buffer-identification))
+               '(:eval (ml-inactive-color-fix mode-line-buffer-identification))
+               " "
+               '(:eval anzu--mode-line-format)
+               " "
+               '(:eval (ml-inactive-color-fix mode-line-modes))
+               " "
+               '(:eval (ml-inactive-color-fix mode-line-misc-info))))
 
 ;; (use-package doom-modeline
 ;;   :init
@@ -280,12 +369,6 @@
   :diminish rainbow-delimiters-mode
   :hook (prog-mode . rainbow-delimiters-mode))
 
-(use-package which-key
-  :init (which-key-mode)
-  :diminish which-key-mode
-  :config
-  (setq which-key-idle-delay 1))
-
 (use-package emojify
   ;; :diminish emojify-mode
   :hook (after-init . global-emojify-mode)
@@ -299,9 +382,11 @@
   ([remap describe-variable] . helpful-variable)
   ([remap describe-key] . helpful-key))
 
+(use-package posframe)
+
 (use-package statusbar
   :diminish statusbar-mode
-  :straight '(:package "statusbar.el" :host github :type git :repo "NAHTAIV3L/statusbar.el")
+  :elpaca (statusbar.el :host github :repo "NAHTAIV3L/statusbar.el")
   :config
   (setq display-wifi-essid-command "iw dev $(ip addr | awk '/state UP/ {gsub(\":\",\"\"); print $2}') link | awk '/SSID:/ {printf $2}'"
         display-wifi-connection-command "iw dev $(ip addr | awk '/state UP/ {gsub(\":\",\"\"); print $2}') link | awk '/signal:/ {gsub(\"-\",\"\"); printf $2}'"))
@@ -314,32 +399,22 @@
   :config
   (setq fci-rule-column 80))
 
-(use-package autorevert
-  :ensure nil
-  :straight nil
-  :diminish auto-revert-mode)
-
-(use-package eldoc
-  :ensure nil
-  :straight nil
-  :diminish eldoc-mode)
-
-(use-package isearch
-  :ensure nil
-  :straight nil
-  :diminish isearch-mode)
+(use-package ace-window
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
+        aw-scope 'frame))
 
 (use-package undo-tree
   :diminish undo-tree-mode
-  :init
-  (global-undo-tree-mode))
-(add-hook 'authinfo-mode-hook #'(lambda () (setq-local undo-tree-auto-save-history nil)))
-(defvar --undo-history-directory (concat user-emacs-directory "undotreefiles/")
-  "Directory to save undo history files.")
-(unless (file-exists-p --undo-history-directory)
-  (make-directory --undo-history-directory t))
-;; stop littering with *.~undo-tree~ files everywhere
-(setq undo-tree-history-directory-alist `(("." . ,--undo-history-directory)))
+  :config
+  (global-undo-tree-mode)
+  (add-hook 'authinfo-mode-hook #'(lambda () (setq-local undo-tree-auto-save-history nil)))
+  (defvar --undo-history-directory (concat user-emacs-directory "undotreefiles/")
+    "Directory to save undo history files.")
+  (unless (file-exists-p --undo-history-directory)
+    (make-directory --undo-history-directory t))
+  ;; stop littering with *.~undo-tree~ files everywhere
+  (setq undo-tree-history-directory-alist `(("." . ,--undo-history-directory))))
 
 (use-package evil
   :diminish evil-mode
@@ -351,9 +426,11 @@
   (setq evil-undo-system 'undo-tree)
   :config
   (evil-mode 1)
-
+  (define-key evil-normal-state-map (kbd "j") 'evil-next-visual-line)
+  (define-key evil-normal-state-map (kbd "k") 'evil-previous-visual-line)
   (evil-set-initial-state 'messages-buffer-mode 'normal)
-  (evil-set-initial-state 'dashboard-mode 'normal))
+  (evil-set-initial-state 'dashboard-mode 'normal)
+  (define-key evil-window-map (kbd "d") '("close buffer & window" . close-window-and-buffer)))
 
 (use-package evil-collection
   :diminish evil-collection-unimpaired-mode
@@ -371,34 +448,44 @@
   (setq anzu-cons-mode-line-p nil)
   (global-anzu-mode 1))
 
-(use-package tex
-  :straight auctex)
+(elpaca-wait)
 
-(use-package lsp-latex
-  :straight '(:package "lsp-latex.el" :host github :type git :repo "ROCKTAKEY/lsp-latex"))
+(use-package tex
+  :elpaca (auctex :pre-build
+                  (("cd" "~/.emacs.d/elpaca/repos/auctex/")
+                   ("./autogen.sh")
+                   ("./configure")
+                   ("make"))
+                  :host github :repo "emacs-straight/auctex" :files ("*" (:exclude ".git"))))
 
 (setq markdown-command "pandoc")
 
 (use-package org
   :diminish org-mode
+  :custom
+  ((org-agenda-files (list "~/org/homework.org")))
   :config
-  (setq org-ellipsis " ▾"))
+  (setq org-ellipsis " ▾")
+
+
+  (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+  (add-to-list 'org-structure-template-alist '("py" . "src python"))
+
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (python . t))))
 
 (use-package org-superstar
   :diminish org-superstar-mode
-  :after org)
-(add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
-(setq org-hide-leading-stars t)
-(require 'org-tempo)
+  :after org
+  :config
+  (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
+  (setq org-hide-leading-stars t)
+  (require 'org-tempo))
 
-(add-to-list 'org-structure-template-alist '("sh" . "src shell"))
-(add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-(add-to-list 'org-structure-template-alist '("py" . "src python"))
-
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((emacs-lisp . t)
-   (python . t)))
+(elpaca-wait)
 
 (defun org-babel-tangle-config ()
   (when (or
@@ -412,7 +499,7 @@
 
 (use-package dired
   :ensure nil
-  :straight nil
+  :elpaca nil
   :commands (dired dired-jump)
   :bind (("C-x C-j" . dired-jump))
   :custom ((dired-listing-switches "-agho --group-directories-first"))
@@ -436,12 +523,13 @@
   (evil-collection-define-key 'normal 'dired-mode-map
     "H" 'dired-hide-dotfiles-mode))
 
-(use-package hydra)
-(defhydra hydra-text-scale (:timeout 4)
-  "scale text"
-  ("j" text-scale-increase "in")
-  ("k" text-scale-decrease "out")
-  ("f" nil "finished" :exit t))
+(use-package hydra
+  :config
+  (defhydra hydra-text-scale (:timeout 4)
+    "scale text"
+    ("j" text-scale-increase "in")
+    ("k" text-scale-decrease "out")
+    ("f" nil "finished" :exit t)))
 
 (use-package perspective
   :config
@@ -455,8 +543,7 @@
   (add-to-list 'consult-buffer-sources persp-consult-source))
 
 (use-package mu4e
-  :ensure nil
-  :straight nil
+  :elpaca nil
   :custom
   (mu4e-completing-read-function #'completing-read)
   :config
@@ -476,16 +563,22 @@
         mu4e-read-option-use-builtin nil
         mu4e-headers-skip-duplicates nil
 
-        mu4e-drafts-folder "/acc1-gmail/Drafts"
-        mu4e-sent-folder   "/acc1-gmail/Sent Mail"
-        mu4e-refile-folder "/acc1-gmail/All Mail"
-        mu4e-trash-folder  "/acc1-gmail/Trash"
+        mu4e-drafts-folder "/Drafts"
+        mu4e-sent-folder   "/Sent Mail"
+        mu4e-refile-folder "/All Mail"
+        mu4e-trash-folder  "/Trash"
         smtpmail-smtp-server "smtp.gmail.com"
         smtpmail-smtp-service 465
         smtpmail-stream-type  'ssl
         message-send-mail-function 'smtpmail-send-it
         mu4e-compose-signature "Riley Beckett\nrbeckettvt@gmail.com"
-        mu4e-compose-format-flowed t))
+        mu4e-compose-format-flowed t
+        mu4e-maildir-shortcuts
+        '((:maildir "/INBOX"    :key ?i)
+          (:maildir "/Sent Mail" :key ?s)
+          (:maildir "/Trash"     :key ?t)
+          (:maildir "/Drafts"    :key ?d)
+          (:maildir "/All Mail"  :key ?a))))
 
 (use-package mu4e-alert
   :config
@@ -517,7 +610,7 @@
   :diminish flycheck-mode
   :config
   (setq-default flycheck-emacs-lisp-load-path 'inherit)
-  :init (global-flycheck-mode))
+  (global-flycheck-mode 1))
 
 (use-package lsp-mode
   :init
@@ -584,6 +677,9 @@
 (use-package company-box
   :diminish company-box-mode
   :hook (company-mode . company-box-mode))
+
+(use-package lsp-latex
+  :elpaca (lsp-latex.el :host github :repo "ROCKTAKEY/lsp-latex"))
 
 (use-package dap-mode
   :diminish
@@ -667,11 +763,14 @@
 
 (use-package harpoon
   :diminish harpoon-mode
-  :straight '(:package "harpoon.el" :host github :type git :repo "NAHTAIV3L/harpoon.el"))
+  :elpaca (harpoon.el :host github :repo "NAHTAIV3L/harpoon.el"))
 
 (use-package glsl-mode
   :diminish
-  :straight '(:package "glsl-mode" :host github :type git :repo "jimhourihan/glsl-mode"))
+  :elpaca (glsl-mode :host github :repo "jimhourihan/glsl-mode"))
+
+(use-package gradle-mode
+  :diminish)
 
 (use-package rust-mode
   :diminish
@@ -683,6 +782,24 @@
 
 (use-package flycheck-rust
   :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+
+(defun my-asm-mode-hook ()
+  (defun asm-calculate-indentation ()
+    (or
+     ;; Flush labels to the left margin.
+                                        ;   (and (looking-at "\\(\\.\\|\\sw\\|\\s_\\)+:") 0)
+     (and (looking-at "[.@_[:word:]]+:") 0)
+     ;; Same thing for `;;;' comments.
+     (and (looking-at "\\s<\\s<\\s<") 0)
+     ;; %if nasm macro stuff goes to the left margin
+     (and (looking-at "%") 0)
+     (and (looking-at "c?global\\|section\\|default\\|align\\|INIT_..X") 0)
+     ;; Simple `;' comments go to the comment-column
+                                        ;(and (looking-at "\\s<\\(\\S<\\|\\'\\)") comment-column)
+     ;; The rest goes at column 4
+     (or 4))))
+
+(add-hook 'asm-mode-hook #'my-asm-mode-hook)
 
 (use-package vterm
   :diminish vterm-mode
@@ -710,9 +827,8 @@
 
 (use-package eshell-git-prompt)
 
-(use-package all-the-icons)
-
 (use-package eshell
+  :elpaca nil
   :diminish eshell-mode
   :hook (eshell-first-time-mode . configure-eshell)
   :config
@@ -723,7 +839,21 @@
 
   (eshell-git-prompt-use-theme 'multiline2))
 
+(use-package calendar
+  :elpaca nil
+  :config
+  (defun calendar-insert-date ()
+    "Capture the date at point, exit the Calendar, insert the date."
+    (interactive)
+    (seq-let (month day year) (save-match-data (calendar-cursor-to-date))
+      (calendar-exit)
+      (insert (format "%02d/%02d/%d" month day year))))
+
+  (define-key calendar-mode-map (kbd "M-I") 'calendar-insert-date))
+
 (use-package general)
+
+(elpaca-wait)
 
 (global-set-key (kbd "<escape>") 'keyboard-quit)
 
@@ -773,9 +903,17 @@
 (map! "<" "switch buffer" #'consult-buffer)
 (map! "s" "search in file" #'consult-line)
 (map! "`" "open file in config dir" #'browse-config)
+(map! "a" "ace window" #'ace-window)
+
 
 (evil-global-set-key 'normal "gc" 'evilnc-comment-operator)
 (evil-global-set-key 'visual "gc" 'evilnc-comment-operator)
+
+(map! "o" "org")
+(map! "oa" "org agenda" #'org-agenda)
+(map! "o[" "org agenda add front" #'org-agenda-file-to-front)
+(map! "os" "org schedule" #'org-schedule)
+(map! "od" "org deadline" #'org-deadline)
 
 (map! "t" "toggle")
 (map! "ts" "text scaling" #'hydra-text-scale/body)
@@ -846,6 +984,8 @@
 (define-key general-override-mode-map (kbd "C-SPC") '("harpoon toggle quick menu" . harpoon-toggle-quick-menu))
 
 (use-package exwm)
+
+(elpaca-wait)
 
 (if (or (string= (getenv "WINDOWMANAGER") "d") (string= (getenv "WINDOWMANAGER") ""))
     nil

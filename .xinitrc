@@ -10,6 +10,8 @@
 #exec emacs
 #!/bin/bash
 togglecaps
+# feh --bg-center /home/nahtaiv3l/Downloads/Images/a9011ed3e03219a4c26d62d4aa606a0f-2497059860
+# xcompmgr &
 xset r rate 300 30
 backlightctrl -set 10
 gpgconf -K gpg-agent

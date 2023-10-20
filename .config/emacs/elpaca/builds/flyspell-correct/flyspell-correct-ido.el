@@ -1,0 +1,1 @@
+/home/nahtaiv3l/.config/emacs/elpaca/repos/flyspell-correct/flyspell-correct-ido.el

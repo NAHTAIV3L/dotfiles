@@ -1,0 +1,1 @@
+/home/nahtaiv3l/.config/emacs/elpaca/repos/pkg-info/pkg-info.el

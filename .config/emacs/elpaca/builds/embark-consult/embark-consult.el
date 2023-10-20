@@ -1,0 +1,1 @@
+/home/nahtaiv3l/.config/emacs/elpaca/repos/embark/embark-consult.el

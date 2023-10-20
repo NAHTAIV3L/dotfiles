@@ -14,4 +14,5 @@ http://zvon.org/other/haskell/Outputglobal/index.html #haskell documentation
 https://refspecs.linuxfoundation.org/elf/x86_64-abi-0.99.pdf #asm parameters pg 20
 https://www.felixcloutier.com/x86/index.html #assembly instructions
 https://github.com/torvalds/linux/blob/master/arch/x86/entry/syscalls/syscall_64.tbl #linux syscalls
+https://black.ccsuvt.org/htcomnet/default.aspx #F drive
 

@@ -23,8 +23,8 @@ Account acc1-gmail
 
 # LOCAL STORAGE (CREATE DIRECTORIES with mkdir -p ~/Maildir/acc1-gmail)
 MaildirStore acc1-gmail-local
-Path ~/Maildir/acc1-gmail/
-Inbox ~/Maildir/acc1-gmail/INBOX
+Path ~/Maildir/
+Inbox ~/Maildir/INBOX
 # REQUIRED ONLY IF YOU WANT TO DOWNLOAD ALL SUBFOLDERS; SYNCING SLOWS DOWN
 # SubFolders Verbatim
 

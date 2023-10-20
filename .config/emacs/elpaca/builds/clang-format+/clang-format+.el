@@ -1,0 +1,1 @@
+/home/nahtaiv3l/.config/emacs/elpaca/repos/emacs-clang-format-plus/clang-format+.el
