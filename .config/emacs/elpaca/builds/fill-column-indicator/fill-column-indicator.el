@@ -1,1 +1,0 @@
-/home/nahtaiv3l/.config/emacs/elpaca/repos/fill-column-indicator/fill-column-indicator.el

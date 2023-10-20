@@ -1,1 +1,0 @@
-/home/nahtaiv3l/.config/emacs/elpaca/repos/emacs-gradle-mode/gradle-mode.el

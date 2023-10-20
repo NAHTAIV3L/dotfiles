@@ -1,1 +1,0 @@
-/home/nahtaiv3l/.config/emacs/elpaca/repos/treemacs/src/scripts/treemacs-git-status.py

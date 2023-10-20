@@ -1,1 +1,0 @@
-/home/nahtaiv3l/.config/emacs/elpaca/repos/dired-single/dired-single.el

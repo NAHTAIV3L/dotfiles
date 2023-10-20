@@ -1,1 +1,0 @@
-/home/nahtaiv3l/.config/emacs/elpaca/repos/log4e/log4e.el

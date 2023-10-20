@@ -1,1 +1,0 @@
-/home/nahtaiv3l/.config/emacs/elpaca/repos/eshell-git-prompt/eshell-git-prompt.el
