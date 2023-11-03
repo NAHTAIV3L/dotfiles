@@ -1,3 +1,5 @@
 *~undo-tree~
 /#bookmark#
 /.config/mpd/mpd.pid
+/.vim/undodir/
+/.config/emacs/undotreefiles/

@@ -12,9 +12,9 @@
 (scroll-bar-mode -1)        ; Disable visible scrollbar
 (tool-bar-mode -1)          ; Disable the toolbar
 (tooltip-mode -1)           ; Disable tooltips
-(set-fringe-mode 20)        ; Give some breathing room
+(add-hook 'prog-mode-hook (lambda () (toggle-truncate-lines +1)))
 
-(menu-bar-mode -1)            ; Disable the menu bar
+(menu-bar-mode -1)          ; Disable the menu bar
 
 (setq scroll-up-aggressively nil)
 (setq scroll-down-aggressively nil)
@@ -238,7 +238,8 @@
 
 (use-package flyspell
   :elpaca nil
-  :diminish flyspell-mode)
+  ;; :diminish flyspell-mode
+  )
 
 (use-package flyspell-correct
   :after flyspell)
@@ -265,12 +266,12 @@
 
 (setq-default mode-line-buffer-identification
               '(:eval (format-mode-line (if buffer-file-truename (or (when-let* ((prj (cdr-safe (project-current)))
-                                                                             (parent (file-name-directory (directory-file-name (cdr-safe (project-current)))))
-                                                                             (folder (file-relative-name prj parent))
-                                                                             (path (file-relative-name buffer-file-truename parent)))
-                                                                   (put-text-property 0 (-(length folder) 1) 'face 'modeline-project-face path)
-                                                                   (put-text-property (-(length folder) 1) (length path) 'face 'modeline-path-face path)
-                                                                   path)
+                                                                                 (parent (file-name-directory (directory-file-name (cdr-safe (project-current)))))
+                                                                                 (folder (file-relative-name prj parent))
+                                                                                 (path (file-relative-name buffer-file-truename parent)))
+                                                                       (put-text-property 0 (-(length folder) 1) 'face 'modeline-project-face path)
+                                                                       (put-text-property (-(length folder) 1) (length path) 'face 'modeline-path-face path)
+                                                                       path)
                                                                      "%b")
                                           "%b"))))
 
@@ -285,7 +286,7 @@
 
 (defun ml-record-selected-window ()
   (or (eq (selected-window) (minibuffer-window))
-  (setq ml-selected-window (selected-window))))
+      (setq ml-selected-window (selected-window))))
 
 (defun ml-update-all ()
   (force-mode-line-update t))
@@ -336,11 +337,10 @@
                " (%l:%c) "
                ;; '(:eval (ml-inactive-color-fix mode-line-buffer-identification))
                '(:eval (ml-inactive-color-fix mode-line-buffer-identification))
-               " "
+               '(:eval (and anzu--state " "))
                '(:eval anzu--mode-line-format)
                " "
                '(:eval (ml-inactive-color-fix mode-line-modes))
-               " "
                '(:eval (ml-inactive-color-fix mode-line-misc-info))))
 
 ;; (use-package doom-modeline
@@ -389,7 +389,8 @@
   :elpaca (statusbar.el :host github :repo "NAHTAIV3L/statusbar.el")
   :config
   (setq display-wifi-essid-command "iw dev $(ip addr | awk '/state UP/ {gsub(\":\",\"\"); print $2}') link | awk '/SSID:/ {printf $2}'"
-        display-wifi-connection-command "iw dev $(ip addr | awk '/state UP/ {gsub(\":\",\"\"); print $2}') link | awk '/signal:/ {gsub(\"-\",\"\"); printf $2}'"))
+        display-wifi-connection-command "iw dev $(ip addr | awk '/state UP/ {gsub(\":\",\"\"); print $2}') link | awk '/signal:/ {gsub(\"-\",\"\"); printf $2}'"
+        externalcmd-shellcommand "slstatus -s -1"))
 
 (use-package writeroom-mode
   :diminish)
@@ -468,6 +469,7 @@
   (setq org-ellipsis " ▾")
 
 
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
   (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
   (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
   (add-to-list 'org-structure-template-alist '("py" . "src python"))
@@ -618,10 +620,12 @@
         lsp-headerline-breadcrumb-enable nil
         lsp-headerline-breadcrumb-icons-enable nil
         lsp-keep-workspace-alive nil
+        lsp-completion-provider :none
+        lsp-enable-snippet nil
         lsp-lens-enable nil)
   :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
          (c-mode . lsp)
-         (python-mode . lsp)
+         (python-mode . lsp-deferred)
          ;; if you want which-key integration
          (lsp-mode . lsp-enable-which-key-integration))
   :commands lsp)
@@ -665,18 +669,37 @@
   (define-key myemacs-leader-map (kbd "lug") '("ui doc glance" . lsp-ui-doc-glance)))
 (add-hook 'lsp-mode-hook 'lsp-bind)
 
-(use-package company
-  :diminish company-mode
-  :hook (prog-mode . company-mode)
-  :bind (:map company-active-map
-              ("<tab>" . company-complete-selection))
+(use-package corfu
   :custom
-  (company-minimum-prefix-length 1)
-  (company-idle-delay 0.0))
+  (corfu-auto t)
+  (corfu-auto-delay 0)
+  (corfu-auto-prefix 1)
+  (corfu-separator ?\s)
+  :config
+  (global-corfu-mode)
+  (bind-key (kbd "s-SPC") 'corfu-insert-separator 'corfu-map))
 
-(use-package company-box
-  :diminish company-box-mode
-  :hook (company-mode . company-box-mode))
+(use-package cape
+  ;; Bind dedicated completion commands
+  ;; Alternative prefix keys: C-c p, M-p, M-+, ...
+  :init
+  ;; Add to the global default value of `completion-at-point-functions' which is
+  ;; used by `completion-at-point'.  The order of the functions matters, the
+  ;; first function returning a result wins.  Note that the list of buffer-local
+  ;; completion functions takes precedence over the global list.
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+  ;;(add-to-list 'completion-at-point-functions #'cape-history)
+  ;;(add-to-list 'completion-at-point-functions #'cape-keyword)
+  (add-to-list 'completion-at-point-functions #'cape-tex)
+  ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
+  ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
+  ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
+  ;;(add-to-list 'completion-at-point-functions #'cape-dict)
+  ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
+  ;;(add-to-list 'completion-at-point-functions #'cape-line)
+  )
 
 (use-package lsp-latex
   :elpaca (lsp-latex.el :host github :repo "ROCKTAKEY/lsp-latex"))
@@ -855,33 +878,33 @@
 
 (elpaca-wait)
 
-(global-set-key (kbd "<escape>") 'keyboard-quit)
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
-(defvar myemacs-escape-hook nil
-  "for killing things")
+;; (defvar myemacs-escape-hook nil
+;;   "for killing things")
 
-(defun myemacs/escape (&optional interactive)
-  "Run `myemacs-escape-hook'."
-  (interactive (list 'interactive))
-  (cond ((minibuffer-window-active-p (minibuffer-window))
-         ;; quit the minibuffer if open.
-         (when interactive
-           (setq this-command 'abort-recursive-edit))
-         (abort-recursive-edit))
-        ;; Run all escape hooks. If any returns non-nil, then stop there.
-        ((run-hook-with-args-until-success 'myemacs-escape-hook))
-        ;; don't abort macros
-        ((or defining-kbd-macro executing-kbd-macro) nil)
-        ;; Back to the default
-        ((unwind-protect (keyboard-quit)
-           (when interactive
-             (setq this-command 'keyboard-quit))))))
+;; (defun myemacs/escape (&optional interactive)
+;;   "Run `myemacs-escape-hook'."
+;;   (interactive (list 'interactive))
+;;   (cond ((minibuffer-window-active-p (minibuffer-window))
+;;          ;; quit the minibuffer if open.
+;;          (when interactive
+;;            (setq this-command 'abort-recursive-edit))
+;;          (abort-recursive-edit))
+;;         ;; Run all escape hooks. If any returns non-nil, then stop there.
+;;         ((run-hook-with-args-until-success 'myemacs-escape-hook))
+;;         ;; don't abort macros
+;;         ((or defining-kbd-macro executing-kbd-macro) nil)
+;;         ;; Back to the default
+;;         ((unwind-protect (keyboard-quit)
+;;            (when interactive
+;;              (setq this-command 'keyboard-quit))))))
 
-(global-set-key [remap keyboard-quit] #'myemacs/escape)
-(add-hook 'myemacs-escape-hook (lambda ()
-      			         (when (evil-ex-hl-active-p 'evil-ex-search)
-      			           (evil-ex-nohighlight)
-      			           t)))
+;; (global-set-key [remap keyboard-quit] #'myemacs/escape)
+;; (add-hook 'myemacs-escape-hook (lambda ()
+;;       			         (when (evil-ex-hl-active-p 'evil-ex-search)
+;;       			           (evil-ex-nohighlight)
+;;       			           t)))
 
 (defvar myemacs-leader-map (make-sparse-keymap)
   "map for leader")

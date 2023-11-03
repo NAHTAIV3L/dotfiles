@@ -30,6 +30,7 @@ alias v="nvim"
 alias xi="doas xbps-install"
 alias xr="doas xbps-remove"
 alias xq="xbps-query"
+alias xpkg="xbps-query -Rs '' | fzf"
 
 alias sdwm="cd ~/.dotfiles/suckless/dwm"
 alias sst="cd ~/.dotfiles/suckless/st"

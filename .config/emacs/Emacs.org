@@ -1,4 +1,4 @@
- #+TITLE Emacs.org config
+#+TITLE Emacs.org config
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 #+STARTUP: fold
 * General Changes
@@ -23,9 +23,9 @@
   (scroll-bar-mode -1)        ; Disable visible scrollbar
   (tool-bar-mode -1)          ; Disable the toolbar
   (tooltip-mode -1)           ; Disable tooltips
-  (set-fringe-mode 20)        ; Give some breathing room
+  (add-hook 'prog-mode-hook (lambda () (toggle-truncate-lines +1)))
 
-  (menu-bar-mode -1)            ; Disable the menu bar
+  (menu-bar-mode -1)          ; Disable the menu bar
 
   (setq scroll-up-aggressively nil)
   (setq scroll-down-aggressively nil)
@@ -339,7 +339,8 @@ better searching
 #+begin_src emacs-lisp
   (use-package flyspell
     :elpaca nil
-    :diminish flyspell-mode)
+    ;; :diminish flyspell-mode
+    )
 #+end_src
 
 *** flyspell-correct
@@ -365,98 +366,96 @@ better searching
 ** mode-line
 
 #+begin_src emacs-lisp
-    (defface modeline-project-face
-      '((t :foreground "#00F00C"
-           :weight bold))
-      "Test face."
-      :group 'modeline-face)
+  (defface modeline-project-face
+    '((t :foreground "#00F00C"
+         :weight bold))
+    "Test face."
+    :group 'modeline-face)
 
-    (defface modeline-path-face
-      '((t :foreground "#00C0FF"
-           :weight bold))
-      "Test2 face."
-      :group 'modeline-face)
+  (defface modeline-path-face
+    '((t :foreground "#00C0FF"
+         :weight bold))
+    "Test2 face."
+    :group 'modeline-face)
 
-    (setq-default mode-line-buffer-identification
-                  '(:eval (format-mode-line (if buffer-file-truename (or (when-let* ((prj (cdr-safe (project-current)))
-                                                                                 (parent (file-name-directory (directory-file-name (cdr-safe (project-current)))))
-                                                                                 (folder (file-relative-name prj parent))
-                                                                                 (path (file-relative-name buffer-file-truename parent)))
-                                                                       (put-text-property 0 (-(length folder) 1) 'face 'modeline-project-face path)
-                                                                       (put-text-property (-(length folder) 1) (length path) 'face 'modeline-path-face path)
-                                                                       path)
-                                                                         "%b")
-                                              "%b"))))
+  (setq-default mode-line-buffer-identification
+                '(:eval (format-mode-line (if buffer-file-truename (or (when-let* ((prj (cdr-safe (project-current)))
+                                                                                   (parent (file-name-directory (directory-file-name (cdr-safe (project-current)))))
+                                                                                   (folder (file-relative-name prj parent))
+                                                                                   (path (file-relative-name buffer-file-truename parent)))
+                                                                         (put-text-property 0 (-(length folder) 1) 'face 'modeline-project-face path)
+                                                                         (put-text-property (-(length folder) 1) (length path) 'face 'modeline-path-face path)
+                                                                         path)
+                                                                       "%b")
+                                            "%b"))))
 
-    (defun ml-fill-to-right (reserve)
-      "Return empty space, leaving RESERVE space on the right."
-      (when (and window-system (eq 'right (get-scroll-bar-mode)))
-        (setq reserve (- reserve 2))) ; Powerline uses 3 here, but my scrollbars are narrower.
-      (propertize " "
-                  'display `((space :align-to (- (+ right right-fringe right-margin)
-                                                 ,reserve)))))
-    (defvar ml-selected-window nil)
+  (defun ml-fill-to-right (reserve)
+    "Return empty space, leaving RESERVE space on the right."
+    (when (and window-system (eq 'right (get-scroll-bar-mode)))
+      (setq reserve (- reserve 2))) ; Powerline uses 3 here, but my scrollbars are narrower.
+    (propertize " "
+                'display `((space :align-to (- (+ right right-fringe right-margin)
+                                               ,reserve)))))
+  (defvar ml-selected-window nil)
 
-    (defun ml-record-selected-window ()
-      (or (eq (selected-window) (minibuffer-window))
-      (setq ml-selected-window (selected-window))))
+  (defun ml-record-selected-window ()
+    (or (eq (selected-window) (minibuffer-window))
+        (setq ml-selected-window (selected-window))))
 
-    (defun ml-update-all ()
-      (force-mode-line-update t))
+  (defun ml-update-all ()
+    (force-mode-line-update t))
 
-    (add-hook 'post-command-hook 'ml-record-selected-window)
+  (add-hook 'post-command-hook 'ml-record-selected-window)
 
-    (add-hook 'buffer-list-update-hook 'ml-update-all)
+  (add-hook 'buffer-list-update-hook 'ml-update-all)
 
-    (defvar mode-line-left (list 
-                            '(:eval mode-line-front-space)
-                            '(:eval evil-mode-line-tag)
-                            " %l:%c "
-                            '(:eval mode-line-mule-info)
-                            '(:eval mode-line-modified)
-                            '(:eval mode-line-remote)
-                            " "
-                            mode-line-buffer-identification))
+  (defvar mode-line-left (list 
+                          '(:eval mode-line-front-space)
+                          '(:eval evil-mode-line-tag)
+                          " %l:%c "
+                          '(:eval mode-line-mule-info)
+                          '(:eval mode-line-modified)
+                          '(:eval mode-line-remote)
+                          " "
+                          mode-line-buffer-identification))
 
-    (defvar mode-line-right (list 
-                             '(:eval (if (eq ml-selected-window (selected-window))
-                                         mode-line-misc-info
-                                       '(:propertize mode-line-misc-info 'face 'mode-line-inactive)))
-                             " "
-                             '(:eval mode-name)))
+  (defvar mode-line-right (list 
+                           '(:eval (if (eq ml-selected-window (selected-window))
+                                       mode-line-misc-info
+                                     '(:propertize mode-line-misc-info 'face 'mode-line-inactive)))
+                           " "
+                           '(:eval mode-name)))
 
-    (defvar mode-line-spacing '(:eval (ml-fill-to-right (string-width (format-mode-line mode-line-right)))))
+  (defvar mode-line-spacing '(:eval (ml-fill-to-right (string-width (format-mode-line mode-line-right)))))
 
-    (defmacro ml-inactive-color-fix (var)
-      `(if (eq ,ml-selected-window (selected-window))
-           ,var
-         '(:eval (let ((a (format-mode-line ,var)))
-                   (set-text-properties 0 (length a) '(face mode-line-inactive) a)
-                   a))))
-    ;; (setq-default mode-line-format
-    ;;               (list
-    ;;                "%e"
-    ;;                '(:eval mode-line-left)
-    ;;                '(:eval mode-line-spacing)
-    ;;                '(:eval mode-line-right)))
-    (setq-default mode-line-format
-                  (list
-                   "%e"
-                   '(:eval mode-line-front-space)
-                   '(:eval evil-mode-line-tag)
-                   '(:eval mode-line-mule-info)
-                   '(:eval mode-line-modified)
-                   '(:eval mode-line-remote)
-                   " (%l:%c) "
-                   ;; '(:eval (ml-inactive-color-fix mode-line-buffer-identification))
-                   '(:eval (ml-inactive-color-fix mode-line-buffer-identification))
-                   " "
-                   '(:eval anzu--mode-line-format)
-                   " "
-                   '(:eval (ml-inactive-color-fix mode-line-modes))
-                   " "
-                   '(:eval (ml-inactive-color-fix mode-line-misc-info))))
-
+  (defmacro ml-inactive-color-fix (var)
+    `(if (eq ,ml-selected-window (selected-window))
+         ,var
+       '(:eval (let ((a (format-mode-line ,var)))
+                 (set-text-properties 0 (length a) '(face mode-line-inactive) a)
+                 a))))
+  ;; (setq-default mode-line-format
+  ;;               (list
+  ;;                "%e"
+  ;;                '(:eval mode-line-left)
+  ;;                '(:eval mode-line-spacing)
+  ;;                '(:eval mode-line-right)))
+  (setq-default mode-line-format
+                (list
+                 "%e"
+                 '(:eval mode-line-front-space)
+                 '(:eval evil-mode-line-tag)
+                 '(:eval mode-line-mule-info)
+                 '(:eval mode-line-modified)
+                 '(:eval mode-line-remote)
+                 " (%l:%c) "
+                 ;; '(:eval (ml-inactive-color-fix mode-line-buffer-identification))
+                 '(:eval (ml-inactive-color-fix mode-line-buffer-identification))
+                 '(:eval (and anzu--state " "))
+                 '(:eval anzu--mode-line-format)
+                 " "
+                 '(:eval (ml-inactive-color-fix mode-line-modes))
+                 '(:eval (ml-inactive-color-fix mode-line-misc-info))))
 #+end_src
 
 ** doom-modeline
@@ -529,14 +528,15 @@ More descriptive describe functions from helpful.
 ** Statusbar
 
 #+begin_src emacs-lisp
-  (use-package posframe)
+      (use-package posframe)
 
-  (use-package statusbar
-    :diminish statusbar-mode
-    :elpaca (statusbar.el :host github :repo "NAHTAIV3L/statusbar.el")
-    :config
-    (setq display-wifi-essid-command "iw dev $(ip addr | awk '/state UP/ {gsub(\":\",\"\"); print $2}') link | awk '/SSID:/ {printf $2}'"
-          display-wifi-connection-command "iw dev $(ip addr | awk '/state UP/ {gsub(\":\",\"\"); print $2}') link | awk '/signal:/ {gsub(\"-\",\"\"); printf $2}'"))
+      (use-package statusbar
+        :diminish statusbar-mode
+        :elpaca (statusbar.el :host github :repo "NAHTAIV3L/statusbar.el")
+        :config
+        (setq display-wifi-essid-command "iw dev $(ip addr | awk '/state UP/ {gsub(\":\",\"\"); print $2}') link | awk '/SSID:/ {printf $2}'"
+              display-wifi-connection-command "iw dev $(ip addr | awk '/state UP/ {gsub(\":\",\"\"); print $2}') link | awk '/signal:/ {gsub(\"-\",\"\"); printf $2}'"
+              externalcmd-shellcommand "slstatus -s -1"))
 #+end_src
 
 ** writeroom-mode
@@ -665,6 +665,7 @@ general configuration of org-mode
     (setq org-ellipsis " ▾")
 
 
+    (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
     (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
     (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
     (add-to-list 'org-structure-template-alist '("py" . "src python"))
@@ -887,10 +888,12 @@ Language Server Protocol Modes also describe keybinds
           lsp-headerline-breadcrumb-enable nil
           lsp-headerline-breadcrumb-icons-enable nil
           lsp-keep-workspace-alive nil
+          lsp-completion-provider :none
+          lsp-enable-snippet nil
           lsp-lens-enable nil)
     :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
            (c-mode . lsp)
-           (python-mode . lsp)
+           (python-mode . lsp-deferred)
            ;; if you want which-key integration
            (lsp-mode . lsp-enable-which-key-integration))
     :commands lsp)
@@ -935,23 +938,42 @@ Language Server Protocol Modes also describe keybinds
   (add-hook 'lsp-mode-hook 'lsp-bind)
 #+end_src
 
-*** Company-mode
+*** corfu-mode
 
-use company for completion coming from lsp
+use corfu for completion coming from lsp
 
 #+begin_src emacs-lisp
-  (use-package company
-    :diminish company-mode
-    :hook (prog-mode . company-mode)
-    :bind (:map company-active-map
-                ("<tab>" . company-complete-selection))
+  (use-package corfu
     :custom
-    (company-minimum-prefix-length 1)
-    (company-idle-delay 0.0))
+    (corfu-auto t)
+    (corfu-auto-delay 0)
+    (corfu-auto-prefix 1)
+    (corfu-separator ?\s)
+    :config
+    (global-corfu-mode)
+    (bind-key (kbd "s-SPC") 'corfu-insert-separator 'corfu-map))
 
-  (use-package company-box
-    :diminish company-box-mode
-    :hook (company-mode . company-box-mode))
+  (use-package cape
+    ;; Bind dedicated completion commands
+    ;; Alternative prefix keys: C-c p, M-p, M-+, ...
+    :init
+    ;; Add to the global default value of `completion-at-point-functions' which is
+    ;; used by `completion-at-point'.  The order of the functions matters, the
+    ;; first function returning a result wins.  Note that the list of buffer-local
+    ;; completion functions takes precedence over the global list.
+    (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+    (add-to-list 'completion-at-point-functions #'cape-file)
+    (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+    ;;(add-to-list 'completion-at-point-functions #'cape-history)
+    ;;(add-to-list 'completion-at-point-functions #'cape-keyword)
+    (add-to-list 'completion-at-point-functions #'cape-tex)
+    ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
+    ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
+    ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
+    ;;(add-to-list 'completion-at-point-functions #'cape-dict)
+    ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
+    ;;(add-to-list 'completion-at-point-functions #'cape-line)
+    )
 #+end_src
 
 ** lsp-latex
@@ -1223,33 +1245,33 @@ general for keybinds
 setup escape to end things
 
 #+begin_src emacs-lisp
-  (global-set-key (kbd "<escape>") 'keyboard-quit)
+  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
-  (defvar myemacs-escape-hook nil
-    "for killing things")
+  ;; (defvar myemacs-escape-hook nil
+  ;;   "for killing things")
 
-  (defun myemacs/escape (&optional interactive)
-    "Run `myemacs-escape-hook'."
-    (interactive (list 'interactive))
-    (cond ((minibuffer-window-active-p (minibuffer-window))
-           ;; quit the minibuffer if open.
-           (when interactive
-             (setq this-command 'abort-recursive-edit))
-           (abort-recursive-edit))
-          ;; Run all escape hooks. If any returns non-nil, then stop there.
-          ((run-hook-with-args-until-success 'myemacs-escape-hook))
-          ;; don't abort macros
-          ((or defining-kbd-macro executing-kbd-macro) nil)
-          ;; Back to the default
-          ((unwind-protect (keyboard-quit)
-             (when interactive
-               (setq this-command 'keyboard-quit))))))
+  ;; (defun myemacs/escape (&optional interactive)
+  ;;   "Run `myemacs-escape-hook'."
+  ;;   (interactive (list 'interactive))
+  ;;   (cond ((minibuffer-window-active-p (minibuffer-window))
+  ;;          ;; quit the minibuffer if open.
+  ;;          (when interactive
+  ;;            (setq this-command 'abort-recursive-edit))
+  ;;          (abort-recursive-edit))
+  ;;         ;; Run all escape hooks. If any returns non-nil, then stop there.
+  ;;         ((run-hook-with-args-until-success 'myemacs-escape-hook))
+  ;;         ;; don't abort macros
+  ;;         ((or defining-kbd-macro executing-kbd-macro) nil)
+  ;;         ;; Back to the default
+  ;;         ((unwind-protect (keyboard-quit)
+  ;;            (when interactive
+  ;;              (setq this-command 'keyboard-quit))))))
 
-  (global-set-key [remap keyboard-quit] #'myemacs/escape)
-  (add-hook 'myemacs-escape-hook (lambda ()
-        			         (when (evil-ex-hl-active-p 'evil-ex-search)
-        			           (evil-ex-nohighlight)
-        			           t)))
+  ;; (global-set-key [remap keyboard-quit] #'myemacs/escape)
+  ;; (add-hook 'myemacs-escape-hook (lambda ()
+  ;;       			         (when (evil-ex-hl-active-p 'evil-ex-search)
+  ;;       			           (evil-ex-nohighlight)
+  ;;       			           t)))
 #+end_src
 
 ** General
