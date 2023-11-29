@@ -15,5 +15,7 @@ config.bind('xx', 'config-cycle tabs.show always never;; config-cycle statusbar.
 
 if os.environ.get("WINDOWMANAGER") == "e":
     c.tabs.tabs_are_windows = True
+    c.tabs.show = "never"
 else:
     c.tabs.tabs_are_windows = False
+    c.tabs.show = "always"

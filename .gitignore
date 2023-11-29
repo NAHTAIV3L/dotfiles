@@ -3,3 +3,4 @@
 /.config/mpd/mpd.pid
 /.vim/undodir/
 /.config/emacs/undotreefiles/
+/.config/emacs/elpa/

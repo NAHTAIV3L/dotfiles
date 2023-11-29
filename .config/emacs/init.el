@@ -9,6 +9,7 @@
 (setq inhibit-startup-message t)
 (setq backup-inhibited t)
 
+
 (scroll-bar-mode -1)        ; Disable visible scrollbar
 (tool-bar-mode -1)          ; Disable the toolbar
 (tooltip-mode -1)           ; Disable tooltips
@@ -24,6 +25,7 @@
 (column-number-mode)
 (global-display-line-numbers-mode t)
 (global-hl-line-mode t)
+(set-fill-column 80)
 
 (dolist (mode '(org-mode-hook
         	term-mode-hook
@@ -60,24 +62,55 @@
 (add-to-list 'default-frame-alist `(alpha . ,background-transparancy))
 
 (defun browse-config ()
+  "open find file in emacs config folder."
   (interactive)
   (let ((default-directory (file-truename (expand-file-name "~/.config/emacs/"))))
     (call-interactively #'find-file)))
 
 (defun close-window-and-buffer ()
-  "Kills current buffer and closes window"
+  "Kills current buffer and closes window."
   (interactive)
   (kill-buffer)
   (delete-window))
 
 (defun lookup-password (&rest keys)
+  "search authinfo.gpg file for passwords"
   (let ((result (apply #'auth-source-search keys)))
     (if result
         (funcall (plist-get (car result) :secret))
       nil)))
 
-(defun map! (key desc &optional fun)
-  (if fun (define-key myemacs-leader-map (kbd key) fun))
+(defun map! (&rest mylist)
+  "Map key to myemacs-leader-map.
+keybinds should be a string
+the description of the keybind if wanted should be prefixed with :desc
+function can be any interactive function"
+  (let (desc
+        function
+        keys
+        (keymap myemacs-leader-map))
+    (while mylist
+      (let ((key (pop mylist)))
+        (cond
+         ((keywordp key)
+          (pcase key
+            (:desc
+             (setq desc (pop mylist)))
+            (:map
+             (setq keymap (pop mylist)))))
+         ((functionp key)
+          (setq function key))
+         ((keymapp key)
+          (setq function key))
+         ((stringp key)
+          (setq keys key)))))
+    (and function
+         (define-key keymap (kbd keys) function))
+    (and desc
+         (which-key-add-keymap-based-replacements keymap keys desc))))
+
+(defun bind! (key desc &optional func)
+  (and func (define-key myemacs-leader-map (kbd key) func))
   (which-key-add-keymap-based-replacements myemacs-leader-map key desc))
 
 (defun sudo-find-file (file)
@@ -92,13 +125,13 @@
                          (file-remote-p file 'host) ":" (file-remote-p file 'localname))
                (concat "/sudo:root@localhost:" file))))
 
-(defvar elpaca-installer-version 0.5)
+(defvar elpaca-installer-version 0.6)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
                               :ref nil
-                              :files (:defaults (:exclude "extensions"))
+                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
                               :build (:not elpaca--activate-package)))
 (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
        (build (expand-file-name "elpaca/" elpaca-builds-directory))
@@ -395,16 +428,6 @@
 (use-package writeroom-mode
   :diminish)
 
-(use-package fill-column-indicator
-  :diminish fci-mode
-  :config
-  (setq fci-rule-column 80))
-
-(use-package ace-window
-  :config
-  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
-        aw-scope 'frame))
-
 (use-package undo-tree
   :diminish undo-tree-mode
   :config
@@ -416,6 +439,13 @@
     (make-directory --undo-history-directory t))
   ;; stop littering with *.~undo-tree~ files everywhere
   (setq undo-tree-history-directory-alist `(("." . ,--undo-history-directory))))
+
+(use-package avy)
+
+(use-package ace-window
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
+        aw-scope 'frame))
 
 (use-package evil
   :diminish evil-mode
@@ -488,6 +518,16 @@
   (require 'org-tempo))
 
 (elpaca-wait)
+
+(use-package org-roam
+  :elpaca t
+  :init
+  (setq org-roam-v2-ack t)
+  :custom
+  (org-roam-directory "~/RoamNotes")
+  (org-roam-completion-everywhere t)
+  :config
+  (org-roam-setup))
 
 (defun org-babel-tangle-config ()
   (when (or
@@ -595,7 +635,7 @@
 
 (use-package projectile
   :diminish projectile-mode
-  :config (projectile-mode))
+  :config (projectile-mode +1))
 
 (use-package smartparens
   :diminish smartparens-mode
@@ -643,7 +683,9 @@
   (haskell-mode . lsp))
 
 (use-package lsp-treemacs
-  :after lsp)
+  :after lsp
+  :custom
+  (lsp-treemacs-error-list-current-project-only t))
 
 (use-package lsp-java
   :hook
@@ -655,17 +697,17 @@
 (defun lsp-bind ()
   (interactive)
   (define-key myemacs-leader-map (kbd "l") lsp-command-map)
-  (map! "l" "lsp")
-  (map! "l=" "formatting")
-  (map! "lF" "folders")
-  (map! "lG" "peek")
-  (map! "lT" "toggle")
-  (map! "la" "code actions")
-  (map! "lg" "goto")
-  (map! "lh" "help")
-  (map! "lr" "refactor")
-  (map! "lu" "ui")
-  (map! "lw" "workspaces")
+  (map! "l" :desc "lsp")
+  (map! "l=" :desc "formatting")
+  (map! "lF" :desc "folders")
+  (map! "lG" :desc "peek")
+  (map! "lT" :desc "toggle")
+  (map! "la" :desc "code actions")
+  (map! "lg" :desc "goto")
+  (map! "lh" :desc "help")
+  (map! "lr" :desc "refactor")
+  (map! "lu" :desc "ui")
+  (map! "lw" :desc "workspaces")
   (define-key myemacs-leader-map (kbd "lug") '("ui doc glance" . lsp-ui-doc-glance)))
 (add-hook 'lsp-mode-hook 'lsp-bind)
 
@@ -675,9 +717,25 @@
   (corfu-auto-delay 0)
   (corfu-auto-prefix 1)
   (corfu-separator ?\s)
+  (corfu-preview-current nil)
   :config
   (global-corfu-mode)
+  (defun corfu-enable-in-minibuffer ()
+    "Enable Corfu in the minibuffer if `completion-at-point' is bound."
+    (when (where-is-internal #'completion-at-point (list (current-local-map)))
+      ;; (setq-local corfu-auto nil) ;; Enable/disable auto completion
+      (setq-local corfu-echo-delay nil ;; Disable automatic echo and popup
+                  corfu-popupinfo-delay nil)
+      (corfu-mode 1)))
+  (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
   (bind-key (kbd "s-SPC") 'corfu-insert-separator 'corfu-map))
+
+(use-package corfu-terminal
+  :diminish corfu-terminal-mode
+  :elpaca (corfu-terminal :repo "https://codeberg.org/akib/emacs-corfu-terminal.git")
+  :config
+  (unless (display-graphic-p)
+    (corfu-terminal-mode +1)))
 
 (use-package cape
   ;; Bind dedicated completion commands
@@ -700,6 +758,16 @@
   ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
   ;;(add-to-list 'completion-at-point-functions #'cape-line)
   )
+
+(use-package yasnippet
+  :diminish yas-minor-mode
+  :config
+  (yas-global-mode))
+(use-package yasnippet-snippets)
+(use-package company
+  :config
+  (add-to-list 'completion-at-point-functions
+                  (cape-company-to-capf #'company-yasnippet)))
 
 (use-package lsp-latex
   :elpaca (lsp-latex.el :host github :repo "ROCKTAKEY/lsp-latex"))
@@ -874,9 +942,16 @@
 
   (define-key calendar-mode-map (kbd "M-I") 'calendar-insert-date))
 
-(use-package general)
-
 (elpaca-wait)
+
+(defvar keyboard-override-mode-map (make-sparse-keymap)
+  "override other keybinds")
+
+(define-minor-mode keyboard-override-mode
+  "override keybinds mode"
+  :lighter ""
+  :global t
+  :keymap keyboard-override-mode-map)
 
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
@@ -912,99 +987,113 @@
 (setq alt-leader "M-SPC")
 
 (define-prefix-command 'myemacs/leader 'myemacs-leader-map)
-(define-key myemacs-leader-map [override-state] 'all)
 
-(evil-define-key* '(normal visual motion) general-override-mode-map (kbd leader) 'myemacs/leader)
+(evil-define-key* '(normal visual motion) keyboard-override-mode-map (kbd leader) 'myemacs/leader)
 (global-set-key (kbd alt-leader) 'myemacs/leader)
-(general-override-mode +1)
+(keyboard-override-mode +1)
 
 (global-unset-key (kbd "M-."))
 
 ;; (define-key myemacs-leader-map (kbd ".") '("find file" . find-file))
-(map! "." "find file"  #'find-file)
-(map! "," "open dired"  #'dired-jump)
-(map! "<" "switch buffer" #'consult-buffer)
-(map! "s" "search in file" #'consult-line)
-(map! "`" "open file in config dir" #'browse-config)
-(map! "a" "ace window" #'ace-window)
+(map! "." :desc "find file"  #'find-file)
+(map! "," :desc "open dired"  #'dired-jump)
+(map! "<" :desc "switch buffer" #'consult-buffer)
+(map! "s" :desc "search in file" #'consult-line)
+(map! "`" :desc "open file in config dir" #'browse-config)
 
+(map! "v" :desc "ace window" #'ace-window)
+
+(map! "a" :desc "avy")
+(map! "ac" :desc "avy go to char" #'avy-goto-char)
+(map! "al" :desc "avy go to char 2" #'avy-goto-char-2)
+(map! "at" :desc "avy go to char timer" #'avy-goto-char-timer)
 
 (evil-global-set-key 'normal "gc" 'evilnc-comment-operator)
 (evil-global-set-key 'visual "gc" 'evilnc-comment-operator)
 
-(map! "o" "org")
-(map! "oa" "org agenda" #'org-agenda)
-(map! "o[" "org agenda add front" #'org-agenda-file-to-front)
-(map! "os" "org schedule" #'org-schedule)
-(map! "od" "org deadline" #'org-deadline)
+(map! "o" :desc "org")
+(map! "oa" :desc "org agenda" #'org-agenda)
+(map! "o[" :desc "org agenda add front" #'org-agenda-file-to-front)
+(map! "os" :desc "org schedule" #'org-schedule)
+(map! "od" :desc "org deadline" #'org-deadline)
 
-(map! "t" "toggle")
-(map! "ts" "text scaling" #'hydra-text-scale/body)
+(map! "n" :desc "org roam")
+(map! "nl" :desc "org roam buffer toggle" #'org-roam-buffer-toggle)
+(map! "nf" :desc "org roam node find" #'org-roam-node-find)
+(map! "ni" :desc "org roam node insert" #'org-roam-node-insert)
 
-(map! "b" "buffer")
-(map! "bk" "kill buffer" #'kill-current-buffer)
-(map! "bi" "ibuffer" #'persp-ibuffer)
-(map! "bn" "next buffer" #'evil-next-buffer)
-(map! "bp" "previous buffer" #'evil-prev-buffer)
+(map! "t" :desc "toggle")
+(map! "ts" :desc "text scaling" #'hydra-text-scale/body)
 
-(map! "c" "consult")
-(map! "cr" "ripgrep" #'consult-ripgrep)
-(map! "cb" "switch buffer" #'consult-buffer)
-(map! "cp" "project buffer" #'consult-project-buffer)
-(map! "cw" "window buffer" #'consult-buffer-other-window)
-(map! "cm" "imenu multi" #'consult-imenu-multi)
-(map! "ci" "imenu" #'consult-imenu)
-(map! "cf" "lsp file symbols" #'consult-lsp-file-symbols)
-(map! "cv" "consult flyspell" #'consult-flyspell)
-(map! "cs" "lsp symbols" #'consult-lsp-symbols)
+(map! "b" :desc "buffer")
+(map! "bk" :desc "kill buffer" #'kill-current-buffer)
+(map! "bi" :desc "ibuffer" #'persp-ibuffer)
+(map! "bn" :desc "next buffer" #'evil-next-buffer)
+(map! "bp" :desc "previous buffer" #'evil-prev-buffer)
 
-(map! "g" "git")
-(map! "gg" "Magit status" #'magit-status)
+(map! "c" :desc "consult")
+(map! "cr" :desc "ripgrep" #'consult-ripgrep)
+(map! "cb" :desc "switch buffer" #'consult-buffer)
+(map! "cp" :desc "project buffer" #'consult-project-buffer)
+(map! "cw" :desc "window buffer" #'consult-buffer-other-window)
+(map! "cm" :desc "imenu multi" #'consult-imenu-multi)
+(map! "ci" :desc "imenu" #'consult-imenu)
+(map! "cf" :desc "lsp file symbols" #'consult-lsp-file-symbols)
+(map! "cv" :desc "consult flyspell" #'consult-flyspell)
+(map! "cs" :desc "lsp symbols" #'consult-lsp-symbols)
 
-(map! "h" "help" #'help-command)
-(map! "r" "cargo" #'cargo-minor-mode-command-map)
-(map! "w" "window" #'evil-window-map)
-(map! "p" "project" #'projectile-command-map)
-(map! "t" "persp" #'perspective-map)
-(unbind-key (kbd "ESC") projectile-command-map)
+(map! "g" :desc "git")
+(map! "gg" :desc "Magit status" #'magit-status)
 
-(define-key general-override-mode-map (kbd "M-1") '("switch to workspace 1" . (lambda () (interactive) (persp-switch-by-number 1))))
-(define-key general-override-mode-map (kbd "M-2") '("switch to workspace 2" . (lambda () (interactive) (persp-switch-by-number 2))))
-(define-key general-override-mode-map (kbd "M-3") '("switch to workspace 3" . (lambda () (interactive) (persp-switch-by-number 3))))
-(define-key general-override-mode-map (kbd "M-4") '("switch to workspace 4" . (lambda () (interactive) (persp-switch-by-number 4))))
-(define-key general-override-mode-map (kbd "M-5") '("switch to workspace 5" . (lambda () (interactive) (persp-switch-by-number 5))))
-(define-key general-override-mode-map (kbd "M-6") '("switch to workspace 6" . (lambda () (interactive) (persp-switch-by-number 6))))
-(define-key general-override-mode-map (kbd "M-7") '("switch to workspace 7" . (lambda () (interactive) (persp-switch-by-number 7))))
-(define-key general-override-mode-map (kbd "M-8") '("switch to workspace 8" . (lambda () (interactive) (persp-switch-by-number 8))))
-(define-key general-override-mode-map (kbd "M-9") '("switch to workspace 9" . (lambda () (interactive) (persp-switch-by-number 9))))
+;; (bind! "h" "help" #'help-command)
+;; (bind! "r" "cargo" #'cargo-minor-mode-command-map)
+;; (bind! "w" "window" #'evil-window-map)
+;; (bind! "t" "persp" #'perspective-map)
+(map! "h" :desc "help" #'help-command)
+(map! "r" :desc "cargo" #'cargo-minor-mode-command-map)
+(map! "w" :desc "window" #'evil-window-map)
+(map! "t" :desc "persp" #'perspective-map)
+(with-eval-after-load "projectile"
+  (map! "p" :desc "project" #'projectile-command-map)
+  (unbind-key (kbd "ESC") #'projectile-command-map))
 
-(map! "1" "harpoon go to 1" #'harpoon-go-to-1)
-(map! "2" "harpoon go to 2" #'harpoon-go-to-2)
-(map! "3" "harpoon go to 3" #'harpoon-go-to-3)
-(map! "4" "harpoon go to 4" #'harpoon-go-to-4)
-(map! "5" "harpoon go to 5" #'harpoon-go-to-5)
-(map! "6" "harpoon go to 6" #'harpoon-go-to-6)
-(map! "7" "harpoon go to 7" #'harpoon-go-to-7)
-(map! "8" "harpoon go to 8" #'harpoon-go-to-8)
-(map! "9" "harpoon go to 9" #'harpoon-go-to-9)
+(map! :map keyboard-override-mode-map "M-1" :desc "switch to workspace 1" #'(lambda () (interactive) (persp-switch-by-number 1)))
+(map! :map keyboard-override-mode-map "M-2" :desc "switch to workspace 2" #'(lambda () (interactive) (persp-switch-by-number 2)))
+(map! :map keyboard-override-mode-map "M-3" :desc "switch to workspace 3" #'(lambda () (interactive) (persp-switch-by-number 3)))
+(map! :map keyboard-override-mode-map "M-4" :desc "switch to workspace 4" #'(lambda () (interactive) (persp-switch-by-number 4)))
+(map! :map keyboard-override-mode-map "M-5" :desc "switch to workspace 5" #'(lambda () (interactive) (persp-switch-by-number 5)))
+(map! :map keyboard-override-mode-map "M-6" :desc "switch to workspace 6" #'(lambda () (interactive) (persp-switch-by-number 6)))
+(map! :map keyboard-override-mode-map "M-7" :desc "switch to workspace 7" #'(lambda () (interactive) (persp-switch-by-number 7)))
+(map! :map keyboard-override-mode-map "M-8" :desc "switch to workspace 8" #'(lambda () (interactive) (persp-switch-by-number 8)))
+(map! :map keyboard-override-mode-map "M-9" :desc "switch to workspace 9" #'(lambda () (interactive) (persp-switch-by-number 9)))
 
-(map! "d" "delete")
-(map! "d1" "harpoon delete 1" #'harpoon-delete-1)
-(map! "d2" "harpoon delete 2" #'harpoon-delete-2)
-(map! "d3" "harpoon delete 3" #'harpoon-delete-3)
-(map! "d4" "harpoon delete 4" #'harpoon-delete-4)
-(map! "d5" "harpoon delete 5" #'harpoon-delete-5)
-(map! "d6" "harpoon delete 6" #'harpoon-delete-6)
-(map! "d7" "harpoon delete 7" #'harpoon-delete-7)
-(map! "d8" "harpoon delete 8" #'harpoon-delete-8)
-(map! "d9" "harpoon delete 9" #'harpoon-delete-9)
+(map! "1" :desc "harpoon go to 1" #'harpoon-go-to-1)
+(map! "2" :desc "harpoon go to 2" #'harpoon-go-to-2)
+(map! "3" :desc "harpoon go to 3" #'harpoon-go-to-3)
+(map! "4" :desc "harpoon go to 4" #'harpoon-go-to-4)
+(map! "5" :desc "harpoon go to 5" #'harpoon-go-to-5)
+(map! "6" :desc "harpoon go to 6" #'harpoon-go-to-6)
+(map! "7" :desc "harpoon go to 7" #'harpoon-go-to-7)
+(map! "8" :desc "harpoon go to 8" #'harpoon-go-to-8)
+(map! "9" :desc "harpoon go to 9" #'harpoon-go-to-9)
 
-(map! "j" "harpoon")
-(map! "ja" "harpoon add file" #'harpoon-add-file)
-(map! "jD" "harpoon delete item" #'harpoon-delete-item)
-(map! "jc" "harpoon clear" #'harpoon-clear)
-(map! "jf" "harpoon toggle file" #'harpoon-toggle-file)
-(define-key general-override-mode-map (kbd "C-SPC") '("harpoon toggle quick menu" . harpoon-toggle-quick-menu))
+(map! "d" :desc "delete")
+(map! "d1" :desc "harpoon delete 1" #'harpoon-delete-1)
+(map! "d2" :desc "harpoon delete 2" #'harpoon-delete-2)
+(map! "d3" :desc "harpoon delete 3" #'harpoon-delete-3)
+(map! "d4" :desc "harpoon delete 4" #'harpoon-delete-4)
+(map! "d5" :desc "harpoon delete 5" #'harpoon-delete-5)
+(map! "d6" :desc "harpoon delete 6" #'harpoon-delete-6)
+(map! "d7" :desc "harpoon delete 7" #'harpoon-delete-7)
+(map! "d8" :desc "harpoon delete 8" #'harpoon-delete-8)
+(map! "d9" :desc "harpoon delete 9" #'harpoon-delete-9)
+
+(map! "j" :desc "harpoon")
+(map! "ja" :desc "harpoon add file" #'harpoon-add-file)
+(map! "jD" :desc "harpoon delete item" #'harpoon-delete-item)
+(map! "jc" :desc "harpoon clear" #'harpoon-clear)
+(map! "jf" :desc "harpoon toggle file" #'harpoon-toggle-file)
+(map! "C-SPC" :desc "harpoon toggle quick menu" #'harpoon-toggle-quick-menu)
 
 (use-package exwm)
 

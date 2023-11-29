@@ -8,9 +8,11 @@ fi
 
 export LESSHISTFILE="-"
 export CARGO_HOME="$HOME/.local/share/cargo"
+export XCURSOR_THEME="Adwaita"
 # Custom scripts
-export PATH="$PATH:$HOME/.dotfiles/scripts:/opt/zoom:$HOME/.local/share/cargo/bin"
+export PATH="$PATH:$HOME/.dotfiles/scripts:$HOME/.local/share/cargo/bin"
 export SUDO_ASKPASS="$HOME/.dotfiles/scripts/dmenupass"
+export ANDROID_HOME="$HOME/Android/Sdk"
 
 if [ "$(tty)" = "/dev/tty1" ]; then
     read -p "dwm or exwm: " hello
