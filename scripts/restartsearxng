@@ -1,0 +1,3 @@
+#!/bin/sh
+docker stop $(docker ps -q)
+/home/nahtaiv3l/Downloads/searxng/run.sh

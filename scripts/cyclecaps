@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if [  -z "$(setxkbmap -query | grep option | cut -d' ' -f5)" ] ; then
+    setxkbmap -option
+    setxkbmap -option caps:swapescape
+    echo escape
+elif [ "$(setxkbmap -query | grep option | cut -d' ' -f5)" = "caps:swapescape" ] ; then
+    setxkbmap -option
+    setxkbmap -option ctrl:swapcaps
+    echo ctrl
+else
+    setxkbmap -option
+    echo normal
+fi

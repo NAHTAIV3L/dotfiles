@@ -16,6 +16,7 @@ set tabstop=4
 set shiftwidth=4
 set expandtab
 set relativenumber number nohlsearch
+set scrolloff=8
 
 set wildmode=longest,list,full
 autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o

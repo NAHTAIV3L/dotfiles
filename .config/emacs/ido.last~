@@ -1,0 +1,37 @@
+;;; -*- coding: utf-8 -*-
+
+;; ----- ido-last-directory-list -----
+(
+ ("/home/nahtaiv3l/dev/C/" . "tetris/")
+)
+
+;; ----- ido-work-directory-list -----
+(
+ "/home/nahtaiv3l/dev/C/tetris/"
+)
+
+;; ----- ido-work-file-list -----
+(
+ "tetris"
+ "tetris.c"
+)
+
+;; ----- ido-dir-file-cache -----
+(
+ ("/home/nahtaiv3l/dev/C/tetris/" (26004 48089 463415 946000) "xftfont.c" "xftfont.h" "nob.c" "./" "tetris" "nob" "../" "nob.old" "tetris.c" "nob.h" ".git/" ".gitignore" "README.md")
+
+ ("/dev/char/" (26004 39367 494014 110000) "226:0" "226:128" "29:0" "89:1" "89:4" "89:7" "89:2" "89:5" "89:8" "89:0" "89:3" "89:6" "244:1" "244:2" "245:0" "189:0" "189:128" "244:3" "189:256" "244:4" "189:384" "89:14" "89:9" "89:13" "89:15" "89:10" "89:11" "89:12" "247:0" "243:1" "243:0" "14:4" "116:8" "14:3" "116:9" "116:10" "14:0" "116:3" "116:2" "116:4" "116:6" "116:5" "116:7" "89:16" "250:0" "4:64" "253:0" "4:67" "4:66" "4:65" "203:0" "203:1" "203:10" "203:11" "203:12" "203:13" "203:14" "203:15" "203:2" "203:3" "203:4" "203:6" "203:5" "203:7" "203:9" "203:8" "1:7" "1:1" "1:11" "1:3" "1:4" "1:8" "1:9" "1:5" "10:125" "10:235" "10:124" "10:203" "10:229" "10:228" "10:232" "10:183" "10:237" "10:126" "10:144" "10:231" "10:242" "202:0" "202:1" "10:127" "202:10" "202:11" "202:13" "202:12" "202:14" "202:15" "202:2" "202:3" "202:4" "202:5" "202:6" "202:7" "202:8" "202:9" "116:1" "14:8" "116:33" "14:1" "13:67" "5:1" "5:2" "4:0" "5:0" "4:1" "4:10" "4:12" "4:14" "4:15" "4:13" "4:11" "4:17" "4:2" "4:19" "4:22" "4:18" "4:23" "4:25" "4:26" "4:20" "4:21" "4:28" "4:24" "4:27" "4:29" "4:16" "4:3" "4:33" "4:32" "4:37" "4:31" "4:36" "4:4" "4:41" "4:30" "4:42" "4:39" "4:43" "4:44" "4:40" "4:45" "4:34" "4:48" "4:50" "4:46" "4:49" "4:5" "4:47" "4:35" "4:38" "4:51" "13:66" "4:52" "4:53" "13:65" "4:57" "4:58" "4:59" "4:60" "13:64" "4:54" "13:70" "4:61" "4:7" "4:63" "4:62" "4:6" "4:56" "7:1" "4:9" "244:0" "4:8" "7:129" "7:65" "7:64" "7:128" "7:0" "4:55" "13:73" "13:81" "13:77" "13:79" "13:83" "13:82" "13:78" "13:80" "13:75" "13:74" "13:68" "13:71" "13:72" "13:69" "189:259" "189:258" "252:0" "81:1" "13:76" "81:0" "7:67" "7:3" "7:130" "7:66" "7:2" "7:131" "7:132" "7:5" "7:4" "7:68" "7:69" "7:133" "7:6" "7:70" "7:134" "7:135" "7:7" "7:71" "7:8" "7:72" "7:136" "7:9" "7:137" "7:74" "7:10" "7:73" "7:138" "7:11" "7:139" "7:12" "7:140" "7:75" "7:76" "246:0" "189:265" "189:266" "../" "./")
+
+ ("/dev/" (26004 34540 358355 170000) "rfkill" "vga_arbiter" "mem" "null" "port" "zero" "full" "random" "urandom" "kmsg" "tty" "console" "tty0" "vcs" "vcsu" "vcsa" "vcs1" "vcsu1" "vcsa1" "tty1" "tty2" "tty3" "tty4" "tty5" "tty6" "tty7" "tty8" "tty9" "tty10" "tty11" "tty12" "tty13" "tty14" "tty15" "tty16" "tty17" "tty18" "tty19" "tty20" "tty21" "tty22" "tty23" "tty24" "tty25" "tty26" "tty27" "tty28" "tty29" "tty30" "tty31" "tty32" "tty33" "tty34" "tty35" "tty36" "tty37" "tty38" "tty39" "tty40" "tty41" "tty42" "tty43" "tty44" "tty45" "tty46" "tty47" "tty48" "tty49" "tty50" "tty51" "tty52" "tty53" "tty54" "tty55" "tty56" "tty57" "tty58" "tty59" "tty60" "tty61" "tty62" "tty63" "hwrng" "kvm" "cpu/" "snapshot" "autofs" "fuse" "cuse" "ptmx" "ttyS0" "ttyS1" "ttyS2" "ttyS3" "hpet" "nvram" "dri/" "loop-control" "fb0" "mei0" "nvme0" "nvme-fabrics" "nvme0n1" "nvme0n1p1" "nvme0n1p2" "nvme0n1p3" "nvme0n1p4" "nvme0n1p5" "nvme0n1p6" "nvme0n1p7" "ng0n1" "ptp0" "usbmon0" "usbmon1" "usbmon2" "bus/" "usbmon3" "usbmon4" "input/" "rtc0" "i2c-0" "i2c-1" "i2c-2" "i2c-3" "i2c-4" "i2c-5" "i2c-6" "i2c-7" "i2c-8" "i2c-9" "i2c-10" "i2c-11" "i2c-12" "i2c-13" "i2c-14" "i2c-15" "acpi_thermal_rel" "i2c-16" "hidraw0" "hidraw1" "video0" "video1" "media0" "snd/" "sequencer" "sequencer2" "cpu_dma_latency" "fd/" "stdin" "stdout" "stderr" "pts/" "shm/" "dsp" "audio" "mixer" "char/" "disk/" "block/" "core" "mqueue/" "rtc" "v4l/" "vcs2" "vcsu2" "vcsa2" "vcs3" "vcsu3" "vcsa3" "vcs4" "vcsu4" "vcsa4" "vcs5" "vcsu5" "vcsa5" "vcs6" "vcsu6" "vcsa6" "vcs7" "vcsu7" "vcsa7" "vcs8" "vcsu8" "vcsa8" "vcs9" "vcsu9" "vcsa9" "vcs10" "vcsu10" "vcsa10" "vcs11" "vcsu11" "vcsa11" "vcs12" "vcsu12" "vcsa12" "log" "../" "./")
+
+ ("/home/" (25963 29331 854027 763000) "./" "../" "nahtaiv3l/")
+
+ ("/home/nahtaiv3l/" (26004 48089 463415 946000) ".xinitrc" ".pki/" ".Xresources" "RoamNotes/" "test/" ".1password/" ".gnupg/" ".android/" "Maildir/" ".config/" "Music/" "Downloads/" ".ssh/" ".bash_profile" ".hplip/" ".dotfiles/" "suckless/" "./" ".gradle/" ".bashrc" "../" "ff2mpv/" ".profile" ".bash_history" ".local/" ".Xauthority" ".dbus/" "Android/" ".mbsyncrc" ".mozilla/" ".authinfo.gpg" ".bash_logout" ".vim/" "dev/" "CollegeEssays/" ".links/" ".viminfo" "wpilib/" ".java/" ".cache/" ".m2/")
+
+ ("/home/nahtaiv3l/dev/C/" (25988 34357 338105 87000) "test/" "slstatus-bar/" "calculator/" "./" "tetris/" "../" "httpserver/" "windman/" "backlightctrl/" "rgbhex/" "HelloWorld/" "random/" "Window/")
+
+ ("/home/nahtaiv3l/dev/" (25963 15180 0 0) "Java/" "haskell/" "asm/" "C/" "rust/" "robotics/" "./" "../" "elisp/" "cpp/" "projects/" "python/")
+)
+
+;; ----- ido-unc-hosts-cache -----
+t

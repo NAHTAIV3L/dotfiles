@@ -9,12 +9,13 @@ fi
 export LESSHISTFILE="-"
 export CARGO_HOME="$HOME/.local/share/cargo"
 export XCURSOR_THEME="Adwaita"
+export LC_COLLATE="C"
 # Custom scripts
 export PATH="$PATH:$HOME/.dotfiles/scripts:$HOME/.local/share/cargo/bin"
 export SUDO_ASKPASS="$HOME/.dotfiles/scripts/dmenupass"
 export ANDROID_HOME="$HOME/Android/Sdk"
 
-if [ "$(tty)" = "/dev/tty1" ]; then
+if [[ -t 0 && $(tty) == /dev/tty1 && ! $DISPLAY ]]; then
     read -p "dwm or exwm: " hello
     hello=$(printf %.1s "$hello")
     hello=$(echo "$hello" | tr '[:upper:]' '[:lower:]')

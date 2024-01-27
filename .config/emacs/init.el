@@ -2,6 +2,7 @@
       user-mail-address "rbeckettvt@gmail.com"
       make-backup-files nil
       create-lockfiles  nil
+      erc-join-buffer 'window
       confirm-kill-processes nil)
 (setq-default indent-tabs-mode nil
               tab-width 4)
@@ -28,10 +29,10 @@
 (set-fill-column 80)
 
 (dolist (mode '(org-mode-hook
-        	term-mode-hook
-        	vterm-mode-hook
-        	shell-mode-hook
-        	eshell-mode-hook
+            	term-mode-hook
+            	vterm-mode-hook
+            	shell-mode-hook
+            	eshell-mode-hook
                 mu4e-main-mode-hook
                 mu4e-headers-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
@@ -61,6 +62,28 @@
 (set-frame-parameter (selected-frame) 'alpha background-transparancy)
 (add-to-list 'default-frame-alist `(alpha . ,background-transparancy))
 
+(defun move-region (start end n)
+  "Move the current region up or down by N lines."
+  (interactive "r\np")
+  (let ((line-text (delete-and-extract-region start end)))
+    (forward-line n)
+    (let ((start (point)))
+      (insert line-text)
+      (setq deactivate-mark nil)
+      (set-mark start))))
+
+(defun move-region-up (start end n)
+  "Move the current line up by N lines."
+  (interactive "r\np")
+  (move-region start end (if (null n) -1 (- n))))
+
+(defun move-region-down (start end n)
+  "Move the current line down by N lines."
+  (interactive "r\np")
+  (move-region start end (if (null n) 1 n)))
+
+
+
 (defun browse-config ()
   "open find file in emacs config folder."
   (interactive)
@@ -82,9 +105,9 @@
 
 (defun map! (&rest mylist)
   "Map key to myemacs-leader-map.
-keybinds should be a string
-the description of the keybind if wanted should be prefixed with :desc
-function can be any interactive function"
+    keybinds should be a string
+    the description of the keybind if wanted should be prefixed with :desc
+    function can be any interactive function"
   (let (desc
         function
         keys
@@ -124,6 +147,11 @@ function can be any interactive function"
                          "|sudo:root@"
                          (file-remote-p file 'host) ":" (file-remote-p file 'localname))
                (concat "/sudo:root@localhost:" file))))
+
+(defun erc-tls-oftc ()
+  (interactive)
+  (erc-tls :server "irc.oftc.net"
+           :port "6697"))
 
 (defvar elpaca-installer-version 0.6)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
@@ -210,6 +238,7 @@ function can be any interactive function"
               ("C-p" . vertico-previous))
   :init
   (vertico-mode 1)
+  (vertico-flat-mode 1)
   (setq vertico-count 15))
 
 ;; Configure directory extension.
@@ -285,104 +314,100 @@ function can be any interactive function"
         consult-flyspell-set-point-after-word t
         consult-flyspell-always-check-buffer nil))
 
-(defface modeline-project-face
-  '((t :foreground "#00F00C"
-       :weight bold))
-  "Test face."
-  :group 'modeline-face)
+;;  (defface modeline-project-face
+;;    '((t :foreground "#00F00C"
+;;         :weight bold))
+;;    "Test face."
+;;    :group 'modeline-face)
+;;
+;;  (defface modeline-path-face
+;;    '((t :foreground "#00C0FF"
+;;         :weight bold))
+;;    "Test2 face."
+;;    :group 'modeline-face)
+;;
+;;  (setq-default mode-line-buffer-identification
+;;                '(:eval (format-mode-line (if buffer-file-truename (or (when-let* ((prj (cdr-safe (project-current)))
+;;                                                                                   (parent (file-name-directory (directory-file-name (cdr-safe (project-current)))))
+;;                                                                                   (folder (file-relative-name prj parent))
+;;                                                                                   (path (file-relative-name buffer-file-truename parent)))
+;;                                                                         (put-text-property 0 (-(length folder) 1) 'face 'modeline-project-face path)
+;;                                                                         (put-text-property (-(length folder) 1) (length path) 'face 'modeline-path-face path)
+;;                                                                         path)
+;;                                                                       "%b")
+;;                                            "%b"))))
+;;
+;;  (defun ml-fill-to-right (reserve)
+;;    "Return empty space, leaving RESERVE space on the right."
+;;    (when (and window-system (eq 'right (get-scroll-bar-mode)))
+;;      (setq reserve (- reserve 2))) ; Powerline uses 3 here, but my scrollbars are narrower.
+;;    (propertize " "
+;;                'display `((space :align-to (- (+ right right-fringe right-margin)
+;;                                               ,reserve)))))
+;;  (defvar ml-selected-window nil)
+;;
+;;  (defun ml-record-selected-window ()
+;;    (or (eq (selected-window) (minibuffer-window))
+;;        (setq ml-selected-window (selected-window))))
+;;
+;;  (defun ml-update-all ()
+;;    (force-mode-line-update t))
+;;
+;;  (add-hook 'post-command-hook 'ml-record-selected-window)
+;;
+;;  (add-hook 'buffer-list-update-hook 'ml-update-all)
+;;
+;;  (defvar mode-line-left (list 
+;;                          '(:eval mode-line-front-space)
+;;                          '(:eval evil-mode-line-tag)
+;;                          " %l:%c "
+;;                          '(:eval mode-line-mule-info)
+;;                          '(:eval mode-line-modified)
+;;                          '(:eval mode-line-remote)
+;;                          " "
+;;                          mode-line-buffer-identification))
+;;
+;;  (defvar mode-line-right (list 
+;;                           '(:eval (if (eq ml-selected-window (selected-window))
+;;                                       mode-line-misc-info
+;;                                     '(:propertize mode-line-misc-info 'face 'mode-line-inactive)))
+;;                           " "
+;;                           '(:eval mode-name)))
+;;
+;;  (defvar mode-line-spacing '(:eval (ml-fill-to-right (string-width (format-mode-line mode-line-right)))))
+;;
+;;  (defmacro ml-inactive-color-fix (var)
+;;    `(if (eq ,ml-selected-window (selected-window))
+;;         ,var
+;;       '(:eval (let ((a (format-mode-line ,var)))
+;;                 (set-text-properties 0 (length a) '(face mode-line-inactive) a)
+;;                 a))))
+  ;; (setq-default mode-line-format
+  ;;               (list
+  ;;                "%e"
+  ;;                '(:eval mode-line-left)
+  ;;                '(:eval mode-line-spacing)
+  ;;                '(:eval mode-line-right)))
+  ;; (setq-default mode-line-format
+  ;;               (list
+  ;;                "%e"
+  ;;                '(:eval mode-line-front-space)
+  ;;                '(:eval evil-mode-line-tag)
+  ;;                '(:eval mode-line-mule-info)
+  ;;                '(:eval mode-line-modified)
+  ;;                '(:eval mode-line-remote)
+  ;;                " (%l:%c) "
+  ;;                ;; '(:eval (ml-inactive-color-fix mode-line-buffer-identification))
+  ;;                '(:eval (ml-inactive-color-fix mode-line-buffer-identification))
+  ;;                '(:eval (and anzu--state " "))
+  ;;                '(:eval anzu--mode-line-format)
+  ;;                " "
+  ;;                '(:eval (ml-inactive-color-fix mode-line-modes))
+  ;;                '(:eval (ml-inactive-color-fix mode-line-misc-info))))
 
-(defface modeline-path-face
-  '((t :foreground "#00C0FF"
-       :weight bold))
-  "Test2 face."
-  :group 'modeline-face)
+(use-package nerd-icons)
 
-(setq-default mode-line-buffer-identification
-              '(:eval (format-mode-line (if buffer-file-truename (or (when-let* ((prj (cdr-safe (project-current)))
-                                                                                 (parent (file-name-directory (directory-file-name (cdr-safe (project-current)))))
-                                                                                 (folder (file-relative-name prj parent))
-                                                                                 (path (file-relative-name buffer-file-truename parent)))
-                                                                       (put-text-property 0 (-(length folder) 1) 'face 'modeline-project-face path)
-                                                                       (put-text-property (-(length folder) 1) (length path) 'face 'modeline-path-face path)
-                                                                       path)
-                                                                     "%b")
-                                          "%b"))))
-
-(defun ml-fill-to-right (reserve)
-  "Return empty space, leaving RESERVE space on the right."
-  (when (and window-system (eq 'right (get-scroll-bar-mode)))
-    (setq reserve (- reserve 2))) ; Powerline uses 3 here, but my scrollbars are narrower.
-  (propertize " "
-              'display `((space :align-to (- (+ right right-fringe right-margin)
-                                             ,reserve)))))
-(defvar ml-selected-window nil)
-
-(defun ml-record-selected-window ()
-  (or (eq (selected-window) (minibuffer-window))
-      (setq ml-selected-window (selected-window))))
-
-(defun ml-update-all ()
-  (force-mode-line-update t))
-
-(add-hook 'post-command-hook 'ml-record-selected-window)
-
-(add-hook 'buffer-list-update-hook 'ml-update-all)
-
-(defvar mode-line-left (list 
-                        '(:eval mode-line-front-space)
-                        '(:eval evil-mode-line-tag)
-                        " %l:%c "
-                        '(:eval mode-line-mule-info)
-                        '(:eval mode-line-modified)
-                        '(:eval mode-line-remote)
-                        " "
-                        mode-line-buffer-identification))
-
-(defvar mode-line-right (list 
-                         '(:eval (if (eq ml-selected-window (selected-window))
-                                     mode-line-misc-info
-                                   '(:propertize mode-line-misc-info 'face 'mode-line-inactive)))
-                         " "
-                         '(:eval mode-name)))
-
-(defvar mode-line-spacing '(:eval (ml-fill-to-right (string-width (format-mode-line mode-line-right)))))
-
-(defmacro ml-inactive-color-fix (var)
-  `(if (eq ,ml-selected-window (selected-window))
-       ,var
-     '(:eval (let ((a (format-mode-line ,var)))
-               (set-text-properties 0 (length a) '(face mode-line-inactive) a)
-               a))))
-;; (setq-default mode-line-format
-;;               (list
-;;                "%e"
-;;                '(:eval mode-line-left)
-;;                '(:eval mode-line-spacing)
-;;                '(:eval mode-line-right)))
-(setq-default mode-line-format
-              (list
-               "%e"
-               '(:eval mode-line-front-space)
-               '(:eval evil-mode-line-tag)
-               '(:eval mode-line-mule-info)
-               '(:eval mode-line-modified)
-               '(:eval mode-line-remote)
-               " (%l:%c) "
-               ;; '(:eval (ml-inactive-color-fix mode-line-buffer-identification))
-               '(:eval (ml-inactive-color-fix mode-line-buffer-identification))
-               '(:eval (and anzu--state " "))
-               '(:eval anzu--mode-line-format)
-               " "
-               '(:eval (ml-inactive-color-fix mode-line-modes))
-               '(:eval (ml-inactive-color-fix mode-line-misc-info))))
-
-;; (use-package doom-modeline
-;;   :init
-;;   (setq doom-modeline-display-default-persp-name t
-;;         doom-modeline-buffer-file-name-style 'relative-from-project
-;;         doom-modeline-mu4e t)
-;;   (doom-modeline-mode 1)
-;;   :custom ((doom-modeline-height 35)))
+(use-package all-the-icons)
 
 (use-package doom-themes
   :config
@@ -456,7 +481,7 @@ function can be any interactive function"
   (setq evil-want-C-i-jump nil)
   (setq evil-undo-system 'undo-tree)
   :config
-  (evil-mode 1)
+  ;; (evil-mode 1)
   (define-key evil-normal-state-map (kbd "j") 'evil-next-visual-line)
   (define-key evil-normal-state-map (kbd "k") 'evil-previous-visual-line)
   (evil-set-initial-state 'messages-buffer-mode 'normal)
@@ -519,16 +544,6 @@ function can be any interactive function"
 
 (elpaca-wait)
 
-(use-package org-roam
-  :elpaca t
-  :init
-  (setq org-roam-v2-ack t)
-  :custom
-  (org-roam-directory "~/RoamNotes")
-  (org-roam-completion-everywhere t)
-  :config
-  (org-roam-setup))
-
 (defun org-babel-tangle-config ()
   (when (or
          (string-equal (buffer-file-name) (expand-file-name "~/.dotfiles/.config/emacs/Emacs.org"))
@@ -543,7 +558,7 @@ function can be any interactive function"
   :ensure nil
   :elpaca nil
   :commands (dired dired-jump)
-  :bind (("C-x C-j" . dired-jump))
+  :bind (:map dired-mode-map ("SPC" . dired-single-buffer))
   :custom ((dired-listing-switches "-agho --group-directories-first"))
   :config
   (evil-collection-define-key 'normal 'dired-mode-map
@@ -552,18 +567,6 @@ function can be any interactive function"
 
 (use-package dired-single
   :commands (dired dired-jump))
-
-(use-package all-the-icons)
-
-(use-package all-the-icons-dired
-  :hook (dired-mode . all-the-icons-dired-mode))
-
-(use-package dired-hide-dotfiles
-  :diminish dired-hide-dotfiles-mode
-  :hook (dired-mode . dired-hide-dotfiles-mode)
-  :config
-  (evil-collection-define-key 'normal 'dired-mode-map
-    "H" 'dired-hide-dotfiles-mode))
 
 (use-package hydra
   :config
@@ -635,7 +638,8 @@ function can be any interactive function"
 
 (use-package projectile
   :diminish projectile-mode
-  :config (projectile-mode +1))
+  :config
+  (projectile-mode -1))
 
 (use-package smartparens
   :diminish smartparens-mode
@@ -644,7 +648,9 @@ function can be any interactive function"
   (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
   (smartparens-global-mode 1))
 
+(use-package transient)
 (use-package magit
+  :bind (("C-x g" . magit-status))
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
@@ -652,7 +658,8 @@ function can be any interactive function"
   :diminish flycheck-mode
   :config
   (setq-default flycheck-emacs-lisp-load-path 'inherit)
-  (global-flycheck-mode 1))
+  (global-flycheck-mode 1)
+  (add-hook 'c-mode-hook '(lambda () (flycheck-mode -1))))
 
 (use-package lsp-mode
   :init
@@ -664,7 +671,7 @@ function can be any interactive function"
         lsp-enable-snippet nil
         lsp-lens-enable nil)
   :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-         (c-mode . lsp)
+         ;; (c-mode . lsp)
          (python-mode . lsp-deferred)
          ;; if you want which-key integration
          (lsp-mode . lsp-enable-which-key-integration))
@@ -678,9 +685,6 @@ function can be any interactive function"
   (setq lsp-ui-sideline-show-diagnostics t)
   (setq lsp-ui-sideline-ignore-duplicate t))
 
-(use-package lsp-haskell
-  :hook
-  (haskell-mode . lsp))
 
 (use-package lsp-treemacs
   :after lsp
@@ -714,20 +718,12 @@ function can be any interactive function"
 (use-package corfu
   :custom
   (corfu-auto t)
-  (corfu-auto-delay 0)
+  (corfu-auto-delay 1)
   (corfu-auto-prefix 1)
   (corfu-separator ?\s)
   (corfu-preview-current nil)
   :config
   (global-corfu-mode)
-  (defun corfu-enable-in-minibuffer ()
-    "Enable Corfu in the minibuffer if `completion-at-point' is bound."
-    (when (where-is-internal #'completion-at-point (list (current-local-map)))
-      ;; (setq-local corfu-auto nil) ;; Enable/disable auto completion
-      (setq-local corfu-echo-delay nil ;; Disable automatic echo and popup
-                  corfu-popupinfo-delay nil)
-      (corfu-mode 1)))
-  (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
   (bind-key (kbd "s-SPC") 'corfu-insert-separator 'corfu-map))
 
 (use-package corfu-terminal
@@ -758,16 +754,6 @@ function can be any interactive function"
   ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
   ;;(add-to-list 'completion-at-point-functions #'cape-line)
   )
-
-(use-package yasnippet
-  :diminish yas-minor-mode
-  :config
-  (yas-global-mode))
-(use-package yasnippet-snippets)
-(use-package company
-  :config
-  (add-to-list 'completion-at-point-functions
-                  (cape-company-to-capf #'company-yasnippet)))
 
 (use-package lsp-latex
   :elpaca (lsp-latex.el :host github :repo "ROCKTAKEY/lsp-latex"))
@@ -852,16 +838,22 @@ function can be any interactive function"
   :config
   (eros-mode 1))
 
-(use-package harpoon
-  :diminish harpoon-mode
-  :elpaca (harpoon.el :host github :repo "NAHTAIV3L/harpoon.el"))
-
 (use-package glsl-mode
   :diminish
   :elpaca (glsl-mode :host github :repo "jimhourihan/glsl-mode"))
 
+(use-package lsp-haskell
+  :hook
+  (haskell-mode . lsp))
+
+(use-package kotlin-mode)
+
 (use-package gradle-mode
   :diminish)
+
+(use-package nasm-mode
+  :hook
+  (asm-mode . nasm-mode))
 
 (use-package rust-mode
   :diminish
@@ -981,6 +973,9 @@ function can be any interactive function"
 ;;       			           (evil-ex-nohighlight)
 ;;       			           t)))
 
+(global-set-key (kbd "C-t") 'forward-char)
+(global-unset-key (kbd "C-z"))
+
 (defvar myemacs-leader-map (make-sparse-keymap)
   "map for leader")
 (setq leader "SPC")
@@ -991,6 +986,9 @@ function can be any interactive function"
 (evil-define-key* '(normal visual motion) keyboard-override-mode-map (kbd leader) 'myemacs/leader)
 (global-set-key (kbd alt-leader) 'myemacs/leader)
 (keyboard-override-mode +1)
+
+(global-set-key (kbd "M-p") 'move-region-up)
+(global-set-key (kbd "M-n") 'move-region-down)
 
 (global-unset-key (kbd "M-."))
 

@@ -1,5 +1,5 @@
 #!/bin/sh
-file="$HOME/.dotfiles/suckless/dwm/config.h"
+file="$HOME/suckless/dwm/config.h"
 temp="$(mktemp binds.XXXXXX)"
 keys="$(grep -n 'static const Key keys' $file | cut -d':' -f1)"
 buttons="$(grep -n 'static const Button buttons' $file | cut -d':' -f1)"
