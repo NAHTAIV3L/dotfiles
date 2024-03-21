@@ -16,9 +16,16 @@ export SUDO_ASKPASS="$HOME/.dotfiles/scripts/dmenupass"
 export ANDROID_HOME="$HOME/Android/Sdk"
 
 if [[ -t 0 && $(tty) == /dev/tty1 && ! $DISPLAY ]]; then
-    read -p "dwm or exwm: " hello
+    read -p "dwm or hyprland: " hello
     hello=$(printf %.1s "$hello")
     hello=$(echo "$hello" | tr '[:upper:]' '[:lower:]')
     export WINDOWMANAGER="$hello"
-    exec startx
+    
+    if [ -z "$WINDOWMANAGER" ] || [ "$WINDOWMANAGER" = "d" ] ; then
+        exec startx
+    else
+        export _JAVA_AWT_WM_NONREPARENTING=1
+        export XCURSOR_SIZE=24
+        exec dbus-launch --exit-with-session Hyprland
+    fi
 fi

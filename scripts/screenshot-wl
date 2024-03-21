@@ -1,0 +1,10 @@
+#!/bin/sh
+
+
+sel="$(slurp)"
+[ $? -eq 1 ] && exit 1
+
+input=$(dmenu-wl -po "Enter filename for Screenshot: ")
+[ $? -eq 1 ] && exit 1
+
+grim -g "$sel" $input

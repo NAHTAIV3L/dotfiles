@@ -14,7 +14,6 @@
 (scroll-bar-mode -1)        ; Disable visible scrollbar
 (tool-bar-mode -1)          ; Disable the toolbar
 (tooltip-mode -1)           ; Disable tooltips
-(add-hook 'prog-mode-hook (lambda () (toggle-truncate-lines +1)))
 
 (menu-bar-mode -1)          ; Disable the menu bar
 
@@ -25,8 +24,9 @@
 
 (column-number-mode)
 (global-display-line-numbers-mode t)
-(global-hl-line-mode t)
 (set-fill-column 80)
+
+(electric-pair-mode +1)
 
 (dolist (mode '(org-mode-hook
             	term-mode-hook
@@ -36,6 +36,9 @@
                 mu4e-main-mode-hook
                 mu4e-headers-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
+
+(set-frame-parameter (selected-frame) 'alpha '(90 . 90))
+(add-to-list 'default-frame-alist '(alpha . (90 . 90)))
 
 (setq scroll-up-aggressively nil)
 (setq scroll-down-aggressively nil)
@@ -314,97 +317,6 @@
         consult-flyspell-set-point-after-word t
         consult-flyspell-always-check-buffer nil))
 
-;;  (defface modeline-project-face
-;;    '((t :foreground "#00F00C"
-;;         :weight bold))
-;;    "Test face."
-;;    :group 'modeline-face)
-;;
-;;  (defface modeline-path-face
-;;    '((t :foreground "#00C0FF"
-;;         :weight bold))
-;;    "Test2 face."
-;;    :group 'modeline-face)
-;;
-;;  (setq-default mode-line-buffer-identification
-;;                '(:eval (format-mode-line (if buffer-file-truename (or (when-let* ((prj (cdr-safe (project-current)))
-;;                                                                                   (parent (file-name-directory (directory-file-name (cdr-safe (project-current)))))
-;;                                                                                   (folder (file-relative-name prj parent))
-;;                                                                                   (path (file-relative-name buffer-file-truename parent)))
-;;                                                                         (put-text-property 0 (-(length folder) 1) 'face 'modeline-project-face path)
-;;                                                                         (put-text-property (-(length folder) 1) (length path) 'face 'modeline-path-face path)
-;;                                                                         path)
-;;                                                                       "%b")
-;;                                            "%b"))))
-;;
-;;  (defun ml-fill-to-right (reserve)
-;;    "Return empty space, leaving RESERVE space on the right."
-;;    (when (and window-system (eq 'right (get-scroll-bar-mode)))
-;;      (setq reserve (- reserve 2))) ; Powerline uses 3 here, but my scrollbars are narrower.
-;;    (propertize " "
-;;                'display `((space :align-to (- (+ right right-fringe right-margin)
-;;                                               ,reserve)))))
-;;  (defvar ml-selected-window nil)
-;;
-;;  (defun ml-record-selected-window ()
-;;    (or (eq (selected-window) (minibuffer-window))
-;;        (setq ml-selected-window (selected-window))))
-;;
-;;  (defun ml-update-all ()
-;;    (force-mode-line-update t))
-;;
-;;  (add-hook 'post-command-hook 'ml-record-selected-window)
-;;
-;;  (add-hook 'buffer-list-update-hook 'ml-update-all)
-;;
-;;  (defvar mode-line-left (list 
-;;                          '(:eval mode-line-front-space)
-;;                          '(:eval evil-mode-line-tag)
-;;                          " %l:%c "
-;;                          '(:eval mode-line-mule-info)
-;;                          '(:eval mode-line-modified)
-;;                          '(:eval mode-line-remote)
-;;                          " "
-;;                          mode-line-buffer-identification))
-;;
-;;  (defvar mode-line-right (list 
-;;                           '(:eval (if (eq ml-selected-window (selected-window))
-;;                                       mode-line-misc-info
-;;                                     '(:propertize mode-line-misc-info 'face 'mode-line-inactive)))
-;;                           " "
-;;                           '(:eval mode-name)))
-;;
-;;  (defvar mode-line-spacing '(:eval (ml-fill-to-right (string-width (format-mode-line mode-line-right)))))
-;;
-;;  (defmacro ml-inactive-color-fix (var)
-;;    `(if (eq ,ml-selected-window (selected-window))
-;;         ,var
-;;       '(:eval (let ((a (format-mode-line ,var)))
-;;                 (set-text-properties 0 (length a) '(face mode-line-inactive) a)
-;;                 a))))
-  ;; (setq-default mode-line-format
-  ;;               (list
-  ;;                "%e"
-  ;;                '(:eval mode-line-left)
-  ;;                '(:eval mode-line-spacing)
-  ;;                '(:eval mode-line-right)))
-  ;; (setq-default mode-line-format
-  ;;               (list
-  ;;                "%e"
-  ;;                '(:eval mode-line-front-space)
-  ;;                '(:eval evil-mode-line-tag)
-  ;;                '(:eval mode-line-mule-info)
-  ;;                '(:eval mode-line-modified)
-  ;;                '(:eval mode-line-remote)
-  ;;                " (%l:%c) "
-  ;;                ;; '(:eval (ml-inactive-color-fix mode-line-buffer-identification))
-  ;;                '(:eval (ml-inactive-color-fix mode-line-buffer-identification))
-  ;;                '(:eval (and anzu--state " "))
-  ;;                '(:eval anzu--mode-line-format)
-  ;;                " "
-  ;;                '(:eval (ml-inactive-color-fix mode-line-modes))
-  ;;                '(:eval (ml-inactive-color-fix mode-line-misc-info))))
-
 (use-package nerd-icons)
 
 (use-package all-the-icons)
@@ -422,6 +334,10 @@
   (doom-themes-treemacs-config)
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
+
+(use-package gruber-darker-theme
+  :config
+  (load-theme 'gruber-darker t))
 
 (use-package rainbow-delimiters
   :diminish rainbow-delimiters-mode
@@ -544,6 +460,21 @@
 
 (elpaca-wait)
 
+(use-package org-roam
+  :elpaca t
+  :init
+  (setq org-roam-v2-ack t)
+  :custom
+  (org-roam-directory "~/RoamNotes")
+  (org-roam-completion-everywhere t)
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n i" . org-roam-node-insert)
+         :map org-mode-map
+         ("C-M-i"    . completion-at-point))
+  :config
+  (org-roam-setup))
+
 (defun org-babel-tangle-config ()
   (when (or
          (string-equal (buffer-file-name) (expand-file-name "~/.dotfiles/.config/emacs/Emacs.org"))
@@ -561,6 +492,7 @@
   :bind (:map dired-mode-map ("SPC" . dired-single-buffer))
   :custom ((dired-listing-switches "-agho --group-directories-first"))
   :config
+  (setq dired-dwim-target t)
   (evil-collection-define-key 'normal 'dired-mode-map
     "h" 'dired-single-up-directory
     "l" 'dired-single-buffer))
@@ -632,21 +564,18 @@
 
 (use-package pinentry)
 
-(use-package origami
-  :config
-  (global-origami-mode 1))
+(use-package multiple-cursors
+  :bind (:map global-map
+              ("C->" . 'mc/mark-next-like-this)
+              ("C-<" . 'mc/mark-previous-like-this)
+              ("C-c C->" . 'mc/mark-all-like-this)
+         :map mc/keymap
+              ("<return>" . nil)))
 
 (use-package projectile
   :diminish projectile-mode
   :config
   (projectile-mode -1))
-
-(use-package smartparens
-  :diminish smartparens-mode
-  :config
-  (setq sp-highlight-pair-overlay nil)
-  (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
-  (smartparens-global-mode 1))
 
 (use-package transient)
 (use-package magit
@@ -884,6 +813,11 @@
 
 (add-hook 'asm-mode-hook #'my-asm-mode-hook)
 
+(use-package yaml-mode)
+
+(use-package simpc-mode
+  :elpaca (simpc-mode.el :host github :repo "rexim/simpc-mode"))
+
 (use-package vterm
   :diminish vterm-mode
   :commands vterm
@@ -973,8 +907,11 @@
 ;;       			           (evil-ex-nohighlight)
 ;;       			           t)))
 
-(global-set-key (kbd "C-t") 'forward-char)
 (global-unset-key (kbd "C-z"))
+(global-set-key (kbd "C-/") #'undo-tree-undo)
+(global-set-key (kbd "M-/") #'undo-tree-redo)
+(global-set-key (kbd "M-p") #'move-region-up)
+(global-set-key (kbd "M-n") #'move-region-down)
 
 (defvar myemacs-leader-map (make-sparse-keymap)
   "map for leader")
@@ -986,9 +923,6 @@
 (evil-define-key* '(normal visual motion) keyboard-override-mode-map (kbd leader) 'myemacs/leader)
 (global-set-key (kbd alt-leader) 'myemacs/leader)
 (keyboard-override-mode +1)
-
-(global-set-key (kbd "M-p") 'move-region-up)
-(global-set-key (kbd "M-n") 'move-region-down)
 
 (global-unset-key (kbd "M-."))
 
@@ -1092,11 +1026,3 @@
 (map! "jc" :desc "harpoon clear" #'harpoon-clear)
 (map! "jf" :desc "harpoon toggle file" #'harpoon-toggle-file)
 (map! "C-SPC" :desc "harpoon toggle quick menu" #'harpoon-toggle-quick-menu)
-
-(use-package exwm)
-
-(elpaca-wait)
-
-(if (or (string= (getenv "WINDOWMANAGER") "d") (string= (getenv "WINDOWMANAGER") ""))
-    nil
-  (load "~/.config/emacs/desktop.el"))

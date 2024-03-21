@@ -1,0 +1,57 @@
+{
+  "layer": "top", // Waybar at top layer
+  // "position": "bottom", // Waybar position (top|bottom|left|right)
+  "height": 20, // Waybar height (to be removed for auto height)
+  // "width": 1280, // Waybar width
+  "spacing": 4, // Gaps between modules (px)
+  // Choose the order of the modules
+  "modules-left": ["hyprland/workspaces", "hyprland/window"],
+  "modules-center": ["clock"],
+  "modules-right": ["network", "pulseaudio", "custom/brightness", "battery", "cpu", "memory"],
+  // Modules configuration
+  "hyprland/workspaces": {
+    "format": "{name}",
+    "on-click": "activate",
+    "all-outputs": true,
+  },
+  "network": {
+    "format-wifi": "[W {signalStrength}% {essid}]",
+    "format-ethernet": "[E {ifname}]",
+    "format-disconnected": "[W No Signal]",
+  },
+  "wlr/window": {
+    "tooltip": true
+  },
+  "cpu": {
+    "format": "[CPU {usage}%]",
+    "interval": 1,
+  },
+  "memory": {
+    "format": "[RAM {percentage}%]",
+    "interval": 1,
+  },
+  "custom/brightness": {
+    "interval": 1,
+    "format": "[B {}%]",
+    "exec": "getbright"
+  },
+  "clock": {
+    // "timezone": "America/New_York",
+    "format": "{:%a %d %b %r}",
+    "interval": 1,
+  },
+  "pulseaudio": {
+    "format": "[V {volume}%]",
+    "format-muted": "[V {volume}% muted]",
+    "on-click": "qpwgraph",
+  },
+  "battery": {
+    "bat": "BAT0",
+    "interval": 0,
+    "format-charging": "[BAT +{capacity}%]",
+    "format-not charging": "[BAT x{capacity}%]",
+    "format-discharging": "[BAT -{capacity}%]",
+    "format": "[BAT x{capacity}%]",
+    "interval": 1,
+  },
+}

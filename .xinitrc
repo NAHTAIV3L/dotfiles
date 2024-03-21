@@ -21,15 +21,8 @@ xss-lock slock &
 pipewire &
 mpd &
 dunst &
-if [ -z "$WINDOWMANAGER" ] || [ "$WINDOWMANAGER" = "d" ] ; then
-    gpg-agent --daemon
-    slstatus &
-    restartemacs >/dev/null &
-    exec dbus-run-session dwm
-else
-    slstatus-bar &
-    gpg-agent --options ~/.gnupg/gpg-agent-exwm.conf --daemon
-    pkill -x emacs
-    exec dbus-run-session emacs -mm --debug-init
-fi
+gpg-agent --daemon
+slstatus &
+restartemacs >/dev/null &
+exec dbus-run-session dwm
 

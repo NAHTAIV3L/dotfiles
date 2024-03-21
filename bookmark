@@ -13,6 +13,7 @@ https://www.gnu.org/software/emacs/manual/html_node/emacs/Amusements.html #emacs
 http://zvon.org/other/haskell/Outputglobal/index.html #haskell documentation
 https://refspecs.linuxfoundation.org/elf/x86_64-abi-0.99.pdf #asm parameters pg 20
 https://www.felixcloutier.com/x86/index.html #assembly instructions
-https://github.com/torvalds/linux/blob/master/arch/x86/entry/syscalls/syscall_64.tbl #linux syscalls
+https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/arch/x86/entry/syscalls/syscall_64.tbl #linux syscalls
 https://black.ccsuvt.org/htcomnet/default.aspx #F drive
 https://x.org/releases/current/doc/libX11/libX11/libX11.html #xlib docs
+https://devmanual.gentoo.org/ #gentoo dev manual
