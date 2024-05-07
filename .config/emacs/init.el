@@ -231,7 +231,7 @@
   :init (which-key-mode)
   :diminish which-key-mode
   :config
-  (setq which-key-idle-delay 1))
+  (setq which-key-idle-delay 3))
 
 (use-package vertico
   :elpaca (vertico :files (:defaults "extensions/*"))
@@ -241,7 +241,7 @@
               ("C-p" . vertico-previous))
   :init
   (vertico-mode 1)
-  (vertico-flat-mode 1)
+  ;; (vertico-flat-mode 1)
   (setq vertico-count 15))
 
 ;; Configure directory extension.
@@ -255,6 +255,20 @@
               ("M-DEL" . vertico-directory-delete-word))
   ;; Tidy shadowed file names
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+
+(use-package vertico-multiform
+  :after vertico
+  :elpaca nil
+  :config
+  (setq vertico-multiform-commands
+        '((switch-to-buffer flat)
+          (find-file flat)
+          (dired flat)
+          (man flat)
+          (cd flat)
+          (kill-buffer flat)
+          (execute-extended-command flat)))
+  (vertico-multiform-mode 1))
 
 (use-package savehist
   :elpaca nil
@@ -388,6 +402,12 @@
   (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
         aw-scope 'frame))
 
+(use-package pdf-tools
+  :elpaca nil
+  :config
+  (pdf-tools-install)
+  (add-hook 'pdf-view-mode-hook #'pdf-view-fit-height-to-window))
+
 (use-package evil
   :diminish evil-mode
   :init
@@ -409,18 +429,6 @@
   :after evil
   :config
   (evil-collection-init))
-
-(use-package evil-nerd-commenter
-  :after evil)
-
-(use-package evil-anzu
-  :diminish anzu-mode
-  :after evil
-  :config
-  (setq anzu-cons-mode-line-p nil)
-  (global-anzu-mode 1))
-
-(elpaca-wait)
 
 (use-package tex
   :elpaca (auctex :pre-build
@@ -500,14 +508,6 @@
 (use-package dired-single
   :commands (dired dired-jump))
 
-(use-package hydra
-  :config
-  (defhydra hydra-text-scale (:timeout 4)
-    "scale text"
-    ("j" text-scale-increase "in")
-    ("k" text-scale-decrease "out")
-    ("f" nil "finished" :exit t)))
-
 (use-package perspective
   :config
   (add-hook 'persp-created-hook #'(lambda () (and (get-buffer "*mu4e-main*") (persp-add-buffer (get-buffer "*mu4e-main*")))))
@@ -571,11 +571,6 @@
               ("C-c C->" . 'mc/mark-all-like-this)
          :map mc/keymap
               ("<return>" . nil)))
-
-(use-package projectile
-  :diminish projectile-mode
-  :config
-  (projectile-mode -1))
 
 (use-package transient)
 (use-package magit
@@ -831,30 +826,46 @@
 
   ;; Truncate buffer for performance
   (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
-
-  ;; Bind some useful keys for evil-mode
-  (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-r") 'counsel-esh-history)
-  (evil-define-key '(normal insert visual) eshell-mode-map (kbd "<home>") 'eshell-bol)
-  (evil-normalize-keymaps)
+  
+  (setq eshell-prompt-function
+        (lambda ()
+          (let* ((start "[")
+                 (center (concat
+                          (getenv "USER")
+                          "@"
+                          (string-trim
+                           (with-temp-buffer
+                             (insert-file "/etc/hostname")
+                             (buffer-string)))))
+                 (dir (let* ((lst (split-string (eshell/pwd) "/" t))
+                             (i (1- (length lst)))
+                             (str (nth i lst)))
+                        str))
+                 (end (concat "]" (if (= (user-uid) 0) "# " "$ ")))
+                 (full (concat start center " " dir end)))
+            (add-face-text-property 0 (length start) 'default t full)
+            (add-face-text-property (length start) (+ (length start) (length center)) 'nerd-icons-green t full)
+            (add-face-text-property
+             (length (concat start " " center)) (+ (length dir) (length (concat start center " ")))
+             'nerd-icons-blue t full)
+            (add-face-text-property
+             (length (concat start center " " dir)) (+ (length end) (length (concat start center " " dir)))
+             'default t full)
+            full)))
 
   (setq eshell-history-size         10000
         eshell-buffer-maximum-lines 10000
         eshell-hist-ignoredups t
         eshell-scroll-to-bottom-on-input t))
 
-(use-package eshell-git-prompt)
-
 (use-package eshell
   :elpaca nil
   :diminish eshell-mode
   :hook (eshell-first-time-mode . configure-eshell)
   :config
-
   (with-eval-after-load 'esh-opt
     (setq eshell-destroy-buffer-when-process-dies t)
-    (setq eshell-visual-commands '("htop" "zsh" "vim")))
-
-  (eshell-git-prompt-use-theme 'multiline2))
+    (setq eshell-visual-commands '("htop"))))
 
 (use-package calendar
   :elpaca nil
@@ -912,6 +923,8 @@
 (global-set-key (kbd "M-/") #'undo-tree-redo)
 (global-set-key (kbd "M-p") #'move-region-up)
 (global-set-key (kbd "M-n") #'move-region-down)
+(global-set-key (kbd "C-c v") #'avy-goto-char-timer)
+(global-set-key (kbd "C-c s") #'consult-flyspell)
 
 (defvar myemacs-leader-map (make-sparse-keymap)
   "map for leader")

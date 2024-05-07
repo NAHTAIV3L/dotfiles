@@ -21,11 +21,11 @@ if [[ -t 0 && $(tty) == /dev/tty1 && ! $DISPLAY ]]; then
     hello=$(echo "$hello" | tr '[:upper:]' '[:lower:]')
     export WINDOWMANAGER="$hello"
     
-    if [ -z "$WINDOWMANAGER" ] || [ "$WINDOWMANAGER" = "d" ] ; then
-        exec startx
-    else
+    if [ -z "$WINDOWMANAGER" ] || [ "$WINDOWMANAGER" = "h" ] ; then
         export _JAVA_AWT_WM_NONREPARENTING=1
         export XCURSOR_SIZE=24
         exec dbus-launch --exit-with-session Hyprland
+    else
+        exec startx
     fi
 fi

@@ -37,7 +37,7 @@
   },
   "clock": {
     // "timezone": "America/New_York",
-    "format": "{:%a %d %b %r}",
+    "format": "{:%a %b %d %r}",
     "interval": 1,
   },
   "pulseaudio": {

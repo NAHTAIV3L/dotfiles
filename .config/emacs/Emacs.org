@@ -295,7 +295,7 @@ which-key for descriptions when entering keybinds
     :init (which-key-mode)
     :diminish which-key-mode
     :config
-    (setq which-key-idle-delay 1))
+    (setq which-key-idle-delay 3))
 #+end_src
 
 ** Vertico
@@ -311,7 +311,7 @@ Vertico used for completion for minibuffers.
                 ("C-p" . vertico-previous))
     :init
     (vertico-mode 1)
-    (vertico-flat-mode 1)
+    ;; (vertico-flat-mode 1)
     (setq vertico-count 15))
 
   ;; Configure directory extension.
@@ -325,6 +325,20 @@ Vertico used for completion for minibuffers.
                 ("M-DEL" . vertico-directory-delete-word))
     ;; Tidy shadowed file names
     :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+  
+  (use-package vertico-multiform
+    :after vertico
+    :elpaca nil
+    :config
+    (setq vertico-multiform-commands
+          '((switch-to-buffer flat)
+            (find-file flat)
+            (dired flat)
+            (man flat)
+            (cd flat)
+            (kill-buffer flat)
+            (execute-extended-command flat)))
+    (vertico-multiform-mode 1))
 #+end_src
 
 ** Saving history
@@ -554,6 +568,15 @@ undo-tree for good undoing
           aw-scope 'frame))
 #+end_src
 
+** pdf-tools
+
+#+begin_src emacs-lisp
+  (use-package pdf-tools
+    :elpaca nil
+    :config
+    (pdf-tools-install)
+    (add-hook 'pdf-view-mode-hook #'pdf-view-fit-height-to-window))
+#+end_src
 * Evil
 ** Evil mode
 
@@ -581,30 +604,6 @@ vim keybinds in emacs
     :after evil
     :config
     (evil-collection-init))
-#+end_src
-
-** Evil nerd commenter
-
-easy commenting with the keybinds: gcc or gc
-
-#+begin_src emacs-lisp
-  (use-package evil-nerd-commenter
-    :after evil)
-#+end_src
-
-** Evil-Anzu
-
-counter on modeline for how many search results from evil-search-forward
-
-#+begin_src emacs-lisp
-  (use-package evil-anzu
-    :diminish anzu-mode
-    :after evil
-    :config
-    (setq anzu-cons-mode-line-p nil)
-    (global-anzu-mode 1))
-
-  (elpaca-wait)
 #+end_src
 
 * AucTeX
@@ -714,20 +713,6 @@ Automatically tangle org config files into .el files.
     :commands (dired dired-jump))
 #+end_src
 
-* Hydra
-
-mini-menus 
-
-#+begin_src emacs-lisp
-  (use-package hydra
-    :config
-    (defhydra hydra-text-scale (:timeout 4)
-      "scale text"
-      ("j" text-scale-increase "in")
-      ("k" text-scale-decrease "out")
-      ("f" nil "finished" :exit t)))
-#+end_src
-
 * Perspective
 
 multiple perspectives per frame
@@ -812,17 +797,6 @@ setup mu4e as email client.
                 ("C-c C->" . 'mc/mark-all-like-this)
            :map mc/keymap
                 ("<return>" . nil)))
-#+end_src
-
-** Projectile
-
-projectile is used for swaping to projects
-
-#+begin_src emacs-lisp
-  (use-package projectile
-    :diminish projectile-mode
-    :config
-    (projectile-mode -1))
 #+end_src
 
 ** Magit
@@ -1187,30 +1161,46 @@ shell written in elisp also can run elisp
 
     ;; Truncate buffer for performance
     (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
-
-    ;; Bind some useful keys for evil-mode
-    (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-r") 'counsel-esh-history)
-    (evil-define-key '(normal insert visual) eshell-mode-map (kbd "<home>") 'eshell-bol)
-    (evil-normalize-keymaps)
+    
+    (setq eshell-prompt-function
+          (lambda ()
+            (let* ((start "[")
+                   (center (concat
+                            (getenv "USER")
+                            "@"
+                            (string-trim
+                             (with-temp-buffer
+                               (insert-file "/etc/hostname")
+                               (buffer-string)))))
+                   (dir (let* ((lst (split-string (eshell/pwd) "/" t))
+                               (i (1- (length lst)))
+                               (str (nth i lst)))
+                          str))
+                   (end (concat "]" (if (= (user-uid) 0) "# " "$ ")))
+                   (full (concat start center " " dir end)))
+              (add-face-text-property 0 (length start) 'default t full)
+              (add-face-text-property (length start) (+ (length start) (length center)) 'nerd-icons-green t full)
+              (add-face-text-property
+               (length (concat start " " center)) (+ (length dir) (length (concat start center " ")))
+               'nerd-icons-blue t full)
+              (add-face-text-property
+               (length (concat start center " " dir)) (+ (length end) (length (concat start center " " dir)))
+               'default t full)
+              full)))
 
     (setq eshell-history-size         10000
           eshell-buffer-maximum-lines 10000
           eshell-hist-ignoredups t
           eshell-scroll-to-bottom-on-input t))
 
-  (use-package eshell-git-prompt)
-
   (use-package eshell
     :elpaca nil
     :diminish eshell-mode
     :hook (eshell-first-time-mode . configure-eshell)
     :config
-
     (with-eval-after-load 'esh-opt
       (setq eshell-destroy-buffer-when-process-dies t)
-      (setq eshell-visual-commands '("htop" "zsh" "vim")))
-
-    (eshell-git-prompt-use-theme 'multiline2))
+      (setq eshell-visual-commands '("htop"))))
 #+end_src
 
 * Calendar
@@ -1282,7 +1272,7 @@ setup escape to end things
   ;;       			           t)))
 #+end_src
 
-** Other
+** Emacs
 
 #+begin_src emacs-lisp
   (global-unset-key (kbd "C-z"))
@@ -1290,6 +1280,8 @@ setup escape to end things
   (global-set-key (kbd "M-/") #'undo-tree-redo)
   (global-set-key (kbd "M-p") #'move-region-up)
   (global-set-key (kbd "M-n") #'move-region-down)
+  (global-set-key (kbd "C-c v") #'avy-goto-char-timer)
+  (global-set-key (kbd "C-c s") #'consult-flyspell)
 #+end_src
 
 ** General
