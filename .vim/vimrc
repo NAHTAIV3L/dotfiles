@@ -4,14 +4,7 @@
 "   \ V /| | | | | | | | | (__
 "    \_/ |_|_| |_| |_|_|  \___|
 "
-
-
-call plug#begin()
-Plug 'junegunn/goyo.vim'
-call plug#end()
-
 syntax on
-let mapleader =" "
 set tabstop=4
 set shiftwidth=4
 set expandtab
@@ -21,15 +14,3 @@ set scrolloff=8
 set wildmode=longest,list,full
 autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 autocmd BufWritePre * %s/\s\+$//e
-
-vnoremap <leader><leader> <Esc>/<++><Enter>"_c4l
-map <leader><leader> <Esc>/<++><Enter>"_c4l
-
-vnoremap <leader><Return> a<++><Esc>
-map <leader><Return> a<++><Esc>
-
-vnoremap <leader><Tab> :tabnext<Return>
-map <leader><Tab> :tabnext<Return>
-
-nnoremap <leader><Bslash> :hi Normal guibg=NONE ctermbg=NONE<Return>:hi EndOfBuffer guibg=NONE ctermbg=NONE<Return>
-nnoremap <leader><BS> :Goyo<Return><Esc>:set number relativenumber<Return>

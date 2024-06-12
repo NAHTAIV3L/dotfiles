@@ -1,57 +1,60 @@
 {
-  "layer": "top", // Waybar at top layer
-  // "position": "bottom", // Waybar position (top|bottom|left|right)
-  "height": 20, // Waybar height (to be removed for auto height)
-  // "width": 1280, // Waybar width
-  "spacing": 4, // Gaps between modules (px)
-  // Choose the order of the modules
-  "modules-left": ["hyprland/workspaces", "hyprland/window"],
-  "modules-center": ["clock"],
-  "modules-right": ["network", "pulseaudio", "custom/brightness", "battery", "cpu", "memory"],
-  // Modules configuration
+  "layer": "top",
+  "height": 20,
+
+  "modules-left": ["hyprland/window"],
+  "modules-center": ["hyprland/workspaces"],
+  "modules-right": ["wireplumber", "custom/brightness", "battery", "cpu", "memory", "network", "clock"],
+
   "hyprland/workspaces": {
-    "format": "{name}",
-    "on-click": "activate",
-    "all-outputs": true,
+    "format": "{id}",
   },
   "network": {
-    "format-wifi": "[W {signalStrength}% {essid}]",
-    "format-ethernet": "[E {ifname}]",
-    "format-disconnected": "[W No Signal]",
+    "format-wifi": "{essid} {signalStrength}% ",
+    "format-ethernet": "{ipaddr}/{cidr}",
+    "format-disconnected": "Disconnected ",
+    "tooltip-format": "{ifname}: {gwaddr}",
+    "format": "{ifname}: {ipaddr}/{cidr}"
   },
-  "wlr/window": {
-    "tooltip": true
+  "hyprland/window": {
+    "format": "{title}",
   },
   "cpu": {
-    "format": "[CPU {usage}%]",
+    "format": "{usage}% ",
     "interval": 1,
   },
   "memory": {
-    "format": "[RAM {percentage}%]",
+    "format": "{percentage}% ",
     "interval": 1,
   },
   "custom/brightness": {
     "interval": 1,
-    "format": "[B {}%]",
+    "format": "{}% 󰃟",
     "exec": "getbright"
   },
   "clock": {
     // "timezone": "America/New_York",
-    "format": "{:%a %b %d %r}",
+    "format": "{:%r}",
+    "tooltip-format": "{:%d %B %Y}",
     "interval": 1,
   },
-  "pulseaudio": {
-    "format": "[V {volume}%]",
-    "format-muted": "[V {volume}% muted]",
-    "on-click": "qpwgraph",
+  "wireplumber": {
+    "format": "{volume}% {icon}",
+    "format-muted": "",
+    "tooltip-format": "{volume}% {node_name}",
+    "scroll-step": 0,
+    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+    "on-click-right": "qpwgraph",
+    "format-icons": ["", "", ""]
   },
   "battery": {
     "bat": "BAT0",
     "interval": 0,
-    "format-charging": "[BAT +{capacity}%]",
-    "format-not charging": "[BAT x{capacity}%]",
-    "format-discharging": "[BAT -{capacity}%]",
-    "format": "[BAT x{capacity}%]",
+    "format-charging": "{capacity}% 󰂄",
+    "format-not charging": "{capacity}%",
+    "format-discharging": "{capacity}% {icon}",
+    "format": "{capacity}% 󰂃",
+    "format-icons": ["󱊡", "󱊢", "󱊣"],
     "interval": 1,
   },
 }

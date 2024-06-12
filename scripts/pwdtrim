@@ -1,0 +1,2 @@
+#!/bin/sh
+pwd | sed -e 's/\/home\/nahtaiv3l/~/g'

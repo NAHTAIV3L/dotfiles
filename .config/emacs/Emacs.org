@@ -10,7 +10,9 @@
         make-backup-files nil
         create-lockfiles  nil
         erc-join-buffer 'window
-        confirm-kill-processes nil)
+        confirm-kill-processes nil
+        gc-cons-threshold (* 50 1000 1000))
+
   (setq-default indent-tabs-mode nil
                 tab-width 4)
 #+end_src
@@ -18,32 +20,32 @@
 ** UI Changes
 
 #+begin_src emacs-lisp
-  (setq inhibit-startup-message t)
-  (setq backup-inhibited t)
+  (setq inhibit-startup-message t
+        backup-inhibited t)
 
 
-  (scroll-bar-mode -1)        ; Disable visible scrollbar
-  (tool-bar-mode -1)          ; Disable the toolbar
-  (tooltip-mode -1)           ; Disable tooltips
+  (scroll-bar-mode -1) ; Disable visible scrollbar
+  (tool-bar-mode -1) ; Disable the toolbar
+  (tooltip-mode -1) ; Disable tooltips
 
-  (menu-bar-mode -1)          ; Disable the menu bar
+  (menu-bar-mode -1) ; Disable the menu bar
 
-  (setq scroll-up-aggressively nil)
-  (setq scroll-down-aggressively nil)
-  (setq scroll-conservatively 101)
-  (setq display-line-numbers-type 'relative)
+  (setq scroll-up-aggressively nil
+        scroll-down-aggressively nil
+        scroll-conservatively 101
+        display-line-numbers-type 'relative)
 
   (column-number-mode)
   (global-display-line-numbers-mode t)
-  (set-fill-column 80)
+  (setq-default fill-column 80)
 
   (electric-pair-mode +1)
 
   (dolist (mode '(org-mode-hook
-              	term-mode-hook
-              	vterm-mode-hook
-              	shell-mode-hook
-              	eshell-mode-hook
+                  term-mode-hook
+                  vterm-mode-hook
+                  shell-mode-hook
+                  eshell-mode-hook
                   mu4e-main-mode-hook
                   mu4e-headers-mode-hook))
     (add-hook mode (lambda () (display-line-numbers-mode 0))))
@@ -63,29 +65,25 @@
   (setq scroll-margin 8)
 #+end_src
 
-** Startup time
+** Fonts
 
 #+begin_src emacs-lisp
-  (setq gc-cons-threshold (* 50 1000 1000))
-  
-  (defun display-startup-time ()
-    (interactive)
-    (message "Emacs loaded in %s with %d garbage collections."
-             (format "%.2f seconds"
-        	           (float-time
-        	            (time-subtract elpaca-after-init-time before-init-time)))
-             gcs-done))
-
-  (add-hook 'after-init-hook #'display-startup-time)
-  (add-hook 'server-after-make-frame-hook #'display-startup-time)
-
+  (set-face-attribute 'default nil
+                      :font "DejaVu Sans Mono"
+                      :family "Monospace"
+                      :height 97)
+  (set-face-attribute 'variable-pitch nil
+                      :font "DejaVu Sans"
+                      :height 97)
+  (set-face-attribute 'fixed-pitch nil
+                      :font "DejaVu Sans Mono"
+                      :family "Monospace"
+                      :height 97)
 #+end_src
-
 ** Background tranparency
 
 #+begin_src emacs-lisp
   (setq background-transparancy '(90 . 90))
-
   (set-frame-parameter (selected-frame) 'alpha background-transparancy)
   (add-to-list 'default-frame-alist `(alpha . ,background-transparancy))
 #+end_src
@@ -115,20 +113,6 @@ some helper functions that i found and edited
     (interactive "r\np")
     (move-region start end (if (null n) 1 n)))
 
-
-
-  (defun browse-config ()
-    "open find file in emacs config folder."
-    (interactive)
-    (let ((default-directory (file-truename (expand-file-name "~/.config/emacs/"))))
-      (call-interactively #'find-file)))
-
-  (defun close-window-and-buffer ()
-    "Kills current buffer and closes window."
-    (interactive)
-    (kill-buffer)
-    (delete-window))
-
   (defun lookup-password (&rest keys)
     "search authinfo.gpg file for passwords"
     (let ((result (apply #'auth-source-search keys)))
@@ -136,55 +120,25 @@ some helper functions that i found and edited
           (funcall (plist-get (car result) :secret))
         nil)))
 
-  (defun map! (&rest mylist)
-    "Map key to myemacs-leader-map.
-      keybinds should be a string
-      the description of the keybind if wanted should be prefixed with :desc
-      function can be any interactive function"
-    (let (desc
-          function
-          keys
-          (keymap myemacs-leader-map))
-      (while mylist
-        (let ((key (pop mylist)))
-          (cond
-           ((keywordp key)
-            (pcase key
-              (:desc
-               (setq desc (pop mylist)))
-              (:map
-               (setq keymap (pop mylist)))))
-           ((functionp key)
-            (setq function key))
-           ((keymapp key)
-            (setq function key))
-           ((stringp key)
-            (setq keys key)))))
-      (and function
-           (define-key keymap (kbd keys) function))
-      (and desc
-           (which-key-add-keymap-based-replacements keymap keys desc))))
-
-  (defun bind! (key desc &optional func)
-    (and func (define-key myemacs-leader-map (kbd key) func))
-    (which-key-add-keymap-based-replacements myemacs-leader-map key desc))
-
-  (defun sudo-find-file (file)
-    "Open FILE as root."
-    (interactive "FOpen file as root: ")
-    (when (file-writable-p file)
-      (user-error "File is user writeable, aborting sudo"))
-    (find-file (if (file-remote-p file)
-                   (concat "/" (file-remote-p file 'method) ":"
-                           (file-remote-p file 'user) "@" (file-remote-p file 'host)
-                           "|sudo:root@"
-                           (file-remote-p file 'host) ":" (file-remote-p file 'localname))
-                 (concat "/sudo:root@localhost:" file))))
-
   (defun erc-tls-oftc ()
     (interactive)
     (erc-tls :server "irc.oftc.net"
              :port "6697"))
+
+  (defun astyle-buffer (&optional justify)
+    (interactive)
+    (let ((saved-line-number (line-number-at-pos)))
+      (shell-command-on-region
+       (point-min)
+       (point-max)
+       "astyle --style=kr"
+       nil
+       t)
+      (goto-line saved-line-number)))
+
+  (defun open-mpv (&optional link)
+    (interactive "sEnter Link:")
+    (async-shell-command (format "mpv %s" link) nil))
 #+end_src
 
 * Use-package and elpaca.el setup
@@ -192,12 +146,12 @@ some helper functions that i found and edited
 Use elpaca.el as package manager and use-package for configuring packages.
 
 #+begin_src emacs-lisp
-  (defvar elpaca-installer-version 0.6)
+  (defvar elpaca-installer-version 0.7)
   (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
   (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
   (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
   (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                                :ref nil
+                                :ref nil :depth 1
                                 :files (:defaults "elpaca-test.el" (:exclude "extensions"))
                                 :build (:not elpaca--activate-package)))
   (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
@@ -210,8 +164,10 @@ Use elpaca.el as package manager and use-package for configuring packages.
       (when (< emacs-major-version 28) (require 'subr-x))
       (condition-case-unless-debug err
           (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-                   ((zerop (call-process "git" nil buffer t "clone"
-                                         (plist-get order :repo) repo)))
+                   ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                   ,@(when-let ((depth (plist-get order :depth)))
+                                                       (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                   ,(plist-get order :repo) ,repo))))
                    ((zerop (call-process "git" nil buffer t "checkout"
                                          (or (plist-get order :ref) "--"))))
                    (emacs (concat invocation-directory invocation-name))
@@ -325,7 +281,7 @@ Vertico used for completion for minibuffers.
                 ("M-DEL" . vertico-directory-delete-word))
     ;; Tidy shadowed file names
     :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
-  
+
   (use-package vertico-multiform
     :after vertico
     :elpaca nil
@@ -427,8 +383,8 @@ better searching
 *** flyspell-correct
 
 #+begin_src emacs-lisp
-    (use-package flyspell-correct
-      :after flyspell)
+  (use-package flyspell-correct
+    :after flyspell)
 #+end_src
 
 *** Consult-flyspell
@@ -444,38 +400,23 @@ better searching
 #+end_src
 
 * UI packages
-** nerd icons
+** icons
 
 #+begin_src emacs-lisp
   (use-package nerd-icons)
-#+end_src
-
-** all the icons
-
-#+begin_src emacs-lisp
   (use-package all-the-icons)
 #+end_src
 
 ** themes
-good looking themes with doom-themes
 
 #+begin_src emacs-lisp
   (use-package doom-themes
     :config
-    (setq doom-themes-enable-bold t    
-          doom-themes-enable-italic t) 
+    (setq doom-themes-enable-bold t
+          doom-themes-enable-italic t)
     (load-theme 'doom-vibrant t)
-
-    ;; Enable flashing mode-line on errors
-    ;; (doom-themes-visual-bell-config)
-    ;; Enable custom neotree theme (all-the-icons must be installed!)
-    ;; or for treemacs users
-    (doom-themes-treemacs-config)
-    ;; Corrects (and improves) org-mode's native fontification.
     (doom-themes-org-config))
-#+end_src
 
-#+begin_src emacs-lisp
   (use-package gruber-darker-theme
     :config
     (load-theme 'gruber-darker t))
@@ -495,7 +436,6 @@ rainbow-delimiters for parens coloring
 
 #+begin_src emacs-lisp
   (use-package emojify
-    ;; :diminish emojify-mode
     :hook (after-init . global-emojify-mode)
     :config
     (add-hook 'prog-mode-hook #'(lambda () (emojify-mode -1))))
@@ -514,24 +454,10 @@ More descriptive describe functions from helpful.
     ([remap describe-key] . helpful-key))
 #+end_src
 
-** Statusbar
-
-#+begin_src emacs-lisp
-      (use-package posframe)
-
-      (use-package statusbar
-        :diminish statusbar-mode
-        :elpaca (statusbar.el :host github :repo "NAHTAIV3L/statusbar.el")
-        :config
-        (setq display-wifi-essid-command "iw dev $(ip addr | awk '/state UP/ {gsub(\":\",\"\"); print $2}') link | awk '/SSID:/ {printf $2}'"
-              display-wifi-connection-command "iw dev $(ip addr | awk '/state UP/ {gsub(\":\",\"\"); print $2}') link | awk '/signal:/ {gsub(\"-\",\"\"); printf $2}'"
-              externalcmd-shellcommand "slstatus -s -1"))
-#+end_src
-
 ** writeroom-mode
 #+begin_src emacs-lisp
-      (use-package writeroom-mode
-        :diminish)
+  (use-package writeroom-mode
+    :diminish)
 #+end_src
 
 * Undo-tree
@@ -577,8 +503,22 @@ undo-tree for good undoing
     (pdf-tools-install)
     (add-hook 'pdf-view-mode-hook #'pdf-view-fit-height-to-window))
 #+end_src
+** whitespace
+
+#+begin_src emacs-lisp
+  (use-package whitespace
+    :elpaca nil
+    :diminish whitespace-mode global-whitespace-mode
+    :config
+    (setq whitespace-style
+          '(face tabs spaces trailing
+                 space-before-tab newline indentation
+                 space-after-tab space-mark tab-mark))
+    (add-hook 'before-save-hook 'delete-trailing-whitespace)
+    (add-hook 'prog-mode-hook (lambda () (whitespace-mode 1))))
+#+end_src
+
 * Evil
-** Evil mode
 
 vim keybinds in emacs
 
@@ -636,7 +576,7 @@ general configuration of org-mode
     ((org-agenda-files (list "~/org/homework.org")))
     :config
     (setq org-ellipsis " ▾")
-
+    (add-hook 'org-mode-hook '(lambda () (whitespace-mode -1)))
 
     (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
     (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
@@ -684,9 +624,7 @@ Automatically tangle org config files into .el files.
 
 #+begin_src emacs-lisp
   (defun org-babel-tangle-config ()
-    (when (or
-           (string-equal (buffer-file-name) (expand-file-name "~/.dotfiles/.config/emacs/Emacs.org"))
-           (string-equal (buffer-file-name) (expand-file-name "~/.dotfiles/.config/emacs/Desktop.org")))
+    (when (string-equal (buffer-file-name) (expand-file-name "~/.dotfiles/.config/emacs/Emacs.org"))
       ;; Dynamic scoping to the rescue
       (let ((org-confirm-babel-evaluate nil))
         (org-babel-tangle))))
@@ -702,7 +640,6 @@ Automatically tangle org config files into .el files.
     :elpaca nil
     :commands (dired dired-jump)
     :bind (:map dired-mode-map ("SPC" . dired-single-buffer))
-    :custom ((dired-listing-switches "-agho --group-directories-first"))
     :config
     (setq dired-dwim-target t)
     (evil-collection-define-key 'normal 'dired-mode-map
@@ -711,23 +648,6 @@ Automatically tangle org config files into .el files.
 
   (use-package dired-single
     :commands (dired dired-jump))
-#+end_src
-
-* Perspective
-
-multiple perspectives per frame
-
-#+begin_src emacs-lisp
-  (use-package perspective
-    :config
-    (add-hook 'persp-created-hook #'(lambda () (and (get-buffer "*mu4e-main*") (persp-add-buffer (get-buffer "*mu4e-main*")))))
-    :init
-    (setq persp-suppress-no-prefix-key-warning t
-          persp-initial-frame-name "main"
-          persp-sort 'name)
-    (persp-mode)
-    (consult-customize consult--source-buffer :hidden t :default nil)
-    (add-to-list 'consult-buffer-sources persp-consult-source))
 #+end_src
 
 * Mail
@@ -741,49 +661,117 @@ setup mu4e as email client.
     :custom
     (mu4e-completing-read-function #'completing-read)
     :config
-
     (add-hook 'after-init-hook #'(lambda () (mu4e t)))
     ;; This is set to 't' to avoid mail syncing issues when using mbsync
     (setq mu4e-change-filenames-when-moving t)
 
-    (add-hook 'mu4e-compose-mode-hook
-              #'(lambda () (setq-local undo-tree-auto-save-history nil)))
-    (add-hook 'mu4e-compose-mode-hook
-              #'(lambda () (flyspell-mode)))
+    (setq mu4e-last-update-buffer " *mu4e-last-update*")
+
+    (add-hook 'mu4e-compose-mode-hook #'(lambda () (setq-local undo-tree-auto-save-history nil)))
+    (add-hook 'mu4e-compose-mode-hook #'(lambda () (flyspell-mode)))
     ;; Refresh mail using isync every 10 minutes
     (setq mu4e-update-interval (* 10 60)
           mu4e-get-mail-command "mbsync -a"
           mu4e-maildir "~/Maildir"
-          mu4e-read-option-use-builtin nil
-          mu4e-headers-skip-duplicates nil
 
-          mu4e-drafts-folder "/Drafts"
-          mu4e-sent-folder   "/Sent Mail"
-          mu4e-refile-folder "/All Mail"
-          mu4e-trash-folder  "/Trash"
-          smtpmail-smtp-server "smtp.gmail.com"
-          smtpmail-smtp-service 465
-          smtpmail-stream-type  'ssl
           message-send-mail-function 'smtpmail-send-it
-          mu4e-compose-signature "Riley Beckett\nrbeckettvt@gmail.com"
           mu4e-compose-format-flowed t
-          mu4e-maildir-shortcuts
-          '((:maildir "/INBOX"    :key ?i)
-            (:maildir "/Sent Mail" :key ?s)
-            (:maildir "/Trash"     :key ?t)
-            (:maildir "/Drafts"    :key ?d)
-            (:maildir "/All Mail"  :key ?a))))
+          mu4e-context-policy 'pick-first
+          mu4e-compose-context-policy 'ask-if-none
+          mu4e-contexts
+          (list
+           (make-mu4e-context
+            :name "gmail"
+            :match-func
+            (lambda (msg) (when msg (string-prefix-p "/gmail" (mu4e-message-field msg :maildir))))
+            :vars '((user-mail-address . "rbeckettvt@gmail.com")
+                    (user-full-name    . "Riley Beckett")
+                    (smtpmail-smtp-server  . "smtp.gmail.com")
+                    (smtpmail-smtp-service . 465)
+                    (smtpmail-stream-type  . ssl)
+                    (mu4e-drafts-folder  . "/gmail/Drafts")
+                    (mu4e-sent-folder  . "/gmail/Sent Mail")
+                    ;; (mu4e-refile-folder  . "/gmail/All Mail")
+                    (mu4e-trash-folder  . "/gmail/Trash")
+                    (message-signature . "Riley Beckett\nrbeckettvt@gmail.com")
+                    (mu4e-maildir-shortcuts . ((:maildir "/gmail/INBOX"     :key ?i)
+                                               (:maildir "/gmail/Sent Mail" :key ?s)
+                                               (:maildir "/gmail/Trash"     :key ?t)
+                                               (:maildir "/gmail/Drafts"    :key ?d)))))
+                                               ;; (:maildir "/gmail/All Mail"  :key ?a)))))
+           (make-mu4e-context
+            :name "rpi"
+            :match-func
+            (lambda (msg) (when msg (string-prefix-p "/rpi" (mu4e-message-field msg :maildir))))
+            :vars '((user-mail-address . "becker3@rpi.edu")
+                    (user-full-name    . "Riley Beckett")
+                    (smtpmail-smtp-server  . "smtp.office365.com")
+                    (smtpmail-smtp-service . 587)
+                    (smtpmail-stream-type  . starttls)
+                    (mu4e-drafts-folder  . "/rpi/Drafts")
+                    (mu4e-sent-folder  .   "/rpi/Send Items")
+                    (mu4e-refile-folder  . "/rpi/Archive")
+                    (mu4e-trash-folder  .  "/rpi/Deleted Items")
+                    (message-signature . "Riley Beckett\nbecker3@rpi.edu")
+                    (mu4e-maildir-shortcuts . ((:maildir "/rpi/Inbox"         :key ?i)
+                                               (:maildir "/rpi/Sent Items"    :key ?s)
+                                               (:maildir "/rpi/Deleted Items" :key ?t)
+                                               (:maildir "/rpi/Drafts"        :key ?d)
+                                               (:maildir "/rpi/Archive"       :key ?a))))))))
 
   (use-package mu4e-alert
     :config
     (mu4e-alert-set-default-style 'libnotify)
     (add-hook 'after-init-hook #'mu4e-alert-enable-notifications))
+  (elpaca-wait)
 #+end_src
 
 ** pinentry
 
 #+begin_src emacs-lisp
   (use-package pinentry)
+#+end_src
+* Elfeed
+
+#+begin_src emacs-lisp
+  (defun elfeed-video (&optional use-generic-p)
+    "watch video link"
+    (interactive "P")
+    (let ((entries (elfeed-search-selected)))
+      (dolist (e entries)
+        (and (elfeed-tagged-p 'video e) (elfeed-entry-link e)
+         (progn (elfeed-untag e 'unread)
+                (open-mpv (elfeed-entry-link e)))))
+      (mapc #'elfeed-search-update-entry entries)
+      (unless (use-region-p) (forward-line))))
+
+  (defun elfeed-podcast (&optional use-generic-p)
+    "run podcast"
+    (interactive "P")
+    (let ((entries (elfeed-search-selected)))
+      (dolist (e entries)
+        (and (elfeed-tagged-p 'podcast e) (elfeed-entry-enclosures e)
+         (progn (elfeed-untag e 'unread)
+                (open-mpv (caar (elfeed-entry-enclosures e))))))
+      (mapc #'elfeed-search-update-entry entries)
+      (unless (use-region-p) (forward-line))))
+
+  (use-package elfeed
+    :bind (:map elfeed-search-mode-map
+                ("v" . #'elfeed-video)
+                ("P" . #'elfeed-podcast))
+    :config
+    (setq elfeed-log-buffer-name " *elfeed-log*")
+    (add-hook 'elfeed-new-entry-hook
+              (elfeed-make-tagger :feed-url "youtube\\.com" :add '(video youtube)))
+    (add-hook 'elfeed-new-entry-hook
+              (lambda (entry) (when (elfeed-entry-enclosures entry) (elfeed-tag entry 'podcast))))
+    (setq elfeed-feeds
+          '(("https://www.youtube.com/feeds/videos.xml?channel_id=UCld68syR8Wi-GY_n4CaoJGA" linux)
+            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCUyeluBRhGPCW4rPe_UvBZQ" programming)
+            ("https://www.reddit.com/r/emacs/.rss" reddit emacs)
+            ("https://anchor.fm/s/149fd51c/podcast/rss" linux)
+            ("https://www.reddit.com/r/unixporn/.rss" reddit))))
 #+end_src
 
 * Programming
@@ -795,7 +783,7 @@ setup mu4e as email client.
                 ("C->" . 'mc/mark-next-like-this)
                 ("C-<" . 'mc/mark-previous-like-this)
                 ("C-c C->" . 'mc/mark-all-like-this)
-           :map mc/keymap
+                :map mc/keymap
                 ("<return>" . nil)))
 #+end_src
 
@@ -816,12 +804,13 @@ best git frontend ever
 give good errors when programming
 
 #+begin_src emacs-lisp
-    (use-package flycheck
-      :diminish flycheck-mode
-      :config
-      (setq-default flycheck-emacs-lisp-load-path 'inherit)
-      (global-flycheck-mode 1)
-      (add-hook 'c-mode-hook '(lambda () (flycheck-mode -1))))
+  (use-package flycheck
+    :diminish flycheck-mode
+    :config
+    (setq flycheck-error-message-buffer " *Flycheck error messages*")
+    (setq-default flycheck-emacs-lisp-load-path 'inherit)
+    (global-flycheck-mode 1)
+    (add-hook 'c-mode-hook '(lambda () (flycheck-mode -1))))
 #+end_src
 
 ** Lsp-mode
@@ -852,12 +841,6 @@ Language Server Protocol Modes also describe keybinds
     (setq lsp-ui-sideline-update-mode 'point)
     (setq lsp-ui-sideline-show-diagnostics t)
     (setq lsp-ui-sideline-ignore-duplicate t))
-
-
-  (use-package lsp-treemacs
-    :after lsp
-    :custom
-    (lsp-treemacs-error-list-current-project-only t))
 
   (use-package lsp-java
     :hook
@@ -920,7 +903,7 @@ use corfu for completion coming from lsp
     (add-to-list 'completion-at-point-functions #'cape-elisp-block)
     ;;(add-to-list 'completion-at-point-functions #'cape-history)
     ;;(add-to-list 'completion-at-point-functions #'cape-keyword)
-    (add-to-list 'completion-at-point-functions #'cape-tex)
+    ;;(add-to-list 'completion-at-point-functions #'cape-tex)
     ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
     ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
     ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
@@ -937,71 +920,9 @@ use corfu for completion coming from lsp
     :elpaca (lsp-latex.el :host github :repo "ROCKTAKEY/lsp-latex"))
 #+end_src
 
-** dap-mode
-
-#+begin_src emacs-lisp
-  (use-package dap-mode
-    :diminish
-    :defer
-    :custom
-    (dap-auto-configure-mode t                           "Automatically configure dap.")
-    (dap-auto-configure-features
-     '(sessions locals breakpoints expressions tooltip)  "Remove the button panel in the top.")
-    :config
-        ;;; dap for c++
-    (require 'dap-lldb)
-    (require 'dap-gdb-lldb)
-    (require 'dap-cpptools)
-    (require 'dap-java)
-
-        ;;; set the debugger executable (c++)
-    (setq dap-lldb-debug-program '("/usr/bin/lldb-vscode"))
-
-        ;;; ask user for executable to debug if not specified explicitly (c++)
-    (setq dap-lldb-debugged-program-function (lambda () (read-file-name "Select file to debug: ")))
-
-    (setq dap-default-terminal-kind "integrated") ;; Make sure that terminal programs open a term for I/O in an Emacs buffer
-    (dap-auto-configure-mode +1)
-        ;;; default debug template for (c++)
-    (dap-register-debug-template
-     "C++ LLDB dap"
-     (list :type "lldb-vscode"
-           :cwd nil
-           :args nil
-           :request "launch"
-           :program nil))
-
-    (dap-register-debug-template
-     "Rust LLDB dap"
-     (list :type "lldb-vscode"
-           :request "launch"
-           :program nil
-           :cwd "${workspaceFolder}"
-           :dap-compilation "cargo build"
-           :dap-compilation-dir "${workspaceFolder}"))
-
-    (defun dap-debug-create-or-edit-c-json-template ()
-      "Edit the C++ debugging configuration or create + edit if none exists yet."
-      (interactive)
-      (let ((filename (concat (lsp-workspace-root) "/launch.json"))
-            (default "~/.dotfiles/.config/emacs/default-c-launch.json"))
-        (unless (file-exists-p filename)
-          (copy-file default filename))
-        (find-file-existing filename))))
-#+end_src
-
 ** Formatting
 
 #+begin_src emacs-lisp
-  (c-add-style "microsoft"
-               '("stroustrup"
-                 (c-offsets-alist
-                  (innamespace . -)
-                  (inline-open . 0)
-                  (inher-cont . c-lineup-multi-inher)
-                  (arglist-cont-nonempty . +)
-                  (template-args-cont . +))))
-  (setq c-default-style "microsoft")
   (use-package clang-format)
   (use-package clang-format+)
 #+end_src
@@ -1030,26 +951,6 @@ elisp ' highlighting
 #+end_src
 
 *** hl-todo
-
-highlights TODO and other things
-
-#+begin_src emacs-lisp
-  (use-package hl-todo
-    :hook
-    (prog-mode . hl-todo-mode))
-#+end_src
-
-** Eros
-
-displays elisp evaluation where cursor is.
-
-#+begin_src emacs-lisp
-  (use-package eros
-    :diminish eros-mode
-    :config
-    (eros-mode 1))
-#+end_src
-
 ** glsl-mode.el
 
 #+begin_src emacs-lisp
@@ -1061,9 +962,9 @@ displays elisp evaluation where cursor is.
 ** haskell
 
 #+begin_src emacs-lisp
-      (use-package lsp-haskell
-        :hook
-        (haskell-mode . lsp))
+  (use-package lsp-haskell
+    :hook
+    (haskell-mode . lsp))
 #+end_src
 
 ** kotlin
@@ -1082,9 +983,9 @@ displays elisp evaluation where cursor is.
 ** nasm-mode
 
 #+begin_src emacs-lisp
-      (use-package nasm-mode
-        :hook
-        (asm-mode . nasm-mode))
+  (use-package nasm-mode
+    :hook
+    (asm-mode . nasm-mode))
 #+end_src
 
 ** rust
@@ -1128,9 +1029,17 @@ displays elisp evaluation where cursor is.
 
 #+begin_src emacs-lisp
   (use-package yaml-mode)
-  
+
+#+end_src
+
+** Simple C mode
+
+#+begin_src emacs-lisp
   (use-package simpc-mode
-    :elpaca (simpc-mode.el :host github :repo "rexim/simpc-mode"))
+    :elpaca (simpc-mode.el :host github :repo "rexim/simpc-mode")
+    :config
+    (add-hook 'simpc-mode-hook (lambda () (interactive) (setq-local fill-paragraph-function 'astyle-buffer)))
+    (add-hook 'c-mode-hook 'simpc-mode))
 #+end_src
 
 ** Terminals
@@ -1161,7 +1070,7 @@ shell written in elisp also can run elisp
 
     ;; Truncate buffer for performance
     (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
-    
+
     (setq eshell-prompt-function
           (lambda ()
             (let* ((start "[")
@@ -1200,7 +1109,8 @@ shell written in elisp also can run elisp
     :config
     (with-eval-after-load 'esh-opt
       (setq eshell-destroy-buffer-when-process-dies t)
-      (setq eshell-visual-commands '("htop"))))
+      (setq eshell-visual-commands '("htop"))
+      (setq eshell-prompt-regexp "^.*\]$ ")))
 #+end_src
 
 * Calendar
@@ -1222,197 +1132,17 @@ shell written in elisp also can run elisp
 #+end_src
 
 * Keybinds
-** Override Mode and Keymap
-
-override mode and keymap
-
-#+begin_src emacs-lisp
-  (defvar keyboard-override-mode-map (make-sparse-keymap)
-    "override other keybinds")
-
-  (define-minor-mode keyboard-override-mode
-    "override keybinds mode"
-    :lighter ""
-    :global t
-    :keymap keyboard-override-mode-map)
-
-#+end_src
-
-** Escape
-
-setup escape to end things
-
-#+begin_src emacs-lisp
-  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-
-  ;; (defvar myemacs-escape-hook nil
-  ;;   "for killing things")
-
-  ;; (defun myemacs/escape (&optional interactive)
-  ;;   "Run `myemacs-escape-hook'."
-  ;;   (interactive (list 'interactive))
-  ;;   (cond ((minibuffer-window-active-p (minibuffer-window))
-  ;;          ;; quit the minibuffer if open.
-  ;;          (when interactive
-  ;;            (setq this-command 'abort-recursive-edit))
-  ;;          (abort-recursive-edit))
-  ;;         ;; Run all escape hooks. If any returns non-nil, then stop there.
-  ;;         ((run-hook-with-args-until-success 'myemacs-escape-hook))
-  ;;         ;; don't abort macros
-  ;;         ((or defining-kbd-macro executing-kbd-macro) nil)
-  ;;         ;; Back to the default
-  ;;         ((unwind-protect (keyboard-quit)
-  ;;            (when interactive
-  ;;              (setq this-command 'keyboard-quit))))))
-
-  ;; (global-set-key [remap keyboard-quit] #'myemacs/escape)
-  ;; (add-hook 'myemacs-escape-hook (lambda ()
-  ;;       			         (when (evil-ex-hl-active-p 'evil-ex-search)
-  ;;       			           (evil-ex-nohighlight)
-  ;;       			           t)))
-#+end_src
-
-** Emacs
 
 #+begin_src emacs-lisp
   (global-unset-key (kbd "C-z"))
+  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
   (global-set-key (kbd "C-/") #'undo-tree-undo)
   (global-set-key (kbd "M-/") #'undo-tree-redo)
   (global-set-key (kbd "M-p") #'move-region-up)
   (global-set-key (kbd "M-n") #'move-region-down)
   (global-set-key (kbd "C-c v") #'avy-goto-char-timer)
   (global-set-key (kbd "C-c s") #'consult-flyspell)
+  (global-set-key (kbd "C-c r") #'recompile)
+  (global-set-key (kbd "C-c m") #'mu4e)
+  (global-set-key (kbd "C-c f") #'elfeed)
 #+end_src
-
-** General
-
-general keybinds that I like.
-
-#+begin_src emacs-lisp
-  (defvar myemacs-leader-map (make-sparse-keymap)
-    "map for leader")
-  (setq leader "SPC")
-  (setq alt-leader "M-SPC")
-
-  (define-prefix-command 'myemacs/leader 'myemacs-leader-map)
-
-  (evil-define-key* '(normal visual motion) keyboard-override-mode-map (kbd leader) 'myemacs/leader)
-  (global-set-key (kbd alt-leader) 'myemacs/leader)
-  (keyboard-override-mode +1)
-
-  (global-unset-key (kbd "M-."))
-
-  ;; (define-key myemacs-leader-map (kbd ".") '("find file" . find-file))
-  (map! "." :desc "find file"  #'find-file)
-  (map! "," :desc "open dired"  #'dired-jump)
-  (map! "<" :desc "switch buffer" #'consult-buffer)
-  (map! "s" :desc "search in file" #'consult-line)
-  (map! "`" :desc "open file in config dir" #'browse-config)
-
-  (map! "v" :desc "ace window" #'ace-window)
-
-  (map! "a" :desc "avy")
-  (map! "ac" :desc "avy go to char" #'avy-goto-char)
-  (map! "al" :desc "avy go to char 2" #'avy-goto-char-2)
-  (map! "at" :desc "avy go to char timer" #'avy-goto-char-timer)
-
-  (evil-global-set-key 'normal "gc" 'evilnc-comment-operator)
-  (evil-global-set-key 'visual "gc" 'evilnc-comment-operator)
-
-  (map! "o" :desc "org")
-  (map! "oa" :desc "org agenda" #'org-agenda)
-  (map! "o[" :desc "org agenda add front" #'org-agenda-file-to-front)
-  (map! "os" :desc "org schedule" #'org-schedule)
-  (map! "od" :desc "org deadline" #'org-deadline)
-
-  (map! "n" :desc "org roam")
-  (map! "nl" :desc "org roam buffer toggle" #'org-roam-buffer-toggle)
-  (map! "nf" :desc "org roam node find" #'org-roam-node-find)
-  (map! "ni" :desc "org roam node insert" #'org-roam-node-insert)
-
-  (map! "t" :desc "toggle")
-  (map! "ts" :desc "text scaling" #'hydra-text-scale/body)
-
-  (map! "b" :desc "buffer")
-  (map! "bk" :desc "kill buffer" #'kill-current-buffer)
-  (map! "bi" :desc "ibuffer" #'persp-ibuffer)
-  (map! "bn" :desc "next buffer" #'evil-next-buffer)
-  (map! "bp" :desc "previous buffer" #'evil-prev-buffer)
-
-  (map! "c" :desc "consult")
-  (map! "cr" :desc "ripgrep" #'consult-ripgrep)
-  (map! "cb" :desc "switch buffer" #'consult-buffer)
-  (map! "cp" :desc "project buffer" #'consult-project-buffer)
-  (map! "cw" :desc "window buffer" #'consult-buffer-other-window)
-  (map! "cm" :desc "imenu multi" #'consult-imenu-multi)
-  (map! "ci" :desc "imenu" #'consult-imenu)
-  (map! "cf" :desc "lsp file symbols" #'consult-lsp-file-symbols)
-  (map! "cv" :desc "consult flyspell" #'consult-flyspell)
-  (map! "cs" :desc "lsp symbols" #'consult-lsp-symbols)
-
-  (map! "g" :desc "git")
-  (map! "gg" :desc "Magit status" #'magit-status)
-
-  ;; (bind! "h" "help" #'help-command)
-  ;; (bind! "r" "cargo" #'cargo-minor-mode-command-map)
-  ;; (bind! "w" "window" #'evil-window-map)
-  ;; (bind! "t" "persp" #'perspective-map)
-  (map! "h" :desc "help" #'help-command)
-  (map! "r" :desc "cargo" #'cargo-minor-mode-command-map)
-  (map! "w" :desc "window" #'evil-window-map)
-  (map! "t" :desc "persp" #'perspective-map)
-  (with-eval-after-load "projectile"
-    (map! "p" :desc "project" #'projectile-command-map)
-    (unbind-key (kbd "ESC") #'projectile-command-map))
-#+end_src
-
-** Workspace
-
-perspective workspace binding. (probably an easier way to do this)
-
-#+begin_src emacs-lisp
-  (map! :map keyboard-override-mode-map "M-1" :desc "switch to workspace 1" #'(lambda () (interactive) (persp-switch-by-number 1)))
-  (map! :map keyboard-override-mode-map "M-2" :desc "switch to workspace 2" #'(lambda () (interactive) (persp-switch-by-number 2)))
-  (map! :map keyboard-override-mode-map "M-3" :desc "switch to workspace 3" #'(lambda () (interactive) (persp-switch-by-number 3)))
-  (map! :map keyboard-override-mode-map "M-4" :desc "switch to workspace 4" #'(lambda () (interactive) (persp-switch-by-number 4)))
-  (map! :map keyboard-override-mode-map "M-5" :desc "switch to workspace 5" #'(lambda () (interactive) (persp-switch-by-number 5)))
-  (map! :map keyboard-override-mode-map "M-6" :desc "switch to workspace 6" #'(lambda () (interactive) (persp-switch-by-number 6)))
-  (map! :map keyboard-override-mode-map "M-7" :desc "switch to workspace 7" #'(lambda () (interactive) (persp-switch-by-number 7)))
-  (map! :map keyboard-override-mode-map "M-8" :desc "switch to workspace 8" #'(lambda () (interactive) (persp-switch-by-number 8)))
-  (map! :map keyboard-override-mode-map "M-9" :desc "switch to workspace 9" #'(lambda () (interactive) (persp-switch-by-number 9)))
-#+end_src
-
-** Harpoon
-
-bindings for harpoon.el
-
-#+begin_src emacs-lisp
-  (map! "1" :desc "harpoon go to 1" #'harpoon-go-to-1)
-  (map! "2" :desc "harpoon go to 2" #'harpoon-go-to-2)
-  (map! "3" :desc "harpoon go to 3" #'harpoon-go-to-3)
-  (map! "4" :desc "harpoon go to 4" #'harpoon-go-to-4)
-  (map! "5" :desc "harpoon go to 5" #'harpoon-go-to-5)
-  (map! "6" :desc "harpoon go to 6" #'harpoon-go-to-6)
-  (map! "7" :desc "harpoon go to 7" #'harpoon-go-to-7)
-  (map! "8" :desc "harpoon go to 8" #'harpoon-go-to-8)
-  (map! "9" :desc "harpoon go to 9" #'harpoon-go-to-9)
-
-  (map! "d" :desc "delete")
-  (map! "d1" :desc "harpoon delete 1" #'harpoon-delete-1)
-  (map! "d2" :desc "harpoon delete 2" #'harpoon-delete-2)
-  (map! "d3" :desc "harpoon delete 3" #'harpoon-delete-3)
-  (map! "d4" :desc "harpoon delete 4" #'harpoon-delete-4)
-  (map! "d5" :desc "harpoon delete 5" #'harpoon-delete-5)
-  (map! "d6" :desc "harpoon delete 6" #'harpoon-delete-6)
-  (map! "d7" :desc "harpoon delete 7" #'harpoon-delete-7)
-  (map! "d8" :desc "harpoon delete 8" #'harpoon-delete-8)
-  (map! "d9" :desc "harpoon delete 9" #'harpoon-delete-9)
-
-  (map! "j" :desc "harpoon")
-  (map! "ja" :desc "harpoon add file" #'harpoon-add-file)
-  (map! "jD" :desc "harpoon delete item" #'harpoon-delete-item)
-  (map! "jc" :desc "harpoon clear" #'harpoon-clear)
-  (map! "jf" :desc "harpoon toggle file" #'harpoon-toggle-file)
-  (map! "C-SPC" :desc "harpoon toggle quick menu" #'harpoon-toggle-quick-menu)
-#+end_src
-

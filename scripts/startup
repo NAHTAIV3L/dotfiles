@@ -6,6 +6,5 @@ restartemacs >/dev/null &
 pipewire &
 mpd &
 dunst &
-xss-lock swaylock &
 waybar &
 gpg-agent --options ~/.gnupg/gpg-agent-wayland.conf --daemon

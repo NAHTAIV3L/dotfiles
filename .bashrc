@@ -10,15 +10,15 @@
 # past this point for scp and rcp, and it's important to refrain from
 # outputting anything in those cases.
 if [[ $- != *i* ]] ; then
-	# Shell is non-interactive.  Be done now!
-	return
+    # Shell is non-interactive.  Be done now!
+    return
 fi
 
 # disable ctrl-s and ctrl-q
 stty -ixon
 
 export PS1="[\[\033[00;32m\]\u@\h\[\033[00;36m\] \W\[\033[00m\]]$ "
-
+export PROMPT_COMMAND='echo -en "\033]0; $("pwdtrim") \a"'
 # turn on infinate history
 export HISTSIZE=""
 
