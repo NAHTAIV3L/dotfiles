@@ -18,7 +18,6 @@ fi
 stty -ixon
 
 export PS1="[\[\033[00;32m\]\u@\h\[\033[00;36m\] \W\[\033[00m\]]$ "
-export PROMPT_COMMAND='echo -en "\033]0; $("pwdtrim") \a"'
 # turn on infinate history
 export HISTSIZE=""
 

@@ -1,6 +1,7 @@
 {
   "layer": "top",
   "height": 20,
+  "margin": "10 10 0 10",
 
   "modules-left": ["hyprland/window"],
   "modules-center": ["hyprland/workspaces"],
@@ -14,7 +15,7 @@
     "format-ethernet": "{ipaddr}/{cidr}",
     "format-disconnected": "Disconnected ",
     "tooltip-format": "{ifname}: {gwaddr}",
-    "format": "{ifname}: {ipaddr}/{cidr}"
+    "format": "{ifname}: {essid}"
   },
   "hyprland/window": {
     "format": "{title}",
@@ -44,16 +45,16 @@
     "tooltip-format": "{volume}% {node_name}",
     "scroll-step": 0,
     "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
-    "on-click-right": "qpwgraph",
+    "on-click-right": "helvum",
     "format-icons": ["", "", ""]
   },
   "battery": {
     "bat": "BAT0",
     "interval": 0,
     "format-charging": "{capacity}% 󰂄",
-    "format-not charging": "{capacity}%",
+    "format-not charging": "{capacity}% 󰂃",
     "format-discharging": "{capacity}% {icon}",
-    "format": "{capacity}% 󰂃",
+    "format": "{capacity}% {icon}",
     "format-icons": ["󱊡", "󱊢", "󱊣"],
     "interval": 1,
   },

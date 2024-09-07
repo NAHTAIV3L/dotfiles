@@ -381,12 +381,7 @@
   (evil-collection-init))
 
 (use-package tex
-  :elpaca (auctex :pre-build
-                  (("cd" "~/.emacs.d/elpaca/repos/auctex/")
-                   ("./autogen.sh")
-                   ("./configure")
-                   ("make"))
-                  :host github :repo "emacs-straight/auctex" :files ("*" (:exclude ".git"))))
+  :elpaca auctex)
 
 (setq markdown-command "pandoc")
 
@@ -402,6 +397,15 @@
   (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
   (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
   (add-to-list 'org-structure-template-alist '("py" . "src python"))
+  (add-to-list 'org-structure-template-alist '("cpp" . "src c++"))
+  (setq org-capture-templates
+        '(("h" "Homework" entry (file "~/org/homework.org")
+           "* TODO %? \nDEADLINE: %^t" :refile-targets (("~/org/homework.org" :level 1)))))
+  (setq org-agenda-prefix-format '((agenda . " %i %-12:c%?-12t% s%:T ")
+                                  (todo . " %i %-12:c")
+                                  (tags . " %i %-12:c%:T ")
+                                  (search . " %i %-12:c%:T ")))
+  (setq org-agenda-hide-tags-regexp ".*")
 
   (org-babel-do-load-languages
    'org-babel-load-languages
@@ -423,7 +427,7 @@
   :init
   (setq org-roam-v2-ack t)
   :custom
-  (org-roam-directory "~/RoamNotes")
+  (org-roam-directory "~/org/RoamNotes")
   (org-roam-completion-everywhere t)
   :bind (("C-c n l" . org-roam-buffer-toggle)
          ("C-c n f" . org-roam-node-find)
@@ -664,14 +668,14 @@
   (add-to-list 'completion-at-point-functions #'cape-dabbrev)
   (add-to-list 'completion-at-point-functions #'cape-file)
   (add-to-list 'completion-at-point-functions #'cape-elisp-block)
-  ;;(add-to-list 'completion-at-point-functions #'cape-history)
-  ;;(add-to-list 'completion-at-point-functions #'cape-keyword)
-  ;;(add-to-list 'completion-at-point-functions #'cape-tex)
+  (add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
+  (add-to-list 'completion-at-point-functions #'cape-history)
+  (add-to-list 'completion-at-point-functions #'cape-keyword)
+  ;; (add-to-list 'completion-at-point-functions #'cape-tex)
   ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
   ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
   ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
   ;;(add-to-list 'completion-at-point-functions #'cape-dict)
-  ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
   ;;(add-to-list 'completion-at-point-functions #'cape-line)
   )
 
@@ -825,3 +829,13 @@
 (global-set-key (kbd "C-c r") #'recompile)
 (global-set-key (kbd "C-c m") #'mu4e)
 (global-set-key (kbd "C-c f") #'elfeed)
+(global-set-key (kbd "C-c c d") #'cape-dabbrev)
+(global-set-key (kbd "C-c c f") #'cape-file)
+(global-set-key (kbd "C-c c b") #'cape-elisp-block)
+(global-set-key (kbd "C-c c s") #'cape-elisp-symbol)
+(global-set-key (kbd "C-c c h") #'cape-history)
+(global-set-key (kbd "C-c c k") #'cape-keyword)
+(global-set-key (kbd "C-c o a") #'org-agenda)
+(global-set-key (kbd "C-c o d") #'org-deadline)
+(global-set-key (kbd "C-c o s") #'org-schedule)
+(global-set-key (kbd "C-c o c") #'org-capture)

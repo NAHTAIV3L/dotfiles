@@ -1,9 +1,10 @@
 IMAPAccount gmail
 Host imap.gmail.com
 User rbeckettvt@gmail.com
-PassCmd "emacsclient -e \"(lookup-password :host \\\"smtp.gmail.com\\\" :login \\\"rbeckettvt@gmail.com\\\")\" | cut -d '\"' -f2"
-AuthMechs LOGIN
+AuthMechs XOAUTH2
+PassCmd "oauth2.py -t ~/.gmail.gpg"
 SSLType IMAPS
+Port 993
 SSLVersions TLSv1.3
 CertificateFile /etc/ssl/certs/ca-certificates.crt
 
@@ -61,7 +62,7 @@ Channel gmail-starred
 IMAPAccount rpi
 Host outlook.office365.com
 User becker3@rpi.edu
-PassCmd "python3 ~/.dotfiles/scripts/oauth2.py -t ~/.rpi.gpg"
+PassCmd "oauth2.py -t ~/.rpi.gpg"
 Port 993
 SSLType IMAPS
 AuthMechs XOAUTH2

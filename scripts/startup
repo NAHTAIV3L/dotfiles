@@ -7,4 +7,4 @@ pipewire &
 mpd &
 dunst &
 waybar &
-gpg-agent --options ~/.gnupg/gpg-agent-wayland.conf --daemon
+gpg-agent --daemon
