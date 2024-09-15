@@ -1,4 +1,4 @@
-#+TITLE Emacs.org config
+#+TITLE: Emacs.org config
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 #+STARTUP: fold
 * General Changes
@@ -14,6 +14,7 @@
         gc-cons-threshold (* 50 1000 1000))
 
   (setq-default indent-tabs-mode nil
+                c-basic-offset 4
                 tab-width 4)
 #+end_src
 
@@ -23,11 +24,9 @@
   (setq inhibit-startup-message t
         backup-inhibited t)
 
-
   (scroll-bar-mode -1) ; Disable visible scrollbar
   (tool-bar-mode -1) ; Disable the toolbar
   (tooltip-mode -1) ; Disable tooltips
-
   (menu-bar-mode -1) ; Disable the menu bar
 
   (setq scroll-up-aggressively nil
@@ -35,8 +34,11 @@
         scroll-conservatively 101
         display-line-numbers-type 'relative)
 
-  (column-number-mode)
-  (global-display-line-numbers-mode t)
+  (setq scroll-step 1)
+  (setq scroll-margin 8)
+
+  (column-number-mode +1)
+  (global-display-line-numbers-mode +1)
   (setq-default fill-column 80)
 
   (electric-pair-mode +1)
@@ -54,17 +56,6 @@
   (add-to-list 'default-frame-alist '(alpha . (90 . 90)))
 #+end_src
 
-** Scrolling
-
-#+begin_src emacs-lisp
-  (setq scroll-up-aggressively nil)
-  (setq scroll-down-aggressively nil)
-  (setq scroll-conservatively 101)
-
-  (setq scroll-step 1)
-  (setq scroll-margin 8)
-#+end_src
-
 ** Fonts
 
 #+begin_src emacs-lisp
@@ -80,6 +71,7 @@
                       :family "Monospace"
                       :height 97)
 #+end_src
+
 ** Background tranparency
 
 #+begin_src emacs-lisp
@@ -93,33 +85,6 @@
 some helper functions that i found and edited
 
 #+begin_src emacs-lisp
-  (defun move-region (start end n)
-    "Move the current region up or down by N lines."
-    (interactive "r\np")
-    (let ((line-text (delete-and-extract-region start end)))
-      (forward-line n)
-      (let ((start (point)))
-        (insert line-text)
-        (setq deactivate-mark nil)
-        (set-mark start))))
-
-  (defun move-region-up (start end n)
-    "Move the current line up by N lines."
-    (interactive "r\np")
-    (move-region start end (if (null n) -1 (- n))))
-
-  (defun move-region-down (start end n)
-    "Move the current line down by N lines."
-    (interactive "r\np")
-    (move-region start end (if (null n) 1 n)))
-
-  (defun lookup-password (&rest keys)
-    "search authinfo.gpg file for passwords"
-    (let ((result (apply #'auth-source-search keys)))
-      (if result
-          (funcall (plist-get (car result) :secret))
-        nil)))
-
   (defun erc-tls-oftc ()
     (interactive)
     (erc-tls :server "irc.oftc.net"
@@ -259,8 +224,8 @@ which-key for descriptions when entering keybinds
 Vertico used for completion for minibuffers.
 
 #+begin_src emacs-lisp
-  (use-package vertico
-    :elpaca (vertico :files (:defaults "extensions/*"))
+ (use-package vertico
+    :ensure (vertico :files (:defaults "extensions/*"))
     :diminish vertico-mode
     :bind (:map vertico-map
                 ("C-n" . vertico-next)
@@ -284,7 +249,7 @@ Vertico used for completion for minibuffers.
 
   (use-package vertico-multiform
     :after vertico
-    :elpaca nil
+    :ensure nil
     :config
     (setq vertico-multiform-commands
           '((switch-to-buffer flat)
@@ -303,7 +268,7 @@ use save-hist-mode to get history saved for completion
 
 #+begin_src emacs-lisp
   (use-package savehist
-    :elpaca nil
+    :ensure nil
     :diminish savehist-mode
     :init
     (savehist-mode 1))
@@ -375,7 +340,7 @@ better searching
 
 #+begin_src emacs-lisp
   (use-package flyspell
-    :elpaca nil
+    :ensure nil
     ;; :diminish flyspell-mode
     )
 #+end_src
@@ -391,7 +356,7 @@ better searching
 
 #+begin_src emacs-lisp
   (use-package consult-flyspell
-    :elpaca (consult-flyspell :host gitlab :repo "OlMon/consult-flyspell" :branch "master")
+    :ensure (consult-flyspell :host gitlab :repo "OlMon/consult-flyspell" :branch "master")
     :config
     ;; default settings
     (setq consult-flyspell-select-function (lambda () (flyspell-correct-at-point) (consult-flyspell))
@@ -498,7 +463,7 @@ undo-tree for good undoing
 
 #+begin_src emacs-lisp
   (use-package pdf-tools
-    :elpaca nil
+    :ensure nil
     :config
     (pdf-tools-install)
     (add-hook 'pdf-view-mode-hook #'pdf-view-fit-height-to-window))
@@ -507,7 +472,7 @@ undo-tree for good undoing
 
 #+begin_src emacs-lisp
   (use-package whitespace
-    :elpaca nil
+    :ensure nil
     :diminish whitespace-mode global-whitespace-mode
     :config
     (setq whitespace-style
@@ -550,7 +515,7 @@ vim keybinds in emacs
 
 #+begin_src emacs-lisp
   (use-package tex
-    :elpaca auctex)
+    :ensure auctex)
 #+end_src
 
 * markdown
@@ -607,7 +572,7 @@ general configuration of org-mode
 
 #+begin_src emacs-lisp
   (use-package org-roam
-    :elpaca t
+    :ensure t
     :init
     (setq org-roam-v2-ack t)
     :custom
@@ -641,7 +606,7 @@ Automatically tangle org config files into .el files.
 #+begin_src emacs-lisp
   (use-package dired
     :ensure nil
-    :elpaca nil
+    :ensure nil
     :commands (dired dired-jump)
     :bind (:map dired-mode-map ("SPC" . dired-single-buffer))
     :config
@@ -661,7 +626,7 @@ setup mu4e as email client.
 
 #+begin_src emacs-lisp
   (use-package mu4e
-    :elpaca nil
+    :ensure nil
     :custom
     (mu4e-completing-read-function #'completing-read)
     :config
@@ -791,6 +756,12 @@ setup mu4e as email client.
                 ("<return>" . nil)))
 #+end_src
 
+** move-text
+
+#+begin_src emacs-lisp
+  (use-package move-text)
+#+end_src
+
 ** Magit
 
 best git frontend ever
@@ -889,7 +860,7 @@ use corfu for completion coming from lsp
 
   (use-package corfu-terminal
     :diminish corfu-terminal-mode
-    :elpaca (corfu-terminal :repo "https://codeberg.org/akib/emacs-corfu-terminal.git")
+    :ensure (corfu-terminal :repo "https://codeberg.org/akib/emacs-corfu-terminal.git")
     :config
     (unless (display-graphic-p)
       (corfu-terminal-mode +1)))
@@ -908,7 +879,7 @@ use corfu for completion coming from lsp
     (add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
     (add-to-list 'completion-at-point-functions #'cape-history)
     (add-to-list 'completion-at-point-functions #'cape-keyword)
-    ;; (add-to-list 'completion-at-point-functions #'cape-tex)
+    ;;(add-to-list 'completion-at-point-functions #'cape-tex)
     ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
     ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
     ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
@@ -921,7 +892,7 @@ use corfu for completion coming from lsp
 
 #+begin_src emacs-lisp
   (use-package lsp-latex
-    :elpaca (lsp-latex.el :host github :repo "ROCKTAKEY/lsp-latex"))
+    :ensure (lsp-latex.el :host github :repo "ROCKTAKEY/lsp-latex"))
 #+end_src
 
 ** Formatting
@@ -954,13 +925,12 @@ elisp ' highlighting
     :hook (emacs-lisp-mode . highlight-quoted-mode))
 #+end_src
 
-*** hl-todo
 ** glsl-mode.el
 
 #+begin_src emacs-lisp
   (use-package glsl-mode
     :diminish
-    :elpaca (glsl-mode :host github :repo "jimhourihan/glsl-mode"))
+    :ensure (glsl-mode :host github :repo "jimhourihan/glsl-mode"))
 #+end_src
 
 ** haskell
@@ -1040,7 +1010,7 @@ elisp ' highlighting
 
 #+begin_src emacs-lisp
   (use-package simpc-mode
-    :elpaca (simpc-mode.el :host github :repo "rexim/simpc-mode")
+    :ensure (simpc-mode.el :host github :repo "rexim/simpc-mode")
     :config
     (add-hook 'simpc-mode-hook (lambda () (interactive) (setq-local fill-paragraph-function 'astyle-buffer)))
     (add-hook 'c-mode-hook 'simpc-mode))
@@ -1107,7 +1077,7 @@ shell written in elisp also can run elisp
           eshell-scroll-to-bottom-on-input t))
 
   (use-package eshell
-    :elpaca nil
+    :ensure nil
     :diminish eshell-mode
     :hook (eshell-first-time-mode . configure-eshell)
     :config
@@ -1121,7 +1091,7 @@ shell written in elisp also can run elisp
 
 #+begin_src emacs-lisp
   (use-package calendar
-    :elpaca nil
+    :ensure nil
     :config
     (defun calendar-insert-date ()
       "Capture the date at point, exit the Calendar, insert the date."
@@ -1142,8 +1112,8 @@ shell written in elisp also can run elisp
   (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
   (global-set-key (kbd "C-/") #'undo-tree-undo)
   (global-set-key (kbd "M-/") #'undo-tree-redo)
-  (global-set-key (kbd "M-p") #'move-region-up)
-  (global-set-key (kbd "M-n") #'move-region-down)
+  (global-set-key (kbd "M-p") #'move-text-up)
+  (global-set-key (kbd "M-n") #'move-text-down)
   (global-set-key (kbd "C-c v") #'avy-goto-char-timer)
   (global-set-key (kbd "C-c s") #'consult-flyspell)
   (global-set-key (kbd "C-c r") #'recompile)

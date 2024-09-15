@@ -33,7 +33,7 @@ mpd_connection_timeout = 5
 #
 mpd_music_dir = ~/Music
 
-mpd_crossfade_time = 5
+mpd_crossfade_time = 10
 
 # Exclude pattern for random song action
 # http://www.boost.org/doc/libs/1_46_1/libs/regex/doc/html/boost_regex/syntax/perl_syntax.html
@@ -111,8 +111,8 @@ visualizer_look = ●▮
 # Alternative subset of 256 colors for terminals that support it.
 #
 #visualizer_color = 47, 83, 119, 155, 191, 227, 221, 215, 209, 203, 197, 161
-visualizer_color = 147, 141, 135, 129, 92
-
+# visualizer_color = 147, 141, 135, 129, 92
+visualizer_color = 123, 122, 121, 120, 119, 112, 118
 #
 # Note: The next few visualization options apply to the spectrum visualizer.
 #
@@ -611,4 +611,3 @@ alternative_ui_separator_color = black:b
 window_border_color = green
 
 active_window_border = red
-

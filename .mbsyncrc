@@ -17,37 +17,37 @@ Inbox ~/Maildir/gmail/INBOX
 SubFolders Verbatim
 
 Channel gmail-inbox
-Master :gmail-remote:
-Slave :gmail-local:
+Far :gmail-remote:
+Near :gmail-local:
 Patterns "INBOX"
 Create Both
 Expunge Both
 SyncState *
 
 Channel gmail-trash
-Master :gmail-remote:"[Gmail]/Trash"
-Slave :gmail-local:"Trash"
+Far :gmail-remote:"[Gmail]/Trash"
+Near :gmail-local:"Trash"
 Create Both
 Expunge Both
 SyncState *
 
 Channel gmail-sent
-Master :gmail-remote:"[Gmail]/Sent Mail"
-Slave :gmail-local:"Sent Mail"
+Far :gmail-remote:"[Gmail]/Sent Mail"
+Near :gmail-local:"Sent Mail"
 Create Both
 Expunge Both
 SyncState *
 
 Channel gmail-all
-Master :gmail-remote:"[Gmail]/All Mail"
-Slave :gmail-local:"All Mail"
+Far :gmail-remote:"[Gmail]/All Mail"
+Near :gmail-local:"All Mail"
 Create Both
 Expunge Both
 SyncState *
 
 Channel gmail-starred
-Master :gmail-remote:"[Gmail]/Starred"
-Slave :gmail-local:"Starred"
+Far :gmail-remote:"[Gmail]/Starred"
+Near :gmail-local:"Starred"
 Create Both
 Expunge Both
 SyncState *
@@ -77,8 +77,8 @@ Inbox ~/Maildir/rpi/Inbox
 SubFolders Verbatim
 
 Channel rpi
-Master :rpi-remote:
-Slave :rpi-local:
+Far :rpi-remote:
+Near :rpi-local:
 Patterns *
 Create Both
 Expunge Both

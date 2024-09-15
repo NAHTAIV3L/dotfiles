@@ -7,16 +7,15 @@
       gc-cons-threshold (* 50 1000 1000))
 
 (setq-default indent-tabs-mode nil
+              c-basic-offset 4
               tab-width 4)
 
 (setq inhibit-startup-message t
       backup-inhibited t)
 
-
 (scroll-bar-mode -1) ; Disable visible scrollbar
 (tool-bar-mode -1) ; Disable the toolbar
 (tooltip-mode -1) ; Disable tooltips
-
 (menu-bar-mode -1) ; Disable the menu bar
 
 (setq scroll-up-aggressively nil
@@ -24,8 +23,11 @@
       scroll-conservatively 101
       display-line-numbers-type 'relative)
 
-(column-number-mode)
-(global-display-line-numbers-mode t)
+(setq scroll-step 1)
+(setq scroll-margin 8)
+
+(column-number-mode +1)
+(global-display-line-numbers-mode +1)
 (setq-default fill-column 80)
 
 (electric-pair-mode +1)
@@ -42,13 +44,6 @@
 (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
 (add-to-list 'default-frame-alist '(alpha . (90 . 90)))
 
-(setq scroll-up-aggressively nil)
-(setq scroll-down-aggressively nil)
-(setq scroll-conservatively 101)
-
-(setq scroll-step 1)
-(setq scroll-margin 8)
-
 (set-face-attribute 'default nil
                     :font "DejaVu Sans Mono"
                     :family "Monospace"
@@ -64,33 +59,6 @@
 (setq background-transparancy '(90 . 90))
 (set-frame-parameter (selected-frame) 'alpha background-transparancy)
 (add-to-list 'default-frame-alist `(alpha . ,background-transparancy))
-
-(defun move-region (start end n)
-  "Move the current region up or down by N lines."
-  (interactive "r\np")
-  (let ((line-text (delete-and-extract-region start end)))
-    (forward-line n)
-    (let ((start (point)))
-      (insert line-text)
-      (setq deactivate-mark nil)
-      (set-mark start))))
-
-(defun move-region-up (start end n)
-  "Move the current line up by N lines."
-  (interactive "r\np")
-  (move-region start end (if (null n) -1 (- n))))
-
-(defun move-region-down (start end n)
-  "Move the current line down by N lines."
-  (interactive "r\np")
-  (move-region start end (if (null n) 1 n)))
-
-(defun lookup-password (&rest keys)
-  "search authinfo.gpg file for passwords"
-  (let ((result (apply #'auth-source-search keys)))
-    (if result
-        (funcall (plist-get (car result) :secret))
-      nil)))
 
 (defun erc-tls-oftc ()
   (interactive)
@@ -192,44 +160,44 @@
   (setq which-key-idle-delay 3))
 
 (use-package vertico
-  :elpaca (vertico :files (:defaults "extensions/*"))
-  :diminish vertico-mode
-  :bind (:map vertico-map
-              ("C-n" . vertico-next)
-              ("C-p" . vertico-previous))
-  :init
-  (vertico-mode 1)
-  ;; (vertico-flat-mode 1)
-  (setq vertico-count 15))
+   :ensure (vertico :files (:defaults "extensions/*"))
+   :diminish vertico-mode
+   :bind (:map vertico-map
+               ("C-n" . vertico-next)
+               ("C-p" . vertico-previous))
+   :init
+   (vertico-mode 1)
+   ;; (vertico-flat-mode 1)
+   (setq vertico-count 15))
 
-;; Configure directory extension.
-(use-package vertico-directory
-  :after vertico
-  :elpaca nil
-  ;; More convenient directory navigation commands
-  :bind (:map vertico-map
-              ("RET" . vertico-directory-enter)
-              ("DEL" . vertico-directory-delete-char)
-              ("M-DEL" . vertico-directory-delete-word))
-  ;; Tidy shadowed file names
-  :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+ ;; Configure directory extension.
+ (use-package vertico-directory
+   :after vertico
+   :elpaca nil
+   ;; More convenient directory navigation commands
+   :bind (:map vertico-map
+               ("RET" . vertico-directory-enter)
+               ("DEL" . vertico-directory-delete-char)
+               ("M-DEL" . vertico-directory-delete-word))
+   ;; Tidy shadowed file names
+   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
-(use-package vertico-multiform
-  :after vertico
-  :elpaca nil
-  :config
-  (setq vertico-multiform-commands
-        '((switch-to-buffer flat)
-          (find-file flat)
-          (dired flat)
-          (man flat)
-          (cd flat)
-          (kill-buffer flat)
-          (execute-extended-command flat)))
-  (vertico-multiform-mode 1))
+ (use-package vertico-multiform
+   :after vertico
+   :ensure nil
+   :config
+   (setq vertico-multiform-commands
+         '((switch-to-buffer flat)
+           (find-file flat)
+           (dired flat)
+           (man flat)
+           (cd flat)
+           (kill-buffer flat)
+           (execute-extended-command flat)))
+   (vertico-multiform-mode 1))
 
 (use-package savehist
-  :elpaca nil
+  :ensure nil
   :diminish savehist-mode
   :init
   (savehist-mode 1))
@@ -274,7 +242,7 @@
   (define-key embark-file-map (kbd "S") 'sudo-find-file))
 
 (use-package flyspell
-  :elpaca nil
+  :ensure nil
   ;; :diminish flyspell-mode
   )
 
@@ -282,7 +250,7 @@
   :after flyspell)
 
 (use-package consult-flyspell
-  :elpaca (consult-flyspell :host gitlab :repo "OlMon/consult-flyspell" :branch "master")
+  :ensure (consult-flyspell :host gitlab :repo "OlMon/consult-flyspell" :branch "master")
   :config
   ;; default settings
   (setq consult-flyspell-select-function (lambda () (flyspell-correct-at-point) (consult-flyspell))
@@ -342,13 +310,13 @@
         aw-scope 'frame))
 
 (use-package pdf-tools
-  :elpaca nil
+  :ensure nil
   :config
   (pdf-tools-install)
   (add-hook 'pdf-view-mode-hook #'pdf-view-fit-height-to-window))
 
 (use-package whitespace
-  :elpaca nil
+  :ensure nil
   :diminish whitespace-mode global-whitespace-mode
   :config
   (setq whitespace-style
@@ -381,7 +349,7 @@
   (evil-collection-init))
 
 (use-package tex
-  :elpaca auctex)
+  :ensure auctex)
 
 (setq markdown-command "pandoc")
 
@@ -423,7 +391,7 @@
 (elpaca-wait)
 
 (use-package org-roam
-  :elpaca t
+  :ensure t
   :init
   (setq org-roam-v2-ack t)
   :custom
@@ -447,7 +415,7 @@
 
 (use-package dired
   :ensure nil
-  :elpaca nil
+  :ensure nil
   :commands (dired dired-jump)
   :bind (:map dired-mode-map ("SPC" . dired-single-buffer))
   :config
@@ -460,7 +428,7 @@
   :commands (dired dired-jump))
 
 (use-package mu4e
-  :elpaca nil
+  :ensure nil
   :custom
   (mu4e-completing-read-function #'completing-read)
   :config
@@ -577,6 +545,8 @@
               :map mc/keymap
               ("<return>" . nil)))
 
+(use-package move-text)
+
 (use-package transient)
 (use-package magit
   :bind (("C-x g" . magit-status))
@@ -652,7 +622,7 @@
 
 (use-package corfu-terminal
   :diminish corfu-terminal-mode
-  :elpaca (corfu-terminal :repo "https://codeberg.org/akib/emacs-corfu-terminal.git")
+  :ensure (corfu-terminal :repo "https://codeberg.org/akib/emacs-corfu-terminal.git")
   :config
   (unless (display-graphic-p)
     (corfu-terminal-mode +1)))
@@ -671,7 +641,7 @@
   (add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
   (add-to-list 'completion-at-point-functions #'cape-history)
   (add-to-list 'completion-at-point-functions #'cape-keyword)
-  ;; (add-to-list 'completion-at-point-functions #'cape-tex)
+  ;;(add-to-list 'completion-at-point-functions #'cape-tex)
   ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
   ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
   ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
@@ -680,7 +650,7 @@
   )
 
 (use-package lsp-latex
-  :elpaca (lsp-latex.el :host github :repo "ROCKTAKEY/lsp-latex"))
+  :ensure (lsp-latex.el :host github :repo "ROCKTAKEY/lsp-latex"))
 
 (use-package clang-format)
 (use-package clang-format+)
@@ -697,7 +667,7 @@
 
 (use-package glsl-mode
   :diminish
-  :elpaca (glsl-mode :host github :repo "jimhourihan/glsl-mode"))
+  :ensure (glsl-mode :host github :repo "jimhourihan/glsl-mode"))
 
 (use-package lsp-haskell
   :hook
@@ -744,7 +714,7 @@
 (use-package yaml-mode)
 
 (use-package simpc-mode
-  :elpaca (simpc-mode.el :host github :repo "rexim/simpc-mode")
+  :ensure (simpc-mode.el :host github :repo "rexim/simpc-mode")
   :config
   (add-hook 'simpc-mode-hook (lambda () (interactive) (setq-local fill-paragraph-function 'astyle-buffer)))
   (add-hook 'c-mode-hook 'simpc-mode))
@@ -795,7 +765,7 @@
         eshell-scroll-to-bottom-on-input t))
 
 (use-package eshell
-  :elpaca nil
+  :ensure nil
   :diminish eshell-mode
   :hook (eshell-first-time-mode . configure-eshell)
   :config
@@ -805,7 +775,7 @@
     (setq eshell-prompt-regexp "^.*\]$ ")))
 
 (use-package calendar
-  :elpaca nil
+  :ensure nil
   :config
   (defun calendar-insert-date ()
     "Capture the date at point, exit the Calendar, insert the date."
@@ -822,8 +792,8 @@
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 (global-set-key (kbd "C-/") #'undo-tree-undo)
 (global-set-key (kbd "M-/") #'undo-tree-redo)
-(global-set-key (kbd "M-p") #'move-region-up)
-(global-set-key (kbd "M-n") #'move-region-down)
+(global-set-key (kbd "M-p") #'move-text-up)
+(global-set-key (kbd "M-n") #'move-text-down)
 (global-set-key (kbd "C-c v") #'avy-goto-char-timer)
 (global-set-key (kbd "C-c s") #'consult-flyspell)
 (global-set-key (kbd "C-c r") #'recompile)
