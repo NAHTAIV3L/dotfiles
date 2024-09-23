@@ -544,8 +544,18 @@ def_key "`"
   add_random_items
 
 def_key "ctrl-p"
-  set_selected_items_priority
+  scroll_up
+
+def_key "ctrl-n"
+  scroll_down
+
+def_key "alt-p"
+  select_item
+  scroll_up
+
+def_key "alt-n"
+  select_item
+  scroll_down
 
 def_key "q"
   quit
-

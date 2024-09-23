@@ -5,6 +5,7 @@ restartsearxng &
 restartemacs >/dev/null &
 pipewire &
 mpd &
+mpd-mpris &
 dunst &
 waybar &
 gpg-agent --daemon

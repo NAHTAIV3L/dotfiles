@@ -173,7 +173,7 @@
  ;; Configure directory extension.
  (use-package vertico-directory
    :after vertico
-   :elpaca nil
+   :ensure nil
    ;; More convenient directory navigation commands
    :bind (:map vertico-map
                ("RET" . vertico-directory-enter)
@@ -591,23 +591,6 @@
 
 (use-package consult-lsp
   :after lsp)
-
-(defun lsp-bind ()
-  (interactive)
-  (define-key myemacs-leader-map (kbd "l") lsp-command-map)
-  (map! "l" :desc "lsp")
-  (map! "l=" :desc "formatting")
-  (map! "lF" :desc "folders")
-  (map! "lG" :desc "peek")
-  (map! "lT" :desc "toggle")
-  (map! "la" :desc "code actions")
-  (map! "lg" :desc "goto")
-  (map! "lh" :desc "help")
-  (map! "lr" :desc "refactor")
-  (map! "lu" :desc "ui")
-  (map! "lw" :desc "workspaces")
-  (define-key myemacs-leader-map (kbd "lug") '("ui doc glance" . lsp-ui-doc-glance)))
-(add-hook 'lsp-mode-hook 'lsp-bind)
 
 (use-package corfu
   :custom

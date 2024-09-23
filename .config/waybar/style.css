@@ -19,7 +19,6 @@ window#waybar {
 .modules-right:last-child {
     /* background-color: rgba(51, 102, 0, 0.5); */
     /* margin: 0 2px 0 0; */
-    margin-right: 10px;
     /* padding: 0 3px; */
 }
 

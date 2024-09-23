@@ -5,8 +5,7 @@
 
   "modules-left": ["hyprland/window"],
   "modules-center": ["hyprland/workspaces"],
-  "modules-right": ["wireplumber", "custom/brightness", "battery", "cpu", "memory", "network", "clock"],
-
+  "modules-right": ["mpris", "wireplumber", "custom/brightness", "battery", "cpu", "memory", "network", "clock"],
   "hyprland/workspaces": {
     "format": "{id}",
   },
@@ -57,5 +56,12 @@
     "format": "{capacity}% {icon}",
     "format-icons": ["󱊡", "󱊢", "󱊣"],
     "interval": 1,
+  },
+  "mpris": {
+    "format": "{dynamic}",
+    "format-paused": "[paused] {dynamic}",
+    "dynamic-order": ["title", "artist"],
+    "interval": 1,
+    "max-length": 25,
   },
 }
