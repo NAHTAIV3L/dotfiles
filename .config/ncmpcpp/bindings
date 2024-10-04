@@ -345,7 +345,7 @@ def_key "z"
 def_key "y"
   save_tag_changes
 
-def_key "y"
+def_key "s"
   start_searching
 
 def_key "y"
@@ -442,7 +442,7 @@ def_key "I"
   show_artist_info
 
 def_key "g"
-  jump_to_position_in_song
+  update_database
 
 def_key "l"
   show_lyrics

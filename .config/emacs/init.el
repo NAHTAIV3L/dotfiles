@@ -1,9 +1,8 @@
-(setq user-full-name    "Riley Beckett"
-      user-mail-address "rbeckettvt@gmail.com"
-      make-backup-files nil
+(setq make-backup-files nil
       create-lockfiles  nil
       erc-join-buffer 'window
       confirm-kill-processes nil
+      ring-bell-function 'ignore
       gc-cons-threshold (* 50 1000 1000))
 
 (setq-default indent-tabs-mode nil
@@ -40,9 +39,6 @@
                 mu4e-main-mode-hook
                 mu4e-headers-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
-
-(set-frame-parameter (selected-frame) 'alpha '(90 . 90))
-(add-to-list 'default-frame-alist '(alpha . (90 . 90)))
 
 (set-face-attribute 'default nil
                     :font "DejaVu Sans Mono"
@@ -264,12 +260,18 @@
   :config
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t)
-  (load-theme 'doom-vibrant t)
+  ;; (load-theme 'doom-vibrant t)
   (doom-themes-org-config))
 
-(use-package gruber-darker-theme
+(use-package gruber-darker-theme)
+  ;; :config
+  ;; (load-theme 'gruber-darker t))
+
+(use-package ef-themes
   :config
-  (load-theme 'gruber-darker t))
+  (setq ef-bio-palette-overrides
+        '((bg-region bg-green-subtle)))
+  (load-theme 'ef-bio t))
 
 (use-package rainbow-delimiters
   :diminish rainbow-delimiters-mode
@@ -641,7 +643,8 @@
 (use-package tree-sitter
   :diminish tree-sitter-mode
   :config
-  (global-tree-sitter-mode 1))
+  (global-tree-sitter-mode 1)
+  (add-hook 'prog-mode-hook #'tree-sitter-hl-mode))
 (use-package tree-sitter-langs)
 
 (use-package highlight-quoted

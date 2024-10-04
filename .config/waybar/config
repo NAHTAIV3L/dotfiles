@@ -1,11 +1,11 @@
 {
   "layer": "top",
-  "height": 20,
+  "height": 34,
   "margin": "10 10 0 10",
 
-  "modules-left": ["hyprland/window"],
-  "modules-center": ["hyprland/workspaces"],
-  "modules-right": ["mpris", "wireplumber", "custom/brightness", "battery", "cpu", "memory", "network", "clock"],
+  "modules-left": ["hyprland/workspaces"],
+  "modules-center": ["clock"],
+  "modules-right": ["mpris", "wireplumber", "custom/brightness", "battery", "cpu", "memory", "network"],
   "hyprland/workspaces": {
     "format": "{id}",
   },
@@ -17,7 +17,7 @@
     "format": "{ifname}: {essid}"
   },
   "hyprland/window": {
-    "format": "{title}",
+    "format": "{class}",
   },
   "cpu": {
     "format": "{usage}% ",
@@ -34,7 +34,7 @@
   },
   "clock": {
     // "timezone": "America/New_York",
-    "format": "{:%r}",
+    "format": "{:%a %r}",
     "tooltip-format": "{:%d %B %Y}",
     "interval": 1,
   },

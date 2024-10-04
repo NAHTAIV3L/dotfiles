@@ -1,2 +1,0 @@
-#!/bin/bash
-echo "" | dmenu -p EnterText | figlet | nms -sac -f green

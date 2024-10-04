@@ -18,7 +18,7 @@ fi
 stty -ixon
 
 export PS1="[\[\033[00;32m\]\u@\h\[\033[00;36m\] \W\[\033[00m\]]$ "
-# turn on infinate history
+# turn on infinite history
 export HISTSIZE=""
 
 #alias ls="ls --color=auto"
@@ -26,9 +26,5 @@ alias ls="eza"
 alias grep="grep --color=auto"
 alias n="ncmpcpp -q"
 alias b="bluetoothctl"
-alias v="nvim"
 alias e="emacsclient -c -a emacs"
 alias emerge-log="doas tail -f /var/log/emerge-fetch.log"
-
-alias nvimconf="cd ~/.config/nvim ; nvim . ; cd - >/dev/null"
-alias regen-mandb="doas makewhatis /usr/share/man"

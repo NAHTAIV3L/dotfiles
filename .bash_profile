@@ -13,6 +13,7 @@ export LC_COLLATE="C"
 # Custom scripts
 export PATH="$PATH:$HOME/.dotfiles/scripts:$HOME/.local/share/cargo/bin"
 export PATH="$PATH:/home/nahtaiv3l/.dotnet/tools"
+export PATH="$PATH:/opt/ghidra"
 export SUDO_ASKPASS="$HOME/.dotfiles/scripts/dmenupass"
 export ANDROID_HOME="$HOME/Android/Sdk"
 

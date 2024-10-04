@@ -1,2 +1,0 @@
-#!/bin/sh
-st -e "$HOME/.dotfiles/scripts/called/dbnds"

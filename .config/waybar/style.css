@@ -3,23 +3,46 @@
 * {
     font-family: "DejaVu Sans Mono", "Symbols Nerd Font";
     font-size: 14px;
+    border-radius: 15px
 }
 
 window#waybar {
-    background-color: rgba(13, 27, 42, 0.5);
-    color: rgba(228, 228, 239, 1);
-    border: 2px solid rgba(51, 102, 0, 0.8);
-    border-radius: 10px;
+    /* background-color: rgba(13, 27, 42, 0.5); */
+    background-color: rgba(0, 0, 0, 0.0);
+    /* color: rgba(228, 228, 239, 1); */
+    /* border: 2px solid rgba(51, 102, 0, 0.8); */
+    /* border-radius: 10px; */
 }
 
 #window {
     margin: 0 10px;
 }
 
-.modules-right:last-child {
+.modules-right {
     /* background-color: rgba(51, 102, 0, 0.5); */
-    /* margin: 0 2px 0 0; */
-    /* padding: 0 3px; */
+    /* margin: 0 10px 0 0; */
+    padding: 0 10px;
+}
+
+.modules-left {
+    background-color: rgba(13, 27, 42, 0.5);
+    color: rgba(228, 228, 239, 1);
+    border: 2px solid rgba(51, 102, 0, 0.8);
+    border-radius: 15px;
+}
+
+.modules-center {
+    background-color: rgba(13, 27, 42, 0.5);
+    color: rgba(255, 255, 255, 1);
+    border: 2px solid rgba(51, 102, 0, 0.8);
+    border-radius: 15px;
+}
+
+.modules-right {
+    background-color: rgba(13, 27, 42, 0.5);
+    color: rgba(228, 228, 239, 1);
+    border: 2px solid rgba(51, 102, 0, 0.8);
+    border-radius: 15px;
 }
 
 .modules-center {
@@ -42,12 +65,10 @@ tooltip {
     background-color: rgba(13, 27, 42, 1);
     color: rgba(228, 228, 239, 1);
     border: 2px solid rgba(51, 102, 0, 0.8);
-    border-radius: 10px;
+    border-radius: 15px;
 }
-
 #workspaces button {
     color: rgba(228, 228, 239, 1);
-    /* padding: 0 3px; */
 }
 
 #workspaces button.focused {
@@ -60,7 +81,8 @@ tooltip {
 
 #workspaces button:hover {
     background: transparent;
-    border-color: rgba(0, 163, 32, 1);
+    background-color: rgba(70, 70, 70, 0.5);
+    /* border-color: rgba(0, 163, 32, 1); */
     box-shadow: none;
     text-shadow: none;
 }
