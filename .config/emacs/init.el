@@ -76,6 +76,18 @@
   (interactive "sEnter Link:")
   (async-shell-command (format "mpv %s" link) nil))
 
+(defun duplicate-line-better ()
+  "Duplicate current line"
+  (interactive)
+  (let ((column (- (point) (point-at-bol)))
+        (line (let ((s (thing-at-point 'line t)))
+                (if s (string-remove-suffix "\n" s) ""))))
+    (move-end-of-line 1)
+    (newline)
+    (insert line)
+    (move-beginning-of-line 1)
+    (forward-char column)))
+
 (defvar elpaca-installer-version 0.7)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
@@ -218,7 +230,8 @@
 
 (use-package orderless
   :config
-  (setq completion-styles '(orderless)
+  (setq completion-styles '(orderless basic)
+        orderless-matching-styles '(orderless-literal orderless-regexp orderless-prefixes orderless-initialism)
         completion-category-defaults nil
         completion-category-overrides '((file (styles . (partial-completion))))))
 
@@ -556,7 +569,6 @@
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
 (use-package flycheck
-  :diminish flycheck-mode
   :config
   (setq flycheck-error-message-buffer " *Flycheck error messages*")
   (setq-default flycheck-emacs-lisp-load-path 'inherit)
@@ -641,7 +653,6 @@
 (use-package clang-format+)
 
 (use-package tree-sitter
-  :diminish tree-sitter-mode
   :config
   (global-tree-sitter-mode 1)
   (add-hook 'prog-mode-hook #'tree-sitter-hl-mode))
@@ -702,6 +713,7 @@
 (use-package simpc-mode
   :ensure (simpc-mode.el :host github :repo "rexim/simpc-mode")
   :config
+  (add-to-list )
   (add-hook 'simpc-mode-hook (lambda () (interactive) (setq-local fill-paragraph-function 'astyle-buffer)))
   (add-hook 'c-mode-hook 'simpc-mode))
 
@@ -774,6 +786,9 @@
 
 (elpaca-wait)
 
+(put 'upcase-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
+
 (global-unset-key (kbd "C-z"))
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 (global-set-key (kbd "C-/") #'undo-tree-undo)
@@ -785,6 +800,8 @@
 (global-set-key (kbd "C-c r") #'recompile)
 (global-set-key (kbd "C-c m") #'mu4e)
 (global-set-key (kbd "C-c f") #'elfeed)
+(global-set-key (kbd "C-c a") #'ace-window)
+(global-set-key (kbd "C-,") #'duplicate-line-better)
 (global-set-key (kbd "C-c c d") #'cape-dabbrev)
 (global-set-key (kbd "C-c c f") #'cape-file)
 (global-set-key (kbd "C-c c b") #'cape-elisp-block)
