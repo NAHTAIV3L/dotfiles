@@ -72,6 +72,15 @@
      t)
     (goto-line saved-line-number)))
 
+(defun better-scroll-up (&optional arg)
+  (interactive "^P")
+  (call-interactively 'scroll-up-command arg)
+  (recenter))
+(defun better-scroll-down (&optional arg)
+  (interactive "^P")
+  (call-interactively 'scroll-down-command)
+  (recenter))
+
 (defun open-mpv (&optional link)
   (interactive "sEnter Link:")
   (async-shell-command (format "mpv %s" link) nil))
@@ -560,6 +569,8 @@
               :map mc/keymap
               ("<return>" . nil)))
 
+(use-package change-inner)
+
 (use-package move-text)
 
 (use-package transient)
@@ -713,7 +724,7 @@
 (use-package simpc-mode
   :ensure (simpc-mode.el :host github :repo "rexim/simpc-mode")
   :config
-  (add-to-list )
+  (add-to-list 'tree-sitter-major-mode-language-alist '(simpc-mode . c))
   (add-hook 'simpc-mode-hook (lambda () (interactive) (setq-local fill-paragraph-function 'astyle-buffer)))
   (add-hook 'c-mode-hook 'simpc-mode))
 
@@ -790,6 +801,8 @@
 (put 'downcase-region 'disabled nil)
 
 (global-unset-key (kbd "C-z"))
+(bind-key [remap scroll-down-command] 'better-scroll-down)
+(bind-key [remap scroll-up-command] 'better-scroll-up)
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 (global-set-key (kbd "C-/") #'undo-tree-undo)
 (global-set-key (kbd "M-/") #'undo-tree-redo)
@@ -812,3 +825,4 @@
 (global-set-key (kbd "C-c o d") #'org-deadline)
 (global-set-key (kbd "C-c o s") #'org-schedule)
 (global-set-key (kbd "C-c o c") #'org-capture)
+(global-set-key (kbd "M-i") #'change-inner)

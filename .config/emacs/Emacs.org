@@ -97,6 +97,15 @@ some helper functions that i found and edited
        t)
       (goto-line saved-line-number)))
 
+  (defun better-scroll-up (&optional arg)
+    (interactive "^P")
+    (call-interactively 'scroll-up-command arg)
+    (recenter))
+  (defun better-scroll-down (&optional arg)
+    (interactive "^P")
+    (call-interactively 'scroll-down-command)
+    (recenter))
+
   (defun open-mpv (&optional link)
     (interactive "sEnter Link:")
     (async-shell-command (format "mpv %s" link) nil))
@@ -771,6 +780,12 @@ setup mu4e as email client.
                 ("<return>" . nil)))
 #+end_src
 
+** change inner
+
+#+begin_src emacs-lisp
+  (use-package change-inner)
+#+end_src
+
 ** move-text
 
 #+begin_src emacs-lisp
@@ -1009,7 +1024,7 @@ elisp ' highlighting
   (use-package simpc-mode
     :ensure (simpc-mode.el :host github :repo "rexim/simpc-mode")
     :config
-    (add-to-list )
+    (add-to-list 'tree-sitter-major-mode-language-alist '(simpc-mode . c))
     (add-hook 'simpc-mode-hook (lambda () (interactive) (setq-local fill-paragraph-function 'astyle-buffer)))
     (add-hook 'c-mode-hook 'simpc-mode))
 #+end_src
@@ -1114,6 +1129,8 @@ shell written in elisp also can run elisp
 
 #+begin_src emacs-lisp
   (global-unset-key (kbd "C-z"))
+  (bind-key [remap scroll-down-command] 'better-scroll-down)
+  (bind-key [remap scroll-up-command] 'better-scroll-up)
   (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
   (global-set-key (kbd "C-/") #'undo-tree-undo)
   (global-set-key (kbd "M-/") #'undo-tree-redo)
@@ -1136,4 +1153,5 @@ shell written in elisp also can run elisp
   (global-set-key (kbd "C-c o d") #'org-deadline)
   (global-set-key (kbd "C-c o s") #'org-schedule)
   (global-set-key (kbd "C-c o c") #'org-capture)
+  (global-set-key (kbd "M-i") #'change-inner)
 #+end_src

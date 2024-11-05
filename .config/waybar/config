@@ -1,7 +1,7 @@
 {
   "layer": "top",
   "height": 34,
-  "margin": "10 10 0 10",
+//  "margin": "10 10 0 10",
 
   "modules-left": ["hyprland/workspaces"],
   "modules-center": ["clock"],

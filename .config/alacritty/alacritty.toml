@@ -33,7 +33,7 @@ shape = "Block"
 TERM = "alacritty"
 
 [font]
-size = 9.7
+size = 10.6
 
 [font.bold]
 style = "Bold"
@@ -70,33 +70,23 @@ key = "Paste"
 action = "Copy"
 key = "Copy"
 
-[[keyboard.bindings]]
-action = "Paste"
-key = "Y"
-mods = "Control"
-
-[[keyboard.bindings]]
-action = "Copy"
-key = "W"
-mods = "Alt"
-
-[[keyboard.bindings]]
-action = "ScrollLineUp"
-key = "PageUp"
-
-[[keyboard.bindings]]
-action = "ScrollLineDown"
-key = "PageDown"
-
-[[keyboard.bindings]]
-action = "ScrollHalfPageUp"
-key = "PageUp"
-mods = "Shift"
-
-[[keyboard.bindings]]
-action = "ScrollHalfPageDown"
-key = "PageDown"
-mods = "Shift"
+#[[keyboard.bindings]]
+#action = "ScrollLineUp"
+#key = "PageUp"
+#
+#[[keyboard.bindings]]
+#action = "ScrollLineDown"
+#key = "PageDown"
+#
+#[[keyboard.bindings]]
+#action = "ScrollHalfPageUp"
+#key = "PageUp"
+#mods = "Shift"
+#
+#[[keyboard.bindings]]
+#action = "ScrollHalfPageDown"
+#key = "PageDown"
+#mods = "Shift"
 
 [scrolling]
 history = 10000
@@ -106,7 +96,7 @@ decorations = "full"
 decorations_theme_variant = "None"
 dynamic_padding = false
 dynamic_title = true
-opacity = 0.9
+opacity = 0.7
 resize_increments = false
 startup_mode = "Windowed"
 title = "Alacritty"
@@ -116,5 +106,5 @@ general = "Alacritty"
 instance = "Alacritty"
 
 [window.padding]
-x = 0
-y = 0
+x = 1
+y = 1

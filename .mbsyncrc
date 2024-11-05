@@ -2,7 +2,7 @@ IMAPAccount gmail
 Host imap.gmail.com
 User rbeckettvt@gmail.com
 AuthMechs XOAUTH2
-PassCmd "oauth2.py -t ~/.gmail.gpg"
+PassCmd "oauth2.py -t ~/.gmail.gpg || notify-send 'MBSYNC:' 'ERROR: <b>GMAIL</b> reauthenticate'"
 SSLType IMAPS
 Port 993
 SSLVersions TLSv1.3
@@ -62,7 +62,7 @@ Channel gmail-starred
 IMAPAccount rpi
 Host outlook.office365.com
 User becker3@rpi.edu
-PassCmd "oauth2.py -t ~/.rpi.gpg"
+PassCmd "oauth2.py -t ~/.rpi.gpg || notify-send 'MBSYNC:' 'ERROR: <b>RPI</b> reauthenticate'"
 Port 993
 SSLType IMAPS
 AuthMechs XOAUTH2
