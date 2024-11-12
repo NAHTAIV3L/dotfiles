@@ -4,3 +4,4 @@
 /.vim/undodir/
 /.config/emacs/undotreefiles/
 /.config/emacs/elpa/
+/.config/nvim/lazy-lock.json

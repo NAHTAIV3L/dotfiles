@@ -11,6 +11,8 @@ vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 vim.keymap.set("n", "<leader>k", "<cmd>:bd<CR>")
 vim.keymap.set("n", "<leader>k", "<cmd>:bd<CR>")
 
+vim.keymap.set("n", "<leader>=", FormatBuffer)
+
 vim.keymap.set({"n", "v"}, "<leader>d", "\"_d")
 vim.keymap.set("n", "<leader>p", "\"+p")
 vim.keymap.set("v", "<leader>y", "\"+y")
