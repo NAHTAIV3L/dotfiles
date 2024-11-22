@@ -9,13 +9,26 @@ function FormatBuffer()
     vim.fn.winrestview(save_view)
 end
 
-vim.api.nvim_create_autocmd("BufWritePre", {
-    pattern = "*",
-    command = ":%s/\\s\\+$//e",
+vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+    pattern = {"*"},
+    callback = function()
+        local save_cursor = vim.fn.getpos(".")
+        vim.cmd([[%s/\s\+$//e]])
+        vim.fn.setpos(".", save_cursor)
+    end,
 })
 
+-- vim.api.nvim_create_autocmd("BufWritePre", {
+--     pattern = "*",
+--     command = ":%s/\\s\\+$//e",
+-- })
+
 vim.filetype.add {
-    extension = { rasi = 'rasi' },
+    extension = {
+        rasi = 'rasi',
+        vert = "glsl",
+        frag = "glsl",
+    },
     pattern = {
         ['.*/waybar/config'] = 'jsonc',
         ['.*/mako/config'] = 'dosini',

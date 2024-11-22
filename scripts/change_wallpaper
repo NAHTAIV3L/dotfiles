@@ -23,13 +23,13 @@ file=$(echo $choices | tr ' ' '\n' |
     -x \$FZF_PREVIEW_LEFT -y \$FZF_PREVIEW_TOP \
     --max-width \$FZF_PREVIEW_COLUMNS --max-height \$FZF_PREVIEW_LINES \
     -f $WALLPAPER_DIR/{}")
-    ueberzugpp cmd -s "$SOCKET" -a exit
+ueberzugpp cmd -s "$SOCKET" -a exit
 
-    if [ -z $file ]; then
-        exit 1
-    fi
+if [ -z $file ]; then
+    exit 1
+fi
 
-    cd $WALLPAPER_DIR
-    ln -sfn $file current_wallpaper
-    pkill -x hyprpaper
-    hyprpaper 2>&1 1>/dev/null &
+cd $WALLPAPER_DIR
+ln -sfn $file current_wallpaper
+pkill -x hyprpaper
+hyprpaper 2>&1 1>/dev/null &
