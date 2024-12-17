@@ -1,67 +1,86 @@
 {
-  "layer": "top",
-  "height": 34,
-//  "margin": "10 10 0 10",
+    "layer": "top",
+    "height": 34,
 
-  "modules-left": ["hyprland/workspaces"],
-  "modules-center": ["clock"],
-  "modules-right": ["mpris", "wireplumber", "custom/brightness", "battery", "cpu", "memory", "network"],
-  "hyprland/workspaces": {
-    "format": "{id}",
-  },
-  "network": {
-    "format-wifi": "{essid} {signalStrength}% ",
-    "format-ethernet": "{ipaddr}/{cidr}",
-    "format-disconnected": "Disconnected ",
-    "tooltip-format": "{ifname}: {gwaddr}",
-    "format": "{ifname}: {essid}"
-  },
-  "hyprland/window": {
-    "format": "{class}",
-  },
-  "cpu": {
-    "format": "{usage}% ",
-    "interval": 1,
-  },
-  "memory": {
-    "format": "{percentage}% ",
-    "interval": 1,
-  },
-  "custom/brightness": {
-    "interval": 1,
-    "format": "{}% 󰃟",
-    "exec": "getbright"
-  },
-  "clock": {
-    // "timezone": "America/New_York",
-    "format": "{:%a %r}",
-    "tooltip-format": "{:%d %B %Y}",
-    "interval": 1,
-  },
-  "wireplumber": {
-    "format": "{volume}% {icon}",
-    "format-muted": "",
-    "tooltip-format": "{volume}% {node_name}",
-    "scroll-step": 0,
-    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
-    "on-click-right": "helvum",
-    "format-icons": ["", "", ""]
-  },
-  "battery": {
-    "bat": "BAT0",
-    "interval": 0,
-    "format-charging": "{capacity}% 󰂄",
-    "format-not charging": "{capacity}% 󰂃",
-    "format-discharging": "{capacity}% {icon}",
-    "format": "{capacity}% {icon}",
-    "format-icons": ["󱊡", "󱊢", "󱊣"],
-    "interval": 1,
-  },
-  "mpris": {
-    "format": "{dynamic}",
-    "format-paused": "[paused] {dynamic}",
-    "dynamic-order": ["title", "artist"],
-    "interval": 1,
-    "max-length": 25,
-  },
+    "modules-left": ["hyprland/workspaces"],
+    "modules-center": ["clock"],
+    "modules-right": ["mpris", "wireplumber", "custom/brightness", "battery", "cpu", "memory", "network"],
+    "hyprland/workspaces": {
+        "format": "{icon}",
+        "format-icons": {
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
+            "9": "9",
+            "10": "1",
+            "11": "2",
+            "12": "3",
+            "13": "4",
+            "14": "5",
+            "15": "6",
+            "16": "7",
+            "17": "8",
+            "18": "9",
+        }
+    },
+    "network": {
+        "format-wifi": "{essid} {signalStrength}% ",
+        "format-ethernet": "{ipaddr}/{cidr}",
+        "format-disconnected": "Disconnected ",
+        "tooltip-format": "{ifname}: {gwaddr}",
+        "format": "{ifname}: {essid}"
+    },
+    "hyprland/window": {
+        "format": "{class}",
+    },
+    "cpu": {
+        "format": "{usage}% ",
+        "interval": 1,
+    },
+    "memory": {
+        "format": "{percentage}% ",
+        "interval": 1,
+    },
+    "custom/brightness": {
+        "interval": 1,
+        "format": "{}% 󰃟",
+        "exec": "getbright"
+    },
+    "clock": {
+        // "timezone": "America/New_York",
+        "format": "{:%a %r}",
+        "tooltip-format": "{:%d %B %Y}",
+        "interval": 1,
+    },
+    "wireplumber": {
+        "format": "{volume}% {icon}",
+        "format-muted": "",
+        "tooltip-format": "{volume}% {node_name}",
+        "scroll-step": 0,
+        "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+        "on-click-right": "helvum",
+        "format-icons": ["", "", ""]
+    },
+    "battery": {
+        "bat": "BAT0",
+        "interval": 0,
+        "format-charging": "{capacity}% 󰂄",
+        "format-not charging": "{capacity}% 󰂃",
+        "format-discharging": "{capacity}% {icon}",
+        "format": "{capacity}% {icon}",
+        "format-icons": ["󱊡", "󱊢", "󱊣"],
+        "interval": 1,
+    },
+    "mpris": {
+        "format": "{dynamic}",
+        "format-paused": "[paused] {dynamic}",
+        "dynamic-order": ["title", "artist"],
+        "interval": 1,
+        "max-length": 25,
+    },
 }
