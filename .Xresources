@@ -1,2 +1,5 @@
-Xcursor.theme: Adwaita
+Xcursor.theme: phinger-cursors-dark
+Xcursor.size: 24
 *.font: -PfEd-DejaVu Sans Mono-regular-normal-normal-*-13-*-*-*-m-0-iso10646-1
+Nsxiv.window.background: black
+Nsxiv.window.foreground: white

@@ -1,0 +1,21 @@
+#!/bin/sh
+
+volume=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null | awk -F' ' '{ printf("%3d", $2 * 100)}')
+muted=$(wpctl get-volume @DEFAULT_SINK@ 2>/dev/null | grep MUTED)
+
+if [ "$1" = "icon" ]; then
+    if [ ! -z "$muted" ]; then
+        echo ""
+    else
+        if [ "$volume" -lt "50" ]; then
+            echo " "
+        else
+            echo " "
+        fi
+    fi
+    exit 0
+elif [ "$1" = "str" ]; then
+    echo "$volume"
+else
+    echo "$volume" | sed 's/\s//g'
+fi

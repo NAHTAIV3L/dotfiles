@@ -1,0 +1,35 @@
+#!/bin/sh
+
+first=0
+
+if [ "$1" = "status" ]; then
+    playerctl --follow status | while read status; do
+        if [ $status = "Playing" ]; then
+            echo ""
+        else
+            echo ""
+        fi
+    done
+elif [ "$1" = "title" ]; then
+    playerctl metadata --format '{{ title }}'
+    playerctl --follow metadata --format '{{ title }}' | while read title; do
+        [ "$first" = 0 ] && first=1 || echo "$title"
+    done
+elif [ "$1" = "artist" ]; then
+    playerctl metadata --format '{{ artist }}'
+    playerctl --follow metadata --format '{{ artist }}' | while read artist; do
+        [ "$first" = 0 ] && first=1 || echo "$artist"
+    done
+elif [ "$1" = "art" ]; then
+    playerctl metadata --format '{{ mpris:artUrl }}'
+    playerctl --follow metadata --format '{{ mpris:artUrl }}' | while read art; do
+        [ "$first" = 0 ] && first=1 || echo "$art"
+    done
+elif [ "$1" = "position" ]; then
+    pos=$(playerctl position)
+    len=$(playerctl metadata --format '{{mpris:length}}' | awk '{printf("%d", $0 / 1000000)}')
+    echo "$pos / $len" | bc -l
+else
+    echo "failed"
+    exit 1
+fi

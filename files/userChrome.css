@@ -154,7 +154,6 @@ panel {
     --panel-border-radius: var(--rounding) !important;
     background-color: var(--bg) !important;
     border: var(--width) solid var(--accent) !important;
-    opacity: 0.9 !important;
 }
 
 #urlbar {

@@ -1,0 +1,6 @@
+#!/bin/sh
+
+hyprlock 1>/dev/null &
+
+sleep 3
+echo mem > /sys/power/state

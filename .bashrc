@@ -14,19 +14,24 @@ if [[ $- != *i* ]] ; then
     return
 fi
 
+. /etc/profile
+export PATH="$PATH:$HOME/.dotfiles/scripts:$HOME/.local/share/cargo/bin:/opt/ghidra:$HOME/.local/bin"
 # disable ctrl-s and ctrl-q
 stty -ixon
 
 export PS1="[\[\033[00;32m\]\u@\h\[\033[00;36m\] \W\[\033[00m\]]$ "
 # turn on infinite history
-export HISTSIZE=""
+export HISTSIZE="-1"
+export HISTFILESIZE="-1"
 
-#alias ls="ls --color=auto"
-alias ls="eza"
+bind '"\e\\":"project\n"'
+
+alias ls="ls --color=auto"
+alias project=". project"
+alias htop="doas htop"
 alias nv="nvim"
 alias grep="grep --color=auto"
 alias n="ncmpcpp -q"
 alias b="bluetoothctl"
 alias e="emacsclient -c -a emacs"
 alias tms="tmux-sessionizer"
-alias emerge-log="doas tail -f /var/log/emerge-fetch.log"

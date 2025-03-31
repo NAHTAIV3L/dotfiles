@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ "$TERM" = "linux" ]; then
+    exit 1
+fi
+
+dir="$(find ~/dev ~/dev/cpp ~/latex/ -mindepth 2 -maxdepth 2 -type d | fzf)"
+if [ -z "$dir" ]; then
+    return
+else
+    cd "$dir"
+fi

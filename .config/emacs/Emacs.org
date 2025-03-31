@@ -68,14 +68,6 @@
                       :height 97)
 #+end_src
 
-** Background tranparency
-
-#+begin_src emacs-lisp
-  (setq background-transparancy '(90 . 90))
-  (set-frame-parameter (selected-frame) 'alpha background-transparancy)
-  (add-to-list 'default-frame-alist `(alpha . ,background-transparancy))
-#+end_src
-
 * Random Functions
 
 some helper functions that i found and edited
@@ -632,15 +624,9 @@ Automatically tangle org config files into .el files.
     :ensure nil
     :ensure nil
     :commands (dired dired-jump)
-    :bind (:map dired-mode-map ("SPC" . dired-single-buffer))
     :config
-    (setq dired-dwim-target t)
-    (evil-collection-define-key 'normal 'dired-mode-map
-      "h" 'dired-single-up-directory
-      "l" 'dired-single-buffer))
+    (setq dired-dwim-target t)))
 
-  (use-package dired-single
-    :commands (dired dired-jump))
 #+end_src
 
 * Mail

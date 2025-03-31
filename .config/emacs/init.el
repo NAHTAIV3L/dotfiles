@@ -52,10 +52,6 @@
                     :family "Monospace"
                     :height 97)
 
-(setq background-transparancy '(90 . 90))
-(set-frame-parameter (selected-frame) 'alpha background-transparancy)
-(add-to-list 'default-frame-alist `(alpha . ,background-transparancy))
-
 (defun erc-tls-oftc ()
   (interactive)
   (erc-tls :server "irc.oftc.net"
@@ -441,15 +437,8 @@
   :ensure nil
   :ensure nil
   :commands (dired dired-jump)
-  :bind (:map dired-mode-map ("SPC" . dired-single-buffer))
   :config
-  (setq dired-dwim-target t)
-  (evil-collection-define-key 'normal 'dired-mode-map
-    "h" 'dired-single-up-directory
-    "l" 'dired-single-buffer))
-
-(use-package dired-single
-  :commands (dired dired-jump))
+  (setq dired-dwim-target t)))
 
 (use-package mu4e
   :ensure nil

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+mpstat --dec=0 1 | while read line; do
+    echo $line | awk '{ printf("%3d\n", (100-$13)) }' 2>/dev/null
+done

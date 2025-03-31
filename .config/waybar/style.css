@@ -1,54 +1,50 @@
-
 * {
-    font-family: "DejaVu Sans Mono", "Symbols Nerd Font";
-    font-size: 14px;
-    /* border-radius: 15px */
+    font-family: "DejaVu Sans Mono", "Symbols Nerd Font", "IPAGothic Bold";
 }
 
 window#waybar {
-    /* background-color: rgba(13, 27, 42, 0.5); */
-    background-color: rgba(0, 0, 0, 0.0);
-    /* color: rgba(228, 228, 239, 1); */
-    /* border: 2px solid rgba(51, 102, 0, 0.8); */
-    /* border-radius: 10px; */
+    background-color: #100d18;
+    border-radius: 10px;
+    font-size: 14px;
 }
 
 .modules-right {
-    /* background-color: rgba(51, 102, 0, 0.5); */
-    /* margin: 0 10px 0 0; */
     padding: 0 10px;
 }
-
 
 tooltip {
     background-color: rgba(55, 55, 55, 0.8);
     color: rgba(255, 255, 255, 1.0);
-    /*border: 2px solid ;*/
     border-radius: 15px;
 }
+
+
 #workspaces button {
-    /*color: rgba(0, 163, 32, 1);*/
-    /*color: rgba(154, 101, 113, 1);*/
-    /*color: rgba(169, 120, 130, 1);*/
-    color: rgba(255, 255, 255, 1.0);
-    /*color: rgba(228, 228, 239, 1);*/
+    color: #a2dbe3;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 6px 11px 10px 11px;
 }
 
 #workspaces button.empty {
-    /*color: rgba(228, 228, 239, 1);*/
-    color: rgba(176, 176, 176, 1.0);
+    color: rgba(100, 100, 100, 1.0);
+    font-size: 20px;
+    font-weight: bold;
+    padding: 6px 11px 10px 11px;
 }
 
 #workspaces button.focused {
-    /*color: rgba(0, 163, 32, 1);*/
-    /*color: rgba(207, 109, 114, 1);*/
-    color: rgba(93, 255, 255, 1.0);
+    color: #a2dbe3;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 6px 11px 10px 11px;
 }
 
 #workspaces button.active {
-    /*color: rgba(0, 163, 32, 1);*/
-    /*color: rgba(207, 109, 114, 1);*/
-    color: rgba(93, 255, 255, 1.0);
+    color: #00cc88;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 6px 11px 10px 11px;
 }
 
 #workspaces button:hover,
@@ -56,9 +52,12 @@ tooltip {
     box-shadow: none;
     text-shadow: none;
     transition: none;
-    background: rgba(50, 50, 50, 0.5);
-    border-radius: 15px;
-    border-color: rgba(50, 50, 50, 0.5)
+    background: rgba(50, 50, 50, 0.0);
+    /*border-radius: 15px;*/
+    border-color: rgba(50, 50, 50, 0.0);
+    font-size: 20px;
+    font-weight: bold;
+    color: #00cc88;
 }
 
 
@@ -68,7 +67,8 @@ tooltip {
 #battery,
 #cpu,
 #memory,
+#mpris,
 #clock {
-    color: rgba(255, 255, 255, 1.0);
-    padding: 0 10px;
+    color: #a2dbe3;
+    padding: 0 6px;
 }

@@ -96,7 +96,7 @@ decorations = "full"
 decorations_theme_variant = "None"
 dynamic_padding = false
 dynamic_title = true
-opacity = 0.5
+opacity = 0.7
 resize_increments = false
 startup_mode = "Windowed"
 title = "Alacritty"
@@ -106,5 +106,5 @@ general = "Alacritty"
 instance = "Alacritty"
 
 [window.padding]
-x = 1
-y = 1
+x = 3
+y = 3

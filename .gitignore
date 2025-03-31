@@ -5,3 +5,4 @@
 /.config/emacs/undotreefiles/
 /.config/emacs/elpa/
 /.config/nvim/lazy-lock.json
+/.vim/.netrwhist

@@ -6,28 +6,25 @@ if [[ -f ~/.bashrc ]] ; then
     . ~/.bashrc
 fi
 
+
 export LESSHISTFILE="-"
 export CARGO_HOME="$HOME/.local/share/cargo"
 export XCURSOR_THEME="Adwaita"
 export LC_COLLATE="C"
 # Custom scripts
-export PATH="$PATH:$HOME/.dotfiles/scripts:$HOME/.local/share/cargo/bin"
-export PATH="$PATH:/home/nahtaiv3l/.dotnet/tools"
-export PATH="$PATH:/opt/ghidra"
-export SUDO_ASKPASS="$HOME/.dotfiles/scripts/dmenupass"
-export ANDROID_HOME="$HOME/Android/Sdk"
+export PATH="$PATH:$HOME/.dotfiles/scripts:$HOME/.local/share/cargo/bin:$HOME/.local/bin"
 
 if [[ -t 0 && $(tty) == /dev/tty1 && ! $DISPLAY ]]; then
-    read -p "hyprland or dwm: "  -t 1 hello
-    hello=$(printf %.1s "$hello")
-    hello=$(echo "$hello" | tr '[:upper:]' '[:lower:]')
-    export WINDOWMANAGER="$hello"
-
-    if [ -z "$WINDOWMANAGER" ] || [ "$WINDOWMANAGER" = "h" ] ; then
-        export _JAVA_AWT_WM_NONREPARENTING=1
-        export XCURSOR_SIZE=24
-        exec dbus-launch --exit-with-session Hyprland
-    else
-        exec startx
-    fi
+    # read -p "hyprland or dwm: "  -t 1 hello
+    # hello=$(printf %.1s "$hello")
+    # hello=$(echo "$hello" | tr '[:upper:]' '[:lower:]')
+    # export WINDOWMANAGER="$hello"
+    #
+    # if [ -z "$WINDOWMANAGER" ] || [ "$WINDOWMANAGER" = "h" ] ; then
+    export _JAVA_AWT_WM_NONREPARENTING=1
+    export XCURSOR_SIZE=24
+    exec dbus-launch --exit-with-session Hyprland
+    # else
+    #     exec startx
+    # fi
 fi

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+eww daemon
+
+for i in $(hyprctl monitors -j | jq -r '.[].id'); do
+    eww open-many bar:$i --arg $i:monitor=$i
+done
+
+exec $HOME/.config/eww/scripts/hyprland_monitoradd.py

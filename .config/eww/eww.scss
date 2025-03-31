@@ -1,0 +1,135 @@
+$background: #100d18;
+$foreground: #a2dbe3;
+$focused-workspace: #00cc88;//rgba(93, 255, 255, 1.0);
+
+* {
+  all: unset; // Unsets everything so you can style everything from scratch
+  font-family: "DejaVu Sans Mono";
+  font-size: 14px;
+}
+
+// Global Styles
+.eww_bar {
+  margin: 10px 10px 0px 10px;
+  background-color: $background;
+  // background-color: rgba(0, 0, 0, 0.0);
+  border-radius: 10px;
+  color: $foreground;
+}
+
+.scale trough {
+  all: unset;
+  background-color: #444444;
+  border-radius: 50px;
+  min-height: 3px;
+  min-width: 50px;
+  margin-left: 10px;
+  margin-right: 20px;
+}
+.scale trough highlight {
+  all: unset;
+  background-color: #00cc88;
+  color: #000000;
+  border-radius: 10px;
+}
+
+.tt {
+  background-color: $background;
+  color: $foreground;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid $focused-workspace;
+}
+
+.workspace {
+  padding: 6px 14px 10px 14px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.workspaceclick:hover .workspace{
+  // box-shadow: none;
+  // text-shadow: none;
+  // transition: none;
+  // background: rgba(50, 50, 50, 0.5);
+  // border-radius: 10px;
+  // border-color: rgba(50, 50, 50, 0.5);
+}
+
+.workspaceclick:hover .workspace .workspace_focused,
+.workspaceclick:hover .workspace .workspace_active,
+.workspaceclick:hover .workspace .workspace_empty {
+  color: $focused-workspace;
+}
+
+.workspace_empty {
+  color: rgba(100, 100, 100, 1.0);
+  font-size: inherit;
+  // color: $foreground;
+}
+
+.workspace_focused {
+  color: $focused-workspace;
+  font-size: inherit;
+}
+
+.workspace_active {
+  color: $foreground;
+  // color: rgba(255, 255, 255, 1.0);
+  font-size: inherit;
+}
+
+.right-side {
+  padding-right: 20px;
+}
+
+.cpu {
+  padding: 0px 5px 0px 0px;
+}
+.music {
+  padding: 10px 0px 10px 14px;
+  margin: 0px;
+}
+
+.volume,
+.battery
+.brightness
+.network {
+  padding: 10px 0px 10px 0px;
+  margin: 0px 10px 0px 10px;
+}
+
+.volume-text {
+  padding: 0px 0px 0px 0px;
+  margin: 0px 0px 0px -5px;
+}
+.volume-slider {
+  padding: 0px 0px 0px 0px;
+  margin: 0px -5px 0px 0px;
+}
+
+.media_window {
+  background-color: rgba($background, 0.8);
+  color: $foreground;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.media_data {
+    margin-left: 10px;
+    margin-right: 17px;
+}
+
+.media_art_popup_box {
+    min-width: 100px;
+    min-height: 100px;
+    margin: 15px 0px 15px 15px;
+}
+
+.media_artist_popup {
+    margin: 0px 15px 0px 10px;
+}
+.media_buttons {
+    font-size: 20px;
+    margin-bottom: 2px;
+}

@@ -1,0 +1,22 @@
+#!/bin/bash
+
+dev=$(ip a | grep "state UP" | awk -F': ' '{printf($2)}')
+type=$(echo $dev | cut -c1-1)
+
+if [ "$1" = "ip" ]; then
+    echo $(ifconfig $dev | grep -E "inet |inet6 " | head -n 1 | sed 's/.*addr\:\([^\s]*\)\s.*/\1/' | cut -d'/' -f1 | xargs)
+    exit 0
+elif [ "$1" = "dev" ]; then
+    echo $dev
+    exit 0
+fi
+
+
+if [ "$type" = "w" ]; then
+    network=$(iwctl station $dev show | grep "Connected network" | awk -F' ' '{printf($3)}')
+    echo $network
+elif [ "$type" = "e" ]; then
+    echo "$dev"
+else
+    echo "Disconnected"
+fi

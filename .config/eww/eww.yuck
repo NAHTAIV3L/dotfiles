@@ -1,0 +1,282 @@
+(defwindow bar [monitor]
+    :monitor monitor
+    :geometry (geometry
+        :x "0%"
+        :y "0%"
+        :width "100%"
+        :height "10px"
+        :anchor "top center")
+    :exclusive true
+    (bar :monitor monitor))
+
+(defwindow music-window [monitor]
+    :monitor monitor
+    :exclusive false
+    :stacking "overlay"
+    :geometry (geometry
+        :x "375px"
+        :y "0px"
+        :width "380px"
+        :height "100px"
+        :anchor "top left")
+    (mw-widget))
+
+(defwidget mw-widget []
+    (eventbox
+        :onhoverlost "eww close music-window"
+        (box
+            :class "media_window"
+            :halign "fill"
+            :valign "fill"
+            :orientation "v"
+            :space-evenly true
+            (box
+                :orientation "h"
+                :space-evenly false
+                :valign "center"
+                :halign "start"
+                :spacing 20
+                (box
+                    :class "media_art_popup_box"
+                    (eventbox
+                        :cursor "pointer"
+                        :onclick "eww close music-window & xdg-open ${music-image-path}"
+                        (image
+                            :class "media_art_popup"
+                            :valign "center"
+                            :halign "center"
+                            :path {music-image-path == "" ? "/home/nahtaiv3l/.config/eww/no-art.jpg" : replace(music-image-path, "file\:\/\/", "")}
+                            :image-width 100
+                            :image-height 100)))
+                (box
+                    :valign "center"
+                    :halign "fill"
+                    :width 245
+                    :orientation "v"
+                    :class "media_data"
+                    :spacing 20
+                    (label
+                        :class "media_title_popup"
+                        :text "${music-title}"
+                        :halign "center")
+                    (label
+                        :class "media_artist_popup"
+                        :text "${music-artist}"
+                        :halign "center")
+                    (box
+                        :orientation "h"
+                        :halign "fill"
+                        :valign "fill"
+                        :class "media_buttons_box_popup"
+                        :space-evenly true
+                        (eventbox
+                            :cursor "pointer"
+                            (button
+                                :onclick "playerctl previous"
+                                ""))
+                        (eventbox
+                            :cursor "pointer"
+                            (button
+                                :onclick "playerctl position 5-"
+                                ""))
+                        (eventbox
+                            :cursor "pointer"
+                            (button
+                                :onclick "playerctl play-pause"
+                                "${music-status}"))
+                        (eventbox
+                            :cursor "pointer"
+                            (button
+                                :onclick "playerctl position 5+"
+                                ""))
+                        (eventbox
+                            :cursor "pointer"
+                            (button
+                                :onclick "playerctl next"
+                                ""))))
+            ))))
+
+
+(defwidget bar [monitor]
+    (centerbox
+        :class "eww_bar"
+        :orientation "h"
+        (left-side :monitor monitor)
+        (time)
+        (right-side)))
+
+(defwidget music [monitor]
+    (eventbox
+        :onclick "eww close music-window 2>/dev/null || eww open-many music-window --arg monitor=${monitor}"
+        :cursor "pointer"
+        (box
+            :class "music"
+            :space-evenly false
+            (label
+                :visible {music-title == "" || music-image-path == "stupid bug" ? false : true}
+                :truncate true
+                :limit-width 25
+                :text "${music-title} - ${music-artist}"))))
+
+(defwidget left-side [monitor]
+    (box
+        :class "left-side"
+        :space-evenly false
+        (workspaces :monitor monitor)
+        (music :monitor monitor)))
+
+(defwidget right-side []
+    (box
+        :class "right-side"
+        :halign "end"
+        :orientation "h"
+        :space-evenly false
+        (volum)
+        (brightness)
+        (battery)
+        (cpu)
+        (network)))
+
+(defwidget brightness []
+    (box
+        (eventbox
+            :class "brightness"
+            :onhover "eww update brightness-slider=true"
+            :onhoverlost "eww update brightness-slider=false"
+            (box :space-evenly false
+                (revealer
+                    :transition "slideright"
+                    :reveal brightness-slider
+                    :duration "250ms"
+                    (scale
+                        :flipped true
+                        :class "scale"
+                        :value {"${bright}" == "" ? 100 : "${bright}"}
+                        :orientation "h"
+                        :min 0
+                        :max 101
+                        :onchange "backlightctrl -set {}; eww update bright={}"))
+                (label :unindent false :text "${bright}% 󰃟  ")))))
+
+(defvar brightness-slider false)
+
+(defpoll bright :inital "10" :interval "1s"
+    "getbright")
+
+(defwidget volum []
+    (box
+        :class "volume"
+        :space-evenly false
+        (eventbox
+            :onhover "eww update volume-slider=true"
+            :onhoverlost "eww update volume-slider=false"
+            :onmiddleclick "wpctl set-mute @DEFAULT_SINK@ toggle"
+            :onrightclick "helvum &"
+            (box
+                :space-evenly false
+                (revealer
+                    :class "volume-slider"
+                    :transition "slideright"
+                    :reveal volume-slider
+                    :duration "250ms"
+                    (scale
+                        :flipped true
+                        :class "scale"
+                        :value {"${volume}" == "" ? 100 : "${volume}"}
+                        :orientation "h"
+                        :min 0
+                        :max 101
+                        :onchange "wpctl set-volume @DEFAULT_SINK@ {}%"))
+                (label
+                    :class "volume-text"
+                    :unindent false
+                    :text "${volume-str}% ${volume-icon}")))))
+(defvar volume-slider false)
+
+(defwidget network []
+    (box
+        :space-evenly false
+        (tooltip
+            :class "network"
+            (box
+                :class "tt"
+                :orientation "h"
+                (label :text "${network-dev}: ${network-ip}"))
+            (label :text "${network-status}  "))))
+
+(defwidget cpu []
+    (box :space-evenly false
+        :class "cpu"
+        (label :unindent false :text "${cpu-usage}%  ")))
+
+(defwidget battery []
+    (box
+        :class "battery"
+        :space-evenly false
+        (label :text "${battery-charge}% ${battery-icon}")))
+
+(defwidget time []
+    (box :space-evenly false
+        (tooltip
+            (calendar :class "tt")
+            (box
+                :orientation "h"
+                :space-evenly false
+                :halign "center"
+                {formattime(EWW_TIME, "%I:%M:%S")}))))
+
+(defwidget workspaces [monitor]
+    (box
+        :space-evenly false
+        (for workspace in "${workspaces-listener['monitors'][monitor]['workspaces']}"
+            (eventbox
+                :class "workspaceclick"
+                :cursor "pointer"
+                :onclick "hyprctl dispatch split-workspace ${workspace.id}"
+                (box :class "workspace"
+                    (label
+                        :class "${workspace.class}"
+                        :text "${workspace.str}"))))))
+
+(deflisten music-title
+    "scripts/getmusic title")
+
+(deflisten music-status
+    "scripts/getmusic status")
+
+(deflisten music-artist
+    "scripts/getmusic artist")
+
+(deflisten music-image-path :inital ""
+    "scripts/getmusic art")
+
+(deflisten workspaces-listener :inital "[]"
+    "scripts/parse_workspaces_hyprland.py")
+
+(deflisten volume :inital "0"
+    "scripts/getvolume; pactl subscribe | grep --line-buffered \"Event 'change'\" | while read -r _; do scripts/getvolume; done")
+
+(deflisten volume-icon :inital ""
+    "scripts/getvolume icon; pactl subscribe | grep --line-buffered \"Event 'change'\" | while read -r _; do scripts/getvolume icon; done")
+
+(deflisten volume-str :inital ""
+    "scripts/getvolume str; pactl subscribe | grep --line-buffered \"Event 'change'\" | while read -r _; do scripts/getvolume str; done")
+
+(deflisten cpu-usage :inital ""
+    "scripts/getcpuusage")
+
+(defpoll battery-charge :inital "100" :interval "1s"
+    "scripts/getbattery")
+
+(defpoll battery-icon :inital "" :interval "1s"
+    "scripts/getbattery icon")
+
+(defpoll network-status :interval "1s"
+    "scripts/getnetwork")
+
+(defpoll network-ip :interval "1s"
+    "scripts/getnetwork ip")
+
+(defpoll network-dev :interval "1s"
+    "scripts/getnetwork dev")
+

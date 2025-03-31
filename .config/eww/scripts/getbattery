@@ -1,0 +1,21 @@
+#!/bin/sh
+
+charge=$(cat /sys/class/power_supply/BAT0/capacity)
+state=$(cat /sys/class/power_supply/BAT0/status)
+
+if [ "$1" = "icon" ]; then
+    if [ "$state" = "Charging" ]; then
+        echo "󰂄"
+    else
+        if [ "$charge" -lt "33" ]; then
+            echo "󱊡"
+        elif [ "$charge" -lt "66" ]; then
+            echo "󱊢"
+        else
+            echo "󱊣"
+        fi
+    fi
+else
+    echo "$charge"
+fi
+

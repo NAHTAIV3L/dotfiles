@@ -87,10 +87,10 @@
 
     # Defines width in pixels of frame around the notification window.
     # Set to 0 to disable.
-    frame_width = 2
+    frame_width = 1
 
     # Defines color of the frame around the notification window.
-    frame_color = "#FFFFFF"
+    frame_color = "#00cc88"
 
     # Size of gap to display between notifications - requires a compositor.
     # If value is greater than 0, separator_height will be ignored and a border
@@ -118,7 +118,7 @@
 
     ### Text ###
 
-    font = DejaVu Sans Mono 9.7
+    font = DejaVu Sans Mono 10.6
 
     # The spacing between lines.  If the height is smaller than the
     # font height, it will get raised to the font height.
@@ -457,15 +457,15 @@
 [urgency_low]
     # IMPORTANT: colors have to be defined in quotation marks.
     # Otherwise the "#" and following would be interpreted as a comment.
-    background = "#0D1B2A80"
-    foreground = "#ffffff"
+    background = "#100d1880"
+    foreground = "#a2dbe3"
     timeout = 10
     # Icon for notifications with low urgency, uncomment to enable
     #icon = /path/to/icon
 
 [urgency_normal]
-    background = "#0D1B2A80"
-    foreground = "#ffffff"
+    background = "#100d1880"
+    foreground = "#a2dbe3"
     timeout = 10
     # Icon for notifications with normal urgency, uncomment to enable
     #icon = /path/to/icon
