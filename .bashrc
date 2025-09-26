@@ -25,6 +25,7 @@ export HISTSIZE="-1"
 export HISTFILESIZE="-1"
 
 bind '"\e\\":"project\n"'
+bind '"\e|":"tmux-sessionizer\n"'
 
 alias ls="ls --color=auto"
 alias project=". project"
@@ -34,4 +35,3 @@ alias grep="grep --color=auto"
 alias n="ncmpcpp -q"
 alias b="bluetoothctl"
 alias e="emacsclient -c -a emacs"
-alias tms="tmux-sessionizer"

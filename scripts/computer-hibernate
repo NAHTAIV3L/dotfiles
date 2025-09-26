@@ -1,6 +1,6 @@
 #!/bin/sh
 
-hyprlock 1>/dev/null &
+simlock 1>/dev/null &
 
 sleep 3
 echo disk > /sys/power/state

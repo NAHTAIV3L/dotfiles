@@ -36,10 +36,10 @@ fi
 
 cd $WALLPAPER_DIR
 ln -sfn $file current_wallpaper
-swww img --resize crop \
---transition-type center \
---transition-fps 60 \
---transition-duration 1 \
-$HOME/wallpapers/current_wallpaper
-# pkill -x hyprpaper
-# hyprpaper 2>&1 1>/dev/null &
+# swww img --resize crop \
+# --transition-type center \
+# --transition-fps 60 \
+# --transition-duration 1 \
+# $WALLPAPER_DIR/current_wallpaper
+pkill -x hyprpaper
+hyprpaper 2>&1 1>/dev/null &

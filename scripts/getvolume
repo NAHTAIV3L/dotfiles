@@ -1,6 +1,0 @@
-#!/bin/sh
-
-left=$(pactl get-sink-volume @DEFAULT_SINK@ | head -n 1 | awk -F' ' '{printf $5}' | cut -d'%' -f1)
-right=$(pactl get-sink-volume @DEFAULT_SINK@ | head -n 1 | awk -F' ' '{printf $12}' | cut -d'%' -f1)
-vol=$(echo "($left + $right) / 2" | bc)
-echo "$vol"

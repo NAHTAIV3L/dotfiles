@@ -25,6 +25,15 @@ vim.api.nvim_create_autocmd({ "BufWritePost" }, {
     end,
 })
 
+vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+    pattern = { "*.ms" },
+    callback = function(args)
+        local out, _ = args.file:gsub("ms$", "pdf")
+        local cmd = "bash -c \"groff -dpaper=letter -ms -Tpdf " .. args.file .. " > " .. out .. "\""
+        vim.cmd(cmd)
+    end,
+})
+
 vim.filetype.add {
     extension = {
         rasi = 'rasi',

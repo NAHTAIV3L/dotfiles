@@ -1,0 +1,3 @@
+#!/bin/sh
+
+find ~/dev ~/dev/cpp ~/latex/ -mindepth 2 -maxdepth 2 -type d

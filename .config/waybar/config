@@ -1,11 +1,14 @@
 {
     "layer": "top",
-    "margin": "10px 10px 0px 10px",
+    // "margin": "10px 10px 0px 10px",
 
     "modules-left": ["hyprland/workspaces", "mpris"],
     "modules-center": ["clock"],
     "modules-right": ["wireplumber", "custom/brightness", "cpu", "battery", "network"],
     "hyprland/workspaces": {
+        "persistent-workspaces": {
+            "*": [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ],
+        },
         "format": "{icon}",
         "format-icons": {
             "default": "○",
@@ -38,6 +41,13 @@
     "clock": {
         "format": "{:%I:%M:%S}",
         "interval": 1,
+        "tooltip": true,
+        "tooltip-format": "{calendar}",
+        "calendar": {
+            "format": {
+                "today": "<span background='#a2dbe3' color='#100d18'>{}</span>",
+            },
+        },
     },
     "wireplumber": {
         "format": "{volume}% {icon}",
@@ -63,6 +73,6 @@
         "format-paused": "[paused] {dynamic}",
         "dynamic-order": ["title", "artist"],
         "interval": 1,
-        "max-length": 25,
+        "max-length": 30,
     },
 }

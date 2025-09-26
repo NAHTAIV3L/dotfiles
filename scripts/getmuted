@@ -1,6 +1,0 @@
-#!/bin/sh
-if [ "$(pactl get-sink-mute @DEFAULT_SINK@ | cut -d' ' -f2)" = 'no' ]; then
-    echo ''
-else
-    echo " muted"
-fi

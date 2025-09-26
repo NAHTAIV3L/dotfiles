@@ -9,11 +9,11 @@ return {
                 range = 'prefix',
             },
             trigger = {
-                -- show_in_snippet = false,
-                -- show_on_keyword = false,
-                -- show_on_trigger_character = false,
-                -- show_on_accept_on_trigger_character = false,
-                -- show_on_insert_on_trigger_character = false,
+                show_in_snippet = false,
+                show_on_keyword = false,
+                show_on_trigger_character = false,
+                show_on_accept_on_trigger_character = false,
+                show_on_insert_on_trigger_character = false,
             },
             list = {
                 selection = {
@@ -22,8 +22,11 @@ return {
                 },
             },
             menu = {
+                border = "",
                 draw = {
-                    columns = { { "label", "label_description", gap = 1 }, { "kind" , "source_name", gap = 1} },
+                    columns = {
+                        { "label", "label_description", gap = 1 },
+                        { "kind" , "source_name", gap = 1} },
                 },
             },
             documentation = {
@@ -32,6 +35,9 @@ return {
             ghost_text = {
                 enabled = true,
             },
+        },
+        signature = {
+            enabled = false,
         },
         fuzzy = {
             prebuilt_binaries = {
@@ -61,7 +67,7 @@ return {
             },
         },
         sources = {
-            default = { 'lsp', 'path', 'snippets', 'buffer' },
+            default = { 'lsp', 'path', 'buffer', 'snippets' },
             providers = {
                 buffer = {
                     name = 'Buffer',

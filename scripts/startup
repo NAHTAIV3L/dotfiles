@@ -1,16 +1,8 @@
 #!/bin/sh
 backlightctrl -set 10
 gpgconf -K gpg-agent
-restartsearxng &
-swww-daemon 2>/dev/null 1>/dev/null &
 pipewire &
 mpd &
 dunst &
-waybar &
 gpg-agent --daemon
 mpd-mpris &
-swww img --resize crop \
---transition-type center \
---transition-fps 60 \
---transition-duration 1 \
-$HOME/wallpapers/current_wallpaper

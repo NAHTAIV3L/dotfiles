@@ -4,8 +4,8 @@
 
 window#waybar {
     background-color: #100d18;
-    border-radius: 10px;
-    font-size: 14px;
+    border-radius: 0px;
+    font-size: 12px;
 }
 
 .modules-right {
@@ -13,38 +13,31 @@ window#waybar {
 }
 
 tooltip {
-    background-color: rgba(55, 55, 55, 0.8);
-    color: rgba(255, 255, 255, 1.0);
-    border-radius: 15px;
+    background-color: #100d18;
+    border-radius: 10px;
+    border: 0px;
 }
 
+tooltip label {
+    color: #a2dbe3;
+}
+
+#workspaces  {
+    font-size: 16px;
+    font-weight: bold;
+}
 
 #workspaces button {
     color: #a2dbe3;
-    font-size: 20px;
-    font-weight: bold;
-    padding: 6px 11px 10px 11px;
+    padding: 3px 5px 5px 5px;
 }
 
 #workspaces button.empty {
     color: rgba(100, 100, 100, 1.0);
-    font-size: 20px;
-    font-weight: bold;
-    padding: 6px 11px 10px 11px;
-}
-
-#workspaces button.focused {
-    color: #a2dbe3;
-    font-size: 20px;
-    font-weight: bold;
-    padding: 6px 11px 10px 11px;
 }
 
 #workspaces button.active {
     color: #00cc88;
-    font-size: 20px;
-    font-weight: bold;
-    padding: 6px 11px 10px 11px;
 }
 
 #workspaces button:hover,
@@ -52,11 +45,8 @@ tooltip {
     box-shadow: none;
     text-shadow: none;
     transition: none;
-    background: rgba(50, 50, 50, 0.0);
-    /*border-radius: 15px;*/
-    border-color: rgba(50, 50, 50, 0.0);
-    font-size: 20px;
-    font-weight: bold;
+    background: rgba(0, 0, 0, 0.0);
+    border-color: rgba(0, 0, 0, 0.0);
     color: #00cc88;
 }
 

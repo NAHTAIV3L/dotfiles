@@ -1,2 +1,0 @@
-GRUB_DISABLE_OS_PROBER="false"
-GRUB_CMDLINE_LINUX="snd_hda_intel.dmic_detect=0"

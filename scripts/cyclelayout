@@ -1,7 +1,0 @@
-#!/bin/sh
-if [ "$1" = "dvorak" ]; then
-    xmodmap $HOME/.dotfiles/kbdlayouts/dvp 
-else
-    xmodmap $HOME/.dotfiles/kbdlayouts/normal 
-fi
-xmodmap $HOME/.dotfiles/kbdlayouts/ctrlcapsswap 

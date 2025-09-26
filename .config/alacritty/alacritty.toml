@@ -1,29 +1,87 @@
+# Colors section of "Alacritty - TOML configuration file format"
+# https://github.com/alacritty/alacritty/blob/master/extra/man/alacritty.5.scd#colors
+
 [colors]
 draw_bold_text_with_bright_colors = false
 
-[colors.bright]
-black = "0x565575"
-blue = "0x65b2ff"
-cyan = "0x63f2f1"
-green = "0x62d196"
-magenta = "0x906cff"
-red = "0xff5458"
-white = "0xa6b3cc"
-yellow = "0xffb378"
+[colors.primary]
+foreground = "#e0def4"
+background = "#191724"
+dim_foreground = "#908caa"
+bright_foreground = "#e0def4"
+
+[colors.cursor]
+text = "#e0def4"
+cursor = "#524f67"
+
+[colors.hints.start]
+foreground = "#908caa"
+background = "#1f1d2e"
+
+[colors.hints.end]
+foreground = "#6e6a86"
+background = "#1f1d2e"
+
+[colors.selection]
+text = "#e0def4"
+background = "#403d52"
 
 [colors.normal]
-black = "0x100e23"
-blue = "0x91ddff"
-cyan = "0xaaffe4"
-green = "0x95ffa4"
-magenta = "0xc991e1"
-red = "0xff8080"
-white = "0xcbe3e7"
-yellow = "0xffe9aa"
+black = "#26233a"
+red = "#eb6f92"
+green = "#31748f"
+yellow = "#f6c177"
+blue = "#9ccfd8"
+magenta = "#c4a7e7"
+cyan = "#ebbcba"
+white = "#e0def4"
 
-[colors.primary]
-background = "0x1b182c"
-foreground = "0xcbe3e7"
+[colors.bright]
+black = "#6e6a86"
+red = "#eb6f92"
+green = "#31748f"
+yellow = "#f6c177"
+blue = "#9ccfd8"
+magenta = "#c4a7e7"
+cyan = "#ebbcba"
+white = "#e0def4"
+
+[colors.dim]
+black = "#6e6a86"
+red = "#eb6f92"
+green = "#31748f"
+yellow = "#f6c177"
+blue = "#9ccfd8"
+magenta = "#c4a7e7"
+cyan = "#ebbcba"
+white = "#e0def4"
+
+#[colors]
+#draw_bold_text_with_bright_colors = false
+#
+#[colors.bright]
+#black = "0x565575"
+#blue = "0x65b2ff"
+#cyan = "0x63f2f1"
+#green = "0x62d196"
+#magenta = "0x906cff"
+#red = "0xff5458"
+#white = "0xa6b3cc"
+#yellow = "0xffb378"
+#
+#[colors.normal]
+#black = "0x100e23"
+#blue = "0x91ddff"
+#cyan = "0xaaffe4"
+#green = "0x95ffa4"
+#magenta = "0xc991e1"
+#red = "0xff8080"
+#white = "0xcbe3e7"
+#yellow = "0xffe9aa"
+#
+#[colors.primary]
+#background = "0x1b182c"
+#foreground = "0xcbe3e7"
 
 [cursor.style]
 blinking = "Off"
@@ -59,7 +117,6 @@ y = 0
 [[hints.enabled]]
 command = "wl-copy"
 hyperlinks = true
-mouse.enabled = true
 regex = "(ipfs:|ipns:|magnet:|mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)[^\u0000-\u001F\u007F-\u009F<>\"\\s{-}\\^⟨⟩`]+"
 
 [[keyboard.bindings]]
@@ -96,7 +153,7 @@ decorations = "full"
 decorations_theme_variant = "None"
 dynamic_padding = false
 dynamic_title = true
-opacity = 0.7
+opacity = 1.0
 resize_increments = false
 startup_mode = "Windowed"
 title = "Alacritty"
