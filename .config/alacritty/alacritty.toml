@@ -4,57 +4,57 @@
 [colors]
 draw_bold_text_with_bright_colors = false
 
-[colors.primary]
-foreground = "#e0def4"
-background = "#191724"
-dim_foreground = "#908caa"
-bright_foreground = "#e0def4"
-
-[colors.cursor]
-text = "#e0def4"
-cursor = "#524f67"
-
-[colors.hints.start]
-foreground = "#908caa"
-background = "#1f1d2e"
-
-[colors.hints.end]
-foreground = "#6e6a86"
-background = "#1f1d2e"
-
-[colors.selection]
-text = "#e0def4"
-background = "#403d52"
-
-[colors.normal]
-black = "#26233a"
-red = "#eb6f92"
-green = "#31748f"
-yellow = "#f6c177"
-blue = "#9ccfd8"
-magenta = "#c4a7e7"
-cyan = "#ebbcba"
-white = "#e0def4"
-
-[colors.bright]
-black = "#6e6a86"
-red = "#eb6f92"
-green = "#31748f"
-yellow = "#f6c177"
-blue = "#9ccfd8"
-magenta = "#c4a7e7"
-cyan = "#ebbcba"
-white = "#e0def4"
-
-[colors.dim]
-black = "#6e6a86"
-red = "#eb6f92"
-green = "#31748f"
-yellow = "#f6c177"
-blue = "#9ccfd8"
-magenta = "#c4a7e7"
-cyan = "#ebbcba"
-white = "#e0def4"
+# [colors.primary]
+# foreground = "#e0def4"
+# background = "#191724"
+# dim_foreground = "#908caa"
+# bright_foreground = "#e0def4"
+#
+# [colors.cursor]
+# text = "#e0def4"
+# cursor = "#524f67"
+#
+# [colors.hints.start]
+# foreground = "#908caa"
+# background = "#1f1d2e"
+#
+# [colors.hints.end]
+# foreground = "#6e6a86"
+# background = "#1f1d2e"
+#
+# [colors.selection]
+# text = "#e0def4"
+# background = "#403d52"
+#
+# [colors.normal]
+# black = "#26233a"
+# red = "#eb6f92"
+# green = "#31748f"
+# yellow = "#f6c177"
+# blue = "#9ccfd8"
+# magenta = "#c4a7e7"
+# cyan = "#ebbcba"
+# white = "#e0def4"
+#
+# [colors.bright]
+# black = "#6e6a86"
+# red = "#eb6f92"
+# green = "#31748f"
+# yellow = "#f6c177"
+# blue = "#9ccfd8"
+# magenta = "#c4a7e7"
+# cyan = "#ebbcba"
+# white = "#e0def4"
+#
+# [colors.dim]
+# black = "#6e6a86"
+# red = "#eb6f92"
+# green = "#31748f"
+# yellow = "#f6c177"
+# blue = "#9ccfd8"
+# magenta = "#c4a7e7"
+# cyan = "#ebbcba"
+# white = "#e0def4"
 
 #[colors]
 #draw_bold_text_with_bright_colors = false

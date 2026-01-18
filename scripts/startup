@@ -1,8 +1,8 @@
 #!/bin/sh
-backlightctrl -set 10
-gpgconf -K gpg-agent
+backlightctrl -set 5
 pipewire &
+gpg-agent --daemon
 mpd &
 dunst &
-gpg-agent --daemon
 mpd-mpris &
+xrdb ~/.Xresources

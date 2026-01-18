@@ -2,5 +2,5 @@
 
 simlock &
 
-sleep 3
+sleep 1
 echo mem > /sys/power/state

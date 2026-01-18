@@ -7,7 +7,11 @@ killall xdg-desktop-portal-wlr
 killall xdg-desktop-portal
 
 sleep 1
-/usr/libexec/xdg-desktop-portal-hyprland &
+# if [ -z "$WINDOWMANAGER" ] || [ "$WINDOWMANAGER" = "d" ] ; then
+#     /usr/libexec/xdg-desktop-portal-wlr &
+# else
+    /usr/libexec/xdg-desktop-portal-hyprland &
+# fi
 
 sleep 1
 /usr/libexec/xdg-desktop-portal-gtk &

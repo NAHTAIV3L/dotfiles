@@ -1,0 +1,38 @@
+#!/bin/bash
+
+CONFIG_FILE_NAME="tmux-sessionizer.conf"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/tmux-sessionizer"
+CONFIG_FILE="$CONFIG_DIR/$CONFIG_FILE_NAME"
+
+if [[ -f "$CONFIG_FILE" ]]; then
+    source "$CONFIG_FILE"
+fi
+
+if [[ -f "$CONFIG_FILE_NAME" ]]; then
+    source "$CONFIG_FILE_NAME"
+fi
+
+find_dirs() {
+    paths=$(for path in "${TS_SEARCH_PATHS[@]}"; do
+        [[ -d "$path" ]] && find "$path" -mindepth 1 -maxdepth 1 -type d
+    done)
+    for x in ${paths}; do
+        echo "~/${x#/*/*/}"
+    done
+}
+
+startingdir=$(find_dirs | swenu -ecoil 15 -p "Starting dir:")
+[ -z "$startingdir" ] && exit 1
+
+name=$(echo "" | swenu -c -p "Enter Project Name:")
+[ -z "$name" ] && exit 1
+while [ -d ${startingdir/\~/$HOME}/$name ]; do
+    notify-send "Project already exists" "$startingdir/$name"
+    startingdir=$(find_dirs | swenu -ecoil 15 -p "Starting dir:")
+    [ -z "$startingdir" ] && exit 1
+
+    name=$(echo "" | swenu -c -p "Enter Project Name:")
+    [ -z "$name" ] && exit 1
+done
+
+mkdir -p "${startingdir/\~/$HOME}/$name"

@@ -2,5 +2,5 @@
 
 simlock 1>/dev/null &
 
-sleep 3
+sleep 1
 echo disk > /sys/power/state

@@ -13,3 +13,4 @@
 /.cache/
 /var/
 /etc/
+/tree-sitter/

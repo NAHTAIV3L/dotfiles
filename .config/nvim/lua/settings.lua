@@ -12,7 +12,9 @@ vim.opt.undofile = true
 
 vim.opt.scrolloff = 7
 
-vim.opt.termguicolors = true
+vim.opt.termguicolors = false
+vim.cmd.colorscheme("sorbet")
+vim.api.nvim_set_hl(0, "Visual", { reverse = true })
 vim.opt.background = "dark"
 
 vim.opt.incsearch = true
@@ -35,3 +37,4 @@ vim.keymap.set("", "<left>", "<nop>", { noremap = true })
 vim.keymap.set("i", "<right>", "<nop>", { noremap = true })
 vim.keymap.set("i", "<left>", "<nop>", { noremap = true })
 vim.opt.mousescroll = "ver:0,hor:0"
+

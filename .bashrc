@@ -15,11 +15,12 @@ if [[ $- != *i* ]] ; then
 fi
 
 . /etc/profile
-export PATH="$PATH:$HOME/.dotfiles/scripts:$HOME/.local/share/cargo/bin:/opt/ghidra:$HOME/.local/bin"
+export PATH="$PATH:$HOME/.dotfiles/scripts:$HOME/.local/bin"
 # disable ctrl-s and ctrl-q
 stty -ixon
 
 export PS1="[\[\033[00;32m\]\u@\h\[\033[00;36m\] \W\[\033[00m\]]$ "
+export GPG_TTY=$(tty)
 # turn on infinite history
 export HISTSIZE="-1"
 export HISTFILESIZE="-1"
@@ -29,7 +30,6 @@ bind '"\e|":"tmux-sessionizer\n"'
 
 alias ls="ls --color=auto"
 alias project=". project"
-alias htop="doas htop"
 alias nv="nvim"
 alias grep="grep --color=auto"
 alias n="ncmpcpp -q"

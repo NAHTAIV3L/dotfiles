@@ -1,0 +1,57 @@
+#!/bin/bash
+CONFIG_FILE_NAME="tmux-sessionizer.conf"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/tmux-sessionizer"
+CONFIG_FILE="$CONFIG_DIR/$CONFIG_FILE_NAME"
+
+if [ -f "$CONFIG_FILE" ]; then
+    source "$CONFIG_FILE"
+fi
+
+if [ -f "$CONFIG_FILE_NAME" ]; then
+    source "$CONFIG_FILE_NAME"
+fi
+
+emacsclient -e '(message "")' 2>&1 >/dev/null || emacs --daemon &
+
+find_dirs() {
+    paths=$(for path in "${TS_SEARCH_PATHS[@]}"; do
+        [[ -d "$path" ]] && find "$path" -mindepth 2 -maxdepth 2 -path '*/.git' -prune -o -type d -print
+    done)
+    open_files=$(emacsclient -e "(delq nil (mapcar 'buffer-file-name (buffer-list)))" | tr '\n' ' ' | sed 's/(\(.*\))/\1/' | sed 's/"\([^"]*\)"/\1/g')
+    for f in $open_files; do
+        for d in $paths; do
+            [ "$f" = "${f#$d}" ] || echo "EMACS ~/${d#/*/*/}"
+        done
+    done
+    for x in ${paths}; do
+        echo "~/${x#/*/*/}"
+    done
+}
+
+emacs_attached() {
+    [ "$(emacsclient -e '(- (length (frame-list)) 1)')" = 0 ] && return 1 || return 0
+}
+
+switch_to() {
+    if emacs_attached; then
+        emacsclient -e "(proj-swap \"$1\")"
+    else
+        emacsclient -ce "(proj-swap \"$1\")"
+    fi
+}
+
+selected=$(find_dirs | swenu -coil 15)
+[ -z "$selected" ] && exit 1;
+
+if [ ! -z "$(echo $selected | grep '^EMACS')" ]; then
+    selected=$(echo "$selected" | sed 's,^EMACS \(.*\)$,\1,')
+fi
+
+selected="${selected/\~/$HOME}"
+switch_to "$selected"
+
+client=$(hyprctl -j clients | jq '.[] | select(.class == "emacs")')
+workspace=$(echo ${client} | jq -r '.workspace.id')
+address=$(echo ${client} | jq -r '.address')
+
+hyprctl --batch "dispatch workspace $workspace ; dispatch focuswindow address:$address" 1>/dev/null

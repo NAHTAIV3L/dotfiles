@@ -34,7 +34,8 @@ return {
             "rust-analyzer",
             "texlab",
             "tinymist",
-            "zls"
+            "zls",
+            "pylsp",
         })
 
         vim.lsp.config("*", {
@@ -64,6 +65,12 @@ return {
                 }
             },
 
+        }
+        vim.lsp.config.clangd = {
+            cmd = {
+                "clangd",
+                "-header-insertion=never"
+            }
         }
         vim.diagnostic.config({
             -- update_in_insert = true,

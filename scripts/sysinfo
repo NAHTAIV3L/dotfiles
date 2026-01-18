@@ -22,6 +22,18 @@ get_volume() {
     wpctl get-volume @DEFAULT_SINK@ | awk -F' ' '{ printf "%s %s%% %s", $1, ($2 * 100), $3; }'
 }
 
+music_info() {
+    if [ "$(playerctl status 2>&1)" != "No players found" ]; then
+        if [ "$TERM" = "linux" ]; then
+            echo -e "\n<b>Now $(playerctl status 2>&1):</b>"
+        else
+            echo -e "\nNow $(playerctl status 2>&1):"
+        fi
+        playerctl metadata title 2>&1
+        playerctl metadata artist 2>&1
+    fi
+}
+
 if [ "$TERM" = "linux" ]; then
     notify-send \
         "System Info:" \
@@ -30,13 +42,13 @@ Time: $(date "+%I:%M:%S")
 $(get_volume)
 Brightness: ${brightness}%
 ${batstate}: ${batperc}%
-$(network_info)"
+$(network_info)$(music_info)"
 else
     echo "\
 Time: $(date "+%I:%M:%S")
 $(get_volume)
 Brightness: ${brightness}%
 ${batstate}: ${batperc}%
-$(network_info)"
+$(network_info)$(music_info)"
 fi
 

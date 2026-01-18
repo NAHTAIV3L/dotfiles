@@ -1,0 +1,88 @@
+#!/bin/bash
+CONFIG_FILE_NAME="tmux-sessionizer.conf"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/tmux-sessionizer"
+CONFIG_FILE="$CONFIG_DIR/$CONFIG_FILE_NAME"
+
+if [[ -f "$CONFIG_FILE" ]]; then
+    source "$CONFIG_FILE"
+fi
+
+if [[ -f "$CONFIG_FILE_NAME" ]]; then
+    source "$CONFIG_FILE_NAME"
+fi
+
+is_tmux_running() {
+    if $(tmux list-sessions 2>&1 >/dev/null); then
+        return 0
+    fi
+    return 1
+}
+
+has_session() {
+    tmux list-sessions | grep -q "^$1:"
+}
+
+find_dirs() {
+    if [[ -n "${TMUX}" ]]; then
+        current_session=$(tmux display-message -p '#S')
+        tmux list-sessions -F "TMUX #{session_name}" 2>/dev/null | grep -vFx "TMUX $current_session"
+    else
+        tmux list-sessions -F "TMUX #{session_name}" 2>/dev/null
+    fi
+
+    paths=$(for path in "${TS_SEARCH_PATHS[@]}"; do
+        [[ -d "$path" ]] && find "$path" -mindepth 2 -maxdepth 2 -path '*/.git' -prune -o -type d -print
+    done)
+    for x in ${paths}; do
+        echo "~/${x#/*/*/}"
+    done
+}
+
+tmux_attached() {
+    attached=0
+    if [ -z "$(tmux list-sessions | grep attached)" ]; then
+        attached=1
+    fi
+    return $attached
+}
+
+switch_to() {
+    if tmux_attached; then
+        tmux switch-client -t "$1"
+    else
+        alacritty -e tmux attach-session -t "$1"
+    fi
+}
+
+selected=$(find_dirs | swenu -coil 15)
+[ -z "$selected" ] && exit 1;
+
+if [ ! -z "$(echo $selected | grep '^TMUX')" ]; then
+    selected=$(echo "$selected" | sed "s,^TMUX \(.*\)$,\1,")
+fi
+
+selected="${selected/\~/$HOME}"
+
+selected_name=$(echo "${selected}" | sed 's,^.*/\([^/]*\)/\([^/]*\)$,\1-\2,' | tr . _)
+
+if ! is_tmux_running; then
+    tmux new-session -ds "$selected_name" -c "$selected"
+fi
+
+if ! has_session "$selected_name"; then
+    tmux new-session -ds "$selected_name" -c "$selected"
+fi
+
+switch_to "$selected_name"
+
+# if [ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
+#     client=$(echo -n "clients" | ncat -U /tmp/dwl.sock | jq '.[] | select(.title == "TMUX")')
+#     uid=$(echo $client | jq -r '.uid')
+#     echo -n "focus-client $uid" | ncat -U /tmp/dwl.sock
+# else
+    client=$(hyprctl clients -j | jq '.[] | select(.title == "TMUX")')
+    workspace=$(echo ${client} | jq -r '.workspace.id')
+    address=$(echo ${client} | jq -r '.address')
+
+    hyprctl --batch "dispatch workspace $workspace ; dispatch focuswindow address:$address" 1>/dev/null
+# fi
