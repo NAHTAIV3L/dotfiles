@@ -9,6 +9,9 @@
 (defvar proj-current nil
   "Current project root")
 
+(defvar proj-compile-commands '()
+  "Current project root")
+
 (defmacro proj--clean-path (path) `(string-replace (getenv "HOME") "~" ,path))
 
 (defun proj--get-paths ()
@@ -24,7 +27,7 @@
 
 (defun proj-goto-dir (dir)
   (interactive "D")
-  (setq proj-current (file-truename dir)))
+  (setq proj-current (file-truename (concat dir "/"))))
 
 (defun proj-swap (&optional dir quiet)
   (interactive)
@@ -80,12 +83,31 @@
       (dired proj-current)
     (proj-swap)))
 
+(defun proj-compile ()
+  (interactive)
+  (let* ((found (seq-find (lambda (f) (equal (car f) proj-current)) proj-compile-commands))
+         (command (cdr (or found '("default" . "make -k"))))
+         (compilation-buffer-name-function
+          (lambda (f)
+            (concat "*" (file-name-nondirectory (directory-file-name proj-current)) ": compilation*"))))
+    (setq compile-command command)
+    (call-interactively 'compile)
+    (unless (equal compile-command command)
+      (if found
+          (setq proj-compile-commands
+                (mapcar
+                 (lambda (d) (if (equal (car d) proj-current) (cons proj-current compile-command) d))
+                 proj-compile-commands))
+        (add-to-list 'proj-compile-commands (cons proj-current compile-command))))))
+
+
 (defvar proj-prefix-map
   (let ((map (make-sparse-keymap)))
     (define-key map "f" 'proj-find-file)
     (define-key map "b" 'proj-switch-to-buffer)
     (define-key map "p" 'proj-swap)
     (define-key map "d" 'proj-dired)
+    (define-key map "c" 'proj-compile)
     map))
 
 (define-key ctl-x-map "p" proj-prefix-map)
