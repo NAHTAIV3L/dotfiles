@@ -17,12 +17,14 @@ find_dirs() {
     paths=$(for path in "${TS_SEARCH_PATHS[@]}"; do
         [[ -d "$path" ]] && find "$path" -mindepth 2 -maxdepth 2 -path '*/.git' -prune -o -type d -print
     done)
-    open_files=$(emacsclient -e "(delq nil (mapcar 'buffer-file-name (buffer-list)))" | tr '\n' ' ' | sed 's/(\(.*\))/\1/' | sed 's/"\([^"]*\)"/\1/g')
-    for f in $open_files; do
+    unparsed_files=$(emacsclient -e "(delq nil (seq-map 'proj--get-buffer-path (buffer-list)))")
+    open_files=$(echo $unparsed_files | sed 's/(\(.*\))/\1/; s/"\([^"]*\)"/\1/g')
+    open_files=$(for f in $open_files; do eval realpath $f; done)
+    (for f in $open_files; do
         for d in $paths; do
             [ "$f" = "${f#$d}" ] || echo "EMACS ~/${d#/*/*/}"
         done
-    done
+    done) | sort -u
     for x in ${paths}; do
         echo "~/${x#/*/*/}"
     done

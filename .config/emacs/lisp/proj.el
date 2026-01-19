@@ -14,6 +14,9 @@
 
 (defmacro proj--clean-path (path) `(string-replace (getenv "HOME") "~" ,path))
 
+(defun proj--get-buffer-path (buffer)
+  (or (with-current-buffer buffer dired-directory) (buffer-file-name buffer)))
+
 (defun proj--get-paths ()
   (delete proj-current
    (flatten-list (mapcar
@@ -23,7 +26,6 @@
           (concat "find " p " " (mapconcat (lambda (param) (concat param " ")) proj-find-params)))
          "\n" t)))
             proj-locations))))
-
 
 (defun proj-goto-dir (dir)
   (interactive "D")
@@ -67,9 +69,7 @@
        (let* ((other-buffer (other-buffer (current-buffer)))
               (other-name (buffer-name other-buffer))
               (pred (lambda (b)
-                      (let ((path (or
-                                   (with-current-buffer (cdr b) dired-directory)
-                                   (buffer-file-name (cdr b)))))
+                      (let ((path (proj--get-buffer-path (cdr b))))
                         (when path (file-in-directory-p (file-truename path) proj-current))))))
          (read-buffer
           (concat "Switch to buffer in " (proj--clean-path proj-current) ": ")
@@ -99,7 +99,6 @@
                  (lambda (d) (if (equal (car d) proj-current) (cons proj-current compile-command) d))
                  proj-compile-commands))
         (add-to-list 'proj-compile-commands (cons proj-current compile-command))))))
-
 
 (defvar proj-prefix-map
   (let ((map (make-sparse-keymap)))
