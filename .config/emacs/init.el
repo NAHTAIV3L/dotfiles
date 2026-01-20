@@ -48,6 +48,16 @@
 (setq scroll-margin 8)
 
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
+(add-hook 'nroff-mode-hook
+          (lambda () (add-hook 'after-save-hook
+                               (lambda ()
+                                 (let* ((input-file (buffer-file-name))
+                                        (output-file (concat (file-name-sans-extension input-file) ".pdf"))
+                                        (command (format "grog --run -dpaper=letter -Tpdf -- %s > %s"
+                                                         (shell-quote-argument input-file)
+                                                         (shell-quote-argument output-file))))
+                                   (compile command)))
+                               nil t)))
 
 (column-number-mode +1)
 (global-display-line-numbers-mode +1)
@@ -223,7 +233,9 @@
   :bind (("M-l"   . 'consult-git-grep)  ;; Search inside a project
 		 ("M-s"   . 'consult-line)      ;; Search current buffer, like swiper
 		 ("C-c i" . 'consult-imenu)     ;; Search the imenu
-		 ))
+		 )
+  :config
+  (setq proj-grep-function 'consult-ripgrep))
 
 (setq treesit-language-source-alist
 	  '((cpp "https://github.com/tree-sitter/tree-sitter-cpp")

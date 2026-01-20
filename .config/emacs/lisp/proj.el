@@ -9,6 +9,9 @@
 (defvar proj-current nil
   "Current project root")
 
+(defvar proj-grep-function #'grep
+  "What function to run for proj-grep")
+
 (defvar proj-compile-commands '()
   "Current project root")
 
@@ -83,6 +86,12 @@
       (dired proj-current)
     (proj-swap)))
 
+(defun proj-grep ()
+  (interactive)
+  (unless proj-current (proj-swap))
+  (let ((default-directory proj-current))
+    (when proj-grep-function (call-interactively proj-grep-function))))
+
 (defun proj-compile ()
   (interactive)
   (let* ((found (seq-find (lambda (f) (equal (car f) proj-current)) proj-compile-commands))
@@ -107,6 +116,7 @@
     (define-key map "p" 'proj-swap)
     (define-key map "d" 'proj-dired)
     (define-key map "c" 'proj-compile)
+    (define-key map "g" 'proj-grep)
     map))
 
 (define-key ctl-x-map "p" proj-prefix-map)
