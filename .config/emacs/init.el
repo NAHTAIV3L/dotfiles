@@ -38,6 +38,7 @@
 (tool-bar-mode -1) ; Disable the toolbar
 (tooltip-mode -1) ; Disable tooltips
 (menu-bar-mode -1) ; Disable the menu bar
+(editorconfig-mode 1)
 
 (setq scroll-up-aggressively nil
       scroll-down-aggressively nil
@@ -108,6 +109,17 @@
 (global-unset-key (kbd "C-z"))
 (bind-key [remap scroll-down-command] 'better-scroll-down)
 (bind-key [remap scroll-up-command] 'better-scroll-up)
+
+(use-package undo-tree
+  :config
+  (global-undo-tree-mode)
+  (add-hook 'authinfo-mode-hook #'(lambda () (setq-local undo-tree-auto-save-history nil)))
+  (defvar --undo-history-directory (concat user-emacs-directory "undotreefiles/")
+    "Directory to save undo history files.")
+  (unless (file-exists-p --undo-history-directory)
+    (make-directory --undo-history-directory t))
+  ;; stop littering with *.~undo-tree~ files everywhere
+  (setq undo-tree-history-directory-alist `(("." . ,--undo-history-directory))))
 
 (use-package evil
   :demand t
@@ -256,7 +268,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    '(avy cape consult corfu evil evil-collection haskell-mode helpful marginalia
-         no-littering orderless spacious-padding vertico)))
+         no-littering orderless spacious-padding undo-tree vertico)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

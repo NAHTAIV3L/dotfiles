@@ -54,16 +54,17 @@
 
 (defun proj-find-file (&optional filename)
   (interactive)
-  (find-file (or filename
-             (unless proj-current (proj-swap nil t))
-             (let ((completion-extra-properties '(:category file))
-                   (default-directory proj-current))
-               (completing-read
-                (concat "Find file in " (proj--clean-path proj-current) ": ")
-                (mapcar (lambda (str) (string-replace proj-current "" str))
-                        (split-string (shell-command-to-string
-                                       (concat "find " proj-current " -path '*/.git' -prune -o -type f -print"))
-                                      "\n" t)))))))
+  (unless proj-current (proj-swap nil t))
+  (when filename (find-file filename))
+  (let ((completion-extra-properties '(:category file))
+        (default-directory proj-current))
+    (find-file
+     (completing-read
+      (concat "Find file in " (proj--clean-path proj-current) ": ")
+      (mapcar (lambda (str) (string-replace proj-current "" str))
+              (split-string (shell-command-to-string
+                             (concat "find " proj-current " -path '*/.git' -prune -o -type f -print"))
+                            "\n" t))))))
 
 (defun proj-switch-to-buffer (&optional buffer-or-name)
   (interactive)
