@@ -38,7 +38,14 @@
 (tool-bar-mode -1) ; Disable the toolbar
 (tooltip-mode -1) ; Disable tooltips
 (menu-bar-mode -1) ; Disable the menu bar
+
+;; fringes
+(setq flymake-autoresize-margins nil)
+(setq fringe-mode 0)
+(set-fringe-mode 0)
+
 (editorconfig-mode 1)
+(add-hook 'prog-mode 'editorconfig-apply)
 
 (setq scroll-up-aggressively nil
       scroll-down-aggressively nil
@@ -159,7 +166,8 @@
 (use-package eglot
   :ensure nil
   :config
-  (add-to-list 'eglot-ignored-server-capabilities ':inlayHintProvider))
+  (add-to-list 'eglot-ignored-server-capabilities ':inlayHintProvider)
+  (add-hook 'eglot-mode-hook 'flymake-mode))
 
 (use-package vertico
   :init
@@ -266,6 +274,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(fringe-mode 0 nil (fringe))
  '(package-selected-packages
    '(avy cape consult corfu evil evil-collection haskell-mode helpful marginalia
          no-littering orderless spacious-padding undo-tree vertico)))

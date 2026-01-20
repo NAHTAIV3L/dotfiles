@@ -95,8 +95,10 @@
 
 (defun proj-compile ()
   (interactive)
+  (unless proj-current (proj-swap))
   (let* ((found (seq-find (lambda (f) (equal (car f) proj-current)) proj-compile-commands))
          (command (cdr (or found '("default" . "make -k"))))
+         (default-directory proj-current)
          (compilation-buffer-name-function
           (lambda (f)
             (concat "*" (file-name-nondirectory (directory-file-name proj-current)) ": compilation*"))))
