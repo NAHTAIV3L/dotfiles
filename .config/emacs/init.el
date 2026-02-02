@@ -10,7 +10,7 @@
 
 (setq use-package-always-ensure t)
 
-(add-to-list 'load-path (concat (getenv "HOME") "/.config/emacs/lisp"))
+(add-to-list 'load-path (concat (getenv "HOME") "/dev/elisp/proj/"))
 
 (use-package no-littering
   :demand t)
@@ -117,17 +117,6 @@
 (bind-key [remap scroll-down-command] 'better-scroll-down)
 (bind-key [remap scroll-up-command] 'better-scroll-up)
 
-(use-package undo-tree
-  :config
-  (global-undo-tree-mode)
-  (add-hook 'authinfo-mode-hook #'(lambda () (setq-local undo-tree-auto-save-history nil)))
-  (defvar --undo-history-directory (concat user-emacs-directory "undotreefiles/")
-    "Directory to save undo history files.")
-  (unless (file-exists-p --undo-history-directory)
-    (make-directory --undo-history-directory t))
-  ;; stop littering with *.~undo-tree~ files everywhere
-  (setq undo-tree-history-directory-alist `(("." . ,--undo-history-directory))))
-
 (use-package evil
   :demand t
   :init
@@ -166,8 +155,21 @@
 (use-package eglot
   :ensure nil
   :config
-  (add-to-list 'eglot-ignored-server-capabilities ':inlayHintProvider)
-  (add-hook 'eglot-mode-hook 'flymake-mode))
+  (setq eglot-ignored-server-capabilities '(:inlayHintProvider :documentHighlightProvider))
+  (add-hook 'eglot-mode-hook (lambda () (flymake-mode 1))))
+
+(use-package yasnippet
+  :ensure t
+  :bind
+  (:map yas-keymap
+        ("M-n" . yas-next-field)
+        ("M-p" . yas-prev-field)))
+
+(use-package dumb-jump
+  :ensure t
+  :init
+  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+  (setq xref-show-definitions-function #'xref-show-definitions-completing-read))
 
 (use-package vertico
   :init
@@ -180,6 +182,7 @@
 (use-package orderless
   :custom
   (completion-styles '(orderless basic))
+  (orderless-matching-styles '(orderless-initialism orderless-literal))
   (completion-category-defaults nil))
 
 (use-package helpful
@@ -191,7 +194,7 @@
 
 (use-package avy
   :config
-  (global-set-key (kbd "C-;") 'avy-goto-char-timer))
+  (global-set-key (kbd "C-;") 'avy-goto-char))
 
 (use-package ace-window
   :config
@@ -241,7 +244,9 @@
   (global-set-key (kbd "C-c b") #'cape-elisp-block)
   (global-set-key (kbd "C-c s") #'cape-elisp-symbol)
   (global-set-key (kbd "C-c h") #'cape-history)
-  (global-set-key (kbd "C-c k") #'cape-keyword))
+  (global-set-key (kbd "C-c k") #'cape-keyword)
+  :config
+  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
 
 (use-package savehist
   :ensure nil
@@ -257,17 +262,28 @@
   :config
   (setq proj-grep-function 'consult-ripgrep))
 
+(setq treesit-font-lock-level 4)
 (setq treesit-language-source-alist
 	  '((cpp "https://github.com/tree-sitter/tree-sitter-cpp")
-		(c "https://github.com/tree-sitter/tree-sitter-c")))
+		(c "https://github.com/tree-sitter/tree-sitter-c")
+        (python "https://github.com/tree-sitter/tree-sitter-python")))
 (dolist (lang treesit-language-source-alist)
   (unless (treesit-language-available-p (car lang))
 	(treesit-install-language-grammar (car lang))))
 (setq treesit-load-name-override-list
       '((c++ "libtree-sitter-cpp")))
+(setq major-mode-remap-alist '((c-mode . c-ts-mode)
+                               (c++-mode . c++-ts-mode)
+                               (python-mode . python-ts-mode)))
 
 (use-package ansi-color
   :hook (compilation-filter . ansi-color-compilation-filter))
+
+(global-set-key (kbd "C-x b") #'proj-switch-to-buffer)
+(global-set-key (kbd "C-c b") #'switch-to-buffer)
+
+(global-set-key (kbd "C-x k") #'proj-kill-buffer)
+(global-set-key (kbd "C-c k") #'kill-buffer)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -276,8 +292,9 @@
  ;; If there is more than one, they won't work right.
  '(fringe-mode 0 nil (fringe))
  '(package-selected-packages
-   '(avy cape consult corfu evil evil-collection haskell-mode helpful marginalia
-         no-littering orderless spacious-padding undo-tree vertico)))
+   '(avy cape consult corfu dumb-jump evil evil-collection haskell-mode helpful
+         marginalia no-littering orderless spacious-padding undo-tree vertico
+         yasnippet)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

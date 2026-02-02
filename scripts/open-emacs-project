@@ -36,9 +36,9 @@ emacs_attached() {
 
 switch_to() {
     if emacs_attached; then
-        emacsclient -e "(proj-swap \"$1\")"
+        emacsclient -e "(proj-set \"$1\")"
     else
-        emacsclient -ce "(proj-swap \"$1\")"
+        emacsclient -ce "(proj-set \"$1\")"
     fi
 }
 
