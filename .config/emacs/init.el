@@ -3,7 +3,7 @@
       '(("org" . "https://orgmode.org/elpa/")
     	("gnu" . "https://elpa.gnu.org/packages/")
     	("melpa" . "https://melpa.org/packages/")
-		("nongnu" . "https://elpa.nongnuorg/nongnu/")))
+		("nongnu" . "https://elpa.nongnu.org/nongnu/")))
 (setq package-archive-priorities
 	  '(("gnu" . 10)))
 (package-initialize)
@@ -11,6 +11,9 @@
 (setq use-package-always-ensure t)
 
 (add-to-list 'load-path (concat (getenv "HOME") "/dev/elisp/proj/"))
+
+(setq custom-file (expand-file-name "customs.el" user-emacs-directory))
+(load custom-file :no-error-if-file-is-missing)
 
 (use-package no-littering
   :demand t)
@@ -61,7 +64,7 @@
                                (lambda ()
                                  (let* ((input-file (buffer-file-name))
                                         (output-file (concat (file-name-sans-extension input-file) ".pdf"))
-                                        (command (format "grog --run -dpaper=letter -Tpdf -- %s > %s"
+                                        (command (format "grog -U --run -dpaper=letter -Tpdf -- %s > %s"
                                                          (shell-quote-argument input-file)
                                                          (shell-quote-argument output-file))))
                                    (compile command)))
@@ -185,6 +188,33 @@
   (orderless-matching-styles '(orderless-initialism orderless-literal))
   (completion-category-defaults nil))
 
+(use-package embark
+  :ensure t
+  :bind
+  :init
+  ;; Optionally replace the key help with a completing-read interface
+
+  ;; Show the Embark target at point via Eldoc. You may adjust the
+  ;; Eldoc strategy, if you want to see the documentation from
+  ;; multiple providers. Beware that using this can be a little
+  ;; jarring since the message shown in the minibuffer can be more
+  ;; than one line, causing the modeline to move up and down:
+
+  ;; (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+  ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
+
+  ;; Add Embark to the mouse context menu. Also enable `context-menu-mode'.
+  ;; (context-menu-mode 1)
+  ;; (add-hook 'context-menu-functions #'embark-context-menu 100)
+  (global-set-key (kbd "C-'") 'embark-act) ;; pick some comfortable binding
+  (global-set-key (kbd "M-'") 'embark-dwim))
+
+;; Consult users will also want the embark-consult package.
+(use-package embark-consult
+  :ensure t ; only need to install it, embark loads it after consult if found
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+
 (use-package helpful
   :bind
   ([remap describe-command] . helpful-command)
@@ -194,7 +224,17 @@
 
 (use-package avy
   :config
-  (global-set-key (kbd "C-;") 'avy-goto-char))
+  (setq avy-dispatch-alist '((?x . avy-action-kill-move)
+                             (?X . avy-action-kill-stay)
+                             (?t . avy-action-teleport)
+                             (?m . avy-action-mark)
+                             (?c . avy-action-copy)
+                             (?y . avy-action-yank)
+                             (?Y . avy-action-yank-line)
+                             (?i . avy-action-ispell)
+                             (?z . avy-action-zap-to-char)))
+  (setq avy-keys '(?s ?d ?f ?g ?h ?j ?k ?l ?p ?v ?b ?n ?q ?w ?e ?r ?u ?o ?a))
+  (global-set-key (kbd "C-;") 'avy-goto-char-timer))
 
 (use-package ace-window
   :config
@@ -244,7 +284,7 @@
   (global-set-key (kbd "C-c b") #'cape-elisp-block)
   (global-set-key (kbd "C-c s") #'cape-elisp-symbol)
   (global-set-key (kbd "C-c h") #'cape-history)
-  (global-set-key (kbd "C-c k") #'cape-keyword)
+  (global-set-key (kbd "C-c w") #'cape-keyword)
   :config
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
 
@@ -262,11 +302,20 @@
   :config
   (setq proj-grep-function 'consult-ripgrep))
 
+
+(use-package haskell-ts-mode
+  :vc (:url "https://codeberg.org/pranshu/haskell-ts-mode"
+            :branch "main")
+  :ensure t
+  :custom
+  (haskell-ts-font-lock-level 4))
+
 (setq treesit-font-lock-level 4)
 (setq treesit-language-source-alist
 	  '((cpp "https://github.com/tree-sitter/tree-sitter-cpp")
 		(c "https://github.com/tree-sitter/tree-sitter-c")
-        (python "https://github.com/tree-sitter/tree-sitter-python")))
+        (python "https://github.com/tree-sitter/tree-sitter-python")
+        (haskell "https://github.com/tree-sitter/tree-sitter-haskell")))
 (dolist (lang treesit-language-source-alist)
   (unless (treesit-language-available-p (car lang))
 	(treesit-install-language-grammar (car lang))))
@@ -274,7 +323,8 @@
       '((c++ "libtree-sitter-cpp")))
 (setq major-mode-remap-alist '((c-mode . c-ts-mode)
                                (c++-mode . c++-ts-mode)
-                               (python-mode . python-ts-mode)))
+                               (python-mode . python-ts-mode)
+                               (haskell-mode . haskell-ts-mode)))
 
 (use-package ansi-color
   :hook (compilation-filter . ansi-color-compilation-filter))
@@ -284,20 +334,3 @@
 
 (global-set-key (kbd "C-x k") #'proj-kill-buffer)
 (global-set-key (kbd "C-c k") #'kill-buffer)
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(fringe-mode 0 nil (fringe))
- '(package-selected-packages
-   '(avy cape consult corfu dumb-jump evil evil-collection haskell-mode helpful
-         marginalia no-littering orderless spacious-padding undo-tree vertico
-         yasnippet)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
