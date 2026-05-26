@@ -14,19 +14,21 @@ fi
 emacsclient -e '(message "")' 2>&1 >/dev/null || emacs --daemon &
 
 find_dirs() {
-    paths=$(for path in "${TS_SEARCH_PATHS[@]}"; do
-        [[ -d "$path" ]] && find "$path" -mindepth 2 -maxdepth 2 -path '*/.git' -prune -o -type d -print
-    done)
-    unparsed_files=$(emacsclient -e "(delq nil (seq-map 'proj--get-buffer-path (buffer-list)))")
-    open_files=$(echo $unparsed_files | sed 's/(\(.*\))/\1/; s/"\([^"]*\)"/\1/g')
-    open_files=$(for f in $open_files; do eval realpath $f; done)
-    (for f in $open_files; do
-        for d in $paths; do
-            [ "$f" = "${f#$d}" ] || echo "EMACS ~/${d#/*/*/}"
-        done
-    done) | sort -u
-    for x in ${paths}; do
-        echo "~/${x#/*/*/}"
+    # paths=$(for path in "${TS_SEARCH_PATHS[@]}"; do
+    #             [[ -d "$path" ]] && find "$path" -mindepth 2 -maxdepth 2 -path '*/.git' -prune -o -type d -print
+    #         done)
+    # eval other_projects=$(emacsclient -e "(proj-previously-opened)")
+    # if [ "$other_projects" != "nil" ]; then
+    #     for f in "${other_projects[@]}"; do
+    #         echo "EMACS ${f%/}"
+    #     done
+    # fi
+    # for x in ${paths}; do
+    #     echo "~/${x#/*/*/}"
+    # done
+    eval paths=$(emacsclient -e "(proj--get-paths)")
+    for x in "${paths[@]}"; do
+        echo "$x"
     done
 }
 
@@ -42,7 +44,7 @@ switch_to() {
     fi
 }
 
-selected=$(find_dirs | swenu -coil 15)
+selected=$(find_dirs | sort -Ru | swenu -coil 15)
 [ -z "$selected" ] && exit 1;
 
 if [ ! -z "$(echo $selected | grep '^EMACS')" ]; then

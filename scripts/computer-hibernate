@@ -1,5 +1,8 @@
 #!/bin/sh
 
+wpctl set-volume @DEFAULT_AUDIO_SINK@ 0%
+wpctl set-mute @DEFAULT_AUDIO_SINK@ 1
+
 simlock 1>/dev/null &
 
 sleep 1

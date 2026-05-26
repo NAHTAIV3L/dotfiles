@@ -1,0 +1,14 @@
+#!/bin/bash
+
+repo=$1
+branch=${2:-main}
+
+if [ ! "$repo" ]; then
+   echo -n "Enter new repo name: "
+   read repo
+fi
+if ssh git@pi "./newrepo $repo $branch"; then
+    echo "Repo $repo created"
+else
+    echo "Repo $repo failed to be created"
+fi

@@ -10,7 +10,7 @@ sleep 1
 # if [ -z "$WINDOWMANAGER" ] || [ "$WINDOWMANAGER" = "d" ] ; then
 #     /usr/libexec/xdg-desktop-portal-wlr &
 # else
-    /usr/libexec/xdg-desktop-portal-hyprland &
+    /usr/libexec/xdg-desktop-portal-wlr &
 # fi
 
 sleep 1

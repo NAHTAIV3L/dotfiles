@@ -5,4 +5,6 @@ gpg-agent --daemon
 mpd &
 dunst &
 mpd-mpris &
+wpctl set-volume @DEFAULT_AUDIO_SINK@ 0%
+wpctl set-mute @DEFAULT_AUDIO_SINK@ 1
 xrdb ~/.Xresources

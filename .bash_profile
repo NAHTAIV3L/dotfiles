@@ -27,6 +27,6 @@ if [[ -t 0 && $(tty) == /dev/tty1 && ! $DISPLAY ]]; then
     #     exec dbus-launch --exit-with-session dwl
     # else
         export XCURSOR_SIZE=24
-        exec dbus-launch --exit-with-session Hyprland
+        exec dbus-launch --exit-with-session mango
     # fi
 fi

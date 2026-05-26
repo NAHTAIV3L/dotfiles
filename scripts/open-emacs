@@ -1,0 +1,26 @@
+#!/bin/bash
+
+started_emacs=0
+
+emacsclient -e '(message "")' 2>/dev/null 1>/dev/null
+if [ "$?" != "0" ]; then
+    emacs --daemon 2>/dev/null & disown
+    started_emacs=1
+fi
+
+if [ "$started_emacs" = "0" -a "$(emacsclient -e '(1- (length (frame-list)))' 2>/dev/null)" != "0" ]; then
+    client=$(hyprctl -j clients | jq '.[] | select(.class == "emacs")')
+    workspace=$(echo ${client} | jq -r '.workspace.id')
+    address=$(echo ${client} | jq -r '.address')
+
+    #hyprctl --batch "dispatch workspace $workspace ; dispatch focuswindow address:$address" 1>/dev/null
+else
+    if [ "$started_emacs" = "1" ]; then
+        echo "Waiting for emacs"
+        emacsclient -e '(message "")' 2>/dev/null >/dev/null
+        while [ $? -ne 0 ]; do
+            emacsclient -e '(message "")' 2>/dev/null >/dev/null
+        done
+    fi
+    emacsclient -c 2>&1 >/dev/null & disown
+fi

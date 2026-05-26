@@ -35,14 +35,17 @@ music_info() {
 }
 
 if [ "$TERM" = "linux" ]; then
-    notify-send \
+    replace_id=$(cat $XDG_RUNTIME_DIR/sysinfoid)
+    [ ! -z "$replace_id" ] && replace_arg="-r $replace_id"
+    notify-send $replace_arg -p \
         "System Info:" \
         "\
 Time: $(date "+%I:%M:%S")
 $(get_volume)
 Brightness: ${brightness}%
 ${batstate}: ${batperc}%
-$(network_info)$(music_info)"
+$(network_info)$(music_info)" \
+         > $XDG_RUNTIME_DIR/sysinfoid
 else
     echo "\
 Time: $(date "+%I:%M:%S")
@@ -51,4 +54,3 @@ Brightness: ${brightness}%
 ${batstate}: ${batperc}%
 $(network_info)$(music_info)"
 fi
-

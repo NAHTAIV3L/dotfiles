@@ -11,12 +11,18 @@
 (setq use-package-always-ensure t)
 
 (add-to-list 'load-path (concat (getenv "HOME") "/dev/elisp/proj/"))
+(add-to-list 'load-path (concat user-emacs-directory "/elisp/"))
 
 (setq custom-file (expand-file-name "customs.el" user-emacs-directory))
 (load custom-file :no-error-if-file-is-missing)
 
 (use-package no-littering
   :demand t)
+
+(setq backup-directory-alist
+      `((".*" . ,temporary-file-directory)))
+(setq auto-save-file-name-transforms
+      `((".*" ,temporary-file-directory t)))
 
 (unless package-archive-contents
   (package-refresh-contents))
@@ -27,6 +33,11 @@
       confirm-kill-processes nil
       ring-bell-function 'ignore
       gc-cons-threshold (* 50 1000 1000))
+
+(setq vc-follow-symlinks t
+	  use-short-answers t)
+
+(setq backward-delete-char-untabify-method "hungry")
 
 (setq-default indent-tabs-mode nil
               c-basic-offset 4
@@ -64,7 +75,7 @@
                                (lambda ()
                                  (let* ((input-file (buffer-file-name))
                                         (output-file (concat (file-name-sans-extension input-file) ".pdf"))
-                                        (command (format "grog -U --run -dpaper=letter -Tpdf -- %s > %s"
+                                        (command (format "$(grog -U -dpaper=letter -Tpdf -- %s) > %s"
                                                          (shell-quote-argument input-file)
                                                          (shell-quote-argument output-file))))
                                    (compile command)))
@@ -107,18 +118,38 @@
   (erc-tls :server "irc.oftc.net"
            :port "6697"))
 
-(defun better-scroll-up (&optional arg)
-  (interactive "^P")
-  (call-interactively 'scroll-up-command arg)
-  (recenter))
-(defun better-scroll-down (&optional arg)
-  (interactive "^P")
-  (call-interactively 'scroll-down-command)
-  (recenter))
+(defmacro better-scroll (dir)
+  `(lambda (&optional arg)
+     (interactive "^P")
+     (call-interactively ',(intern (concat "scroll-" (symbol-name dir) "-command")) arg)
+     (recenter)))
+(fset 'better-scroll-up (better-scroll up))
+(fset 'better-scroll-down (better-scroll down))
 
 (global-unset-key (kbd "C-z"))
 (bind-key [remap scroll-down-command] 'better-scroll-down)
 (bind-key [remap scroll-up-command] 'better-scroll-up)
+
+(use-package diminish)
+
+(use-package undo-tree
+  :diminish
+  :config
+  (global-undo-tree-mode 1)
+  (let ((dir (concat user-emacs-directory "undotreefiles/")))
+    (unless (file-exists-p dir)
+      (make-directory dir t))
+    (setq undo-tree-history-directory-alist `(("." . ,dir)))))
+
+(defmacro better-evil-scroll (dir)
+  `(lambda (&optional arg)
+     (interactive "^P")
+     (if arg
+         (call-interactively ',(intern (concat "evil-scroll-" (symbol-name dir))) arg)
+       (call-interactively ',(intern (concat "evil-scroll-page-" (symbol-name dir))) arg))
+     (evil-scroll-line-to-center)))
+(fset 'better-evil-scroll-up (better-evil-scroll up))
+(fset 'better-evil-scroll-down (better-evil-scroll down))
 
 (use-package evil
   :demand t
@@ -133,12 +164,15 @@
               (evil-previous-line))
             'evil-normal-state-map)
   (bind-key "g c" #'comment-dwim 'evil-visual-state-map)
+  (bind-key [remap evil-scroll-down] 'better-evil-scroll-down)
+  (bind-key [remap evil-scroll-up] 'better-evil-scroll-up)
   :custom
   (evil-want-C-u-scroll t)
-  (evil-undo-system 'undo-redo)
+  (evil-undo-system 'undo-tree)
   (evil-move-beyond-eol nil))
 
 (use-package evil-collection
+  :diminish evil-collection-unimpaired-mode
   :after evil
   :config
   (evil-collection-init))
@@ -152,14 +186,35 @@
   (setq dired-recursive-copies 'always)
   (setq dired-recursive-deletes 'always)
   (setq dired-dwim-target t)
-  (setq dired-kill-when-opening-new-dired-buffer t)
   (setq dired-listing-switches "-alh --group-directories-first"))
 
 (use-package eglot
   :ensure nil
   :config
-  (setq eglot-ignored-server-capabilities '(:inlayHintProvider :documentHighlightProvider))
-  (add-hook 'eglot-mode-hook (lambda () (flymake-mode 1))))
+  (setq eglot-send-changes-idle-time 0.1
+        eglot-autoshutdown t)
+  (add-to-list 'eglot-ignored-server-capabilities ':inlayHintProvider)
+  (add-to-list 'eglot-ignored-server-capabilities ':documentOnTypeFormattingProvider)
+  (add-to-list 'eglot-ignored-server-capabilities ':documentHighlightProvider)
+  (add-to-list 'eglot-server-programs
+               '((c-ts-mode c++-ts-mode c-mode c++-mode simpc-mode)
+                 . ("clangd"
+                    "-j=8"
+                    "--log=error"
+                    "--malloc-trim"
+                    "--background-index"
+                    "--completion-style=detailed"
+                    "--pch-storage=memory"
+                    "--header-insertion=never"
+                    "--header-insertion-decorators=0")))
+  (add-hook 'eglot-managed-mode-hook
+            (lambda () (setq-local eldoc-documentation-strategy 'eldoc-documentation-enthusiast))))
+
+(use-package eldoc
+  :ensure nil
+  :config
+  (setq-default eldoc-documentation-strategy 'eldoc-documentation-enthusiast)
+  (setq-default eldoc-minor-mode-string ""))
 
 (use-package yasnippet
   :ensure t
@@ -168,11 +223,12 @@
         ("M-n" . yas-next-field)
         ("M-p" . yas-prev-field)))
 
-(use-package dumb-jump
-  :ensure t
-  :init
-  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
-  (setq xref-show-definitions-function #'xref-show-definitions-completing-read))
+(setq xref-show-definitions-function #'xref-show-definitions-completing-read)
+;; (use-package dumb-jump
+;;   :ensure t
+;;   :init
+;;   (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+;;   (setq xref-show-definitions-function #'xref-show-definitions-completing-read))
 
 (use-package vertico
   :init
@@ -224,7 +280,8 @@
 
 (use-package avy
   :config
-  (setq avy-dispatch-alist '((?x . avy-action-kill-move)
+  (setq avy-timeout-seconds 0.4
+        avy-dispatch-alist '((?x . avy-action-kill-move)
                              (?X . avy-action-kill-stay)
                              (?t . avy-action-teleport)
                              (?m . avy-action-mark)
@@ -267,12 +324,11 @@
   ;; used by `completion-at-point'.  The order of the functions matters, the
   ;; first function returning a result wins.  Note that the list of buffer-local
   ;; completion functions takes precedence over the global list.
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-  (add-to-list 'completion-at-point-functions #'cape-file)
   (add-to-list 'completion-at-point-functions #'cape-elisp-block)
   (add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
   (add-to-list 'completion-at-point-functions #'cape-history)
-  (add-to-list 'completion-at-point-functions #'cape-keyword)
+  (add-to-list 'completion-at-point-functions (cape-capf-buster (cape-capf-super #'cape-dabbrev #'cape-keyword)))
+  (add-to-list 'completion-at-point-functions #'cape-file)
   ;;(add-to-list 'completion-at-point-functions #'cape-tex)
   ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
   ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
@@ -280,11 +336,12 @@
   ;;(add-to-list 'completion-at-point-functions #'cape-dict)
   ;;(add-to-list 'completion-at-point-functions #'cape-line)
   (global-set-key (kbd "C-c f") #'cape-file)
+  (global-set-key (kbd "C-c w") #'cape-dict)
   (global-set-key (kbd "C-c d") #'cape-dabbrev)
   (global-set-key (kbd "C-c b") #'cape-elisp-block)
   (global-set-key (kbd "C-c s") #'cape-elisp-symbol)
   (global-set-key (kbd "C-c h") #'cape-history)
-  (global-set-key (kbd "C-c w") #'cape-keyword)
+  (global-set-key (kbd "C-c o") #'cape-keyword)
   :config
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
 
@@ -295,6 +352,7 @@
 (use-package consult
   :custom
   (consult-preview-key nil)
+  (consult-project-function (lambda (_) proj-current))
   :bind (("M-l"   . 'consult-git-grep)  ;; Search inside a project
 		 ("M-s"   . 'consult-line)      ;; Search current buffer, like swiper
 		 ("C-c i" . 'consult-imenu)     ;; Search the imenu
@@ -302,35 +360,68 @@
   :config
   (setq proj-grep-function 'consult-ripgrep))
 
+(require 'simpc-mode)
+;; (with-eval-after-load 'simpc-mode
+;;   (add-to-list 'major-mode-remap-alist '(c-mode . simpc-mode)))
 
-(use-package haskell-ts-mode
-  :vc (:url "https://codeberg.org/pranshu/haskell-ts-mode"
-            :branch "main")
-  :ensure t
-  :custom
-  (haskell-ts-font-lock-level 4))
+(add-hook 'c-mode-hook (lambda () (setq-local font-lock-defaults '(simpc-font-lock-keywords))))
 
-(setq treesit-font-lock-level 4)
-(setq treesit-language-source-alist
-	  '((cpp "https://github.com/tree-sitter/tree-sitter-cpp")
-		(c "https://github.com/tree-sitter/tree-sitter-c")
-        (python "https://github.com/tree-sitter/tree-sitter-python")
-        (haskell "https://github.com/tree-sitter/tree-sitter-haskell")))
-(dolist (lang treesit-language-source-alist)
-  (unless (treesit-language-available-p (car lang))
-	(treesit-install-language-grammar (car lang))))
-(setq treesit-load-name-override-list
-      '((c++ "libtree-sitter-cpp")))
-(setq major-mode-remap-alist '((c-mode . c-ts-mode)
-                               (c++-mode . c++-ts-mode)
-                               (python-mode . python-ts-mode)
-                               (haskell-mode . haskell-ts-mode)))
+(require 'jai-mode)
+
+(use-package nov
+  :mode ("\\.epub\\'" . nov-mode)
+  :config
+  (add-hook 'nov-mode-hook 'visual-line-mode)
+  (add-hook 'nov-mode-hook 'visual-fill-column-mode)
+  (add-hook 'nov-mode-hook (lambda ()
+                             (display-line-numbers-mode -1)
+                             (setq-local mode-line-format nil
+                                         nov-text-width t
+                                         visual-fill-column-center-text t
+                                         scroll-margin 1
+                                         fill-column 122))))
+
+;; (use-package haskell-ts-mode
+;;   :vc (:url "https://codeberg.org/pranshu/haskell-ts-mode"
+;;             :branch "main")
+;;   :ensure t
+;;   :custom
+;;   (haskell-ts-font-lock-level 4))
+
+;; (setq treesit-font-lock-level 4)
+;; (setq treesit-language-source-alist
+;; 	  '((cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+;; 		(c "https://github.com/tree-sitter/tree-sitter-c")
+;;         (python "https://github.com/tree-sitter/tree-sitter-python")
+;;         (haskell "https://github.com/tree-sitter/tree-sitter-haskell")))
+;; (dolist (lang treesit-language-source-alist)
+;;   (unless (treesit-language-available-p (car lang))
+;; 	(treesit-install-language-grammar (car lang))))
+;; (setq treesit-load-name-override-list
+;;       '((c++ "libtree-sitter-cpp")))
+;; (setq major-mode-remap-alist '((c-mode . c-ts-mode)
+;;                                (c++-mode . c++-ts-mode)
+;;                                (python-mode . python-ts-mode)
+;;                                (haskell-mode . haskell-ts-mode)))
 
 (use-package ansi-color
   :hook (compilation-filter . ansi-color-compilation-filter))
+
+(with-eval-after-load 'proj
+  (setq proj-locations '(("~/dev" . 2) ("~/rpi" . 2) ("~/opt" . 1) ("~/.dotfiles" . 0))))
 
 (global-set-key (kbd "C-x b") #'proj-switch-to-buffer)
 (global-set-key (kbd "C-c b") #'switch-to-buffer)
 
 (global-set-key (kbd "C-x k") #'proj-kill-buffer)
 (global-set-key (kbd "C-c k") #'kill-buffer)
+(global-set-key (kbd "C-c c") #'recompile)
+
+(proj-add-property-handler :tags-file-name (proj--gen-handler
+                                            :set-emacs-state
+                                            (setq tags-file-name value)
+                                            :get-emacs-state
+                                            tags-file-name
+                                            :set-default-emacs-state
+                                            (setq tags-file-name (when (file-exists-p (concat proj-current "TAGS"))
+                                                                   (concat proj-current "TAGS")))))
